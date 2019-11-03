@@ -7,12 +7,13 @@ const client = new Discord.Client();
 
 function getStats(message, args)
 {
-    
+
     try
     {
         var uid = args[1];
         var mode;
         var gamemode;
+
         if (args[2])
         {
             switch (args[2].toLowerCase())
@@ -36,7 +37,7 @@ function getStats(message, args)
             {
                 var username = json_array_user[j].username;
                 var userid = json_array_user[j].user_id;
-                var joindate = json_array_user[j].join_date;
+                var joindate = new Date(json_array_user[j].join_date);
                 var playcount = json_array_user[j].playcount;
                 var pp = json_array_user[j].pp_raw;
                 var rank = json_array_user[j].pp_rank;
@@ -51,22 +52,45 @@ function getStats(message, args)
             // display stuff
             const statEmbed = new Discord.RichEmbed()
                 .setColor('#ff007a')
-                .setTitle(`**${username}**'s osu! stats (${gamemode})`)
+                .setTitle(`osu! stats for **${username}** :flag_${country.toLowerCase()}:`)
+                .setDescription(`*${gamemode} gamemode*`)
                 .setThumbnail(avatarurl)
-                .addBlankField()
-                .addField("user:", `${username} :flag_${country.toLowerCase()}:`)
-                .addField("pp:", `${Math.round(pp)}pp`)
-                .addField("rank:", `#${rank} (#${countryrank} ${country})`)
+                .addField("Basic stats:", `\`\`\`xl\n#${ac(rank)} (#${ac(countryrank)} ${country})\n${ac(Math.round(pp))} pp\n${ac(playcount)} plays\n${Math.round(accuracy * 100) / 100}% accuracy\n\nJoined ${formatDate(joindate)}\n${ac(daysSince(joindate))} days ago\`\`\``)
+                .setFooter(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
             message.channel.send(statEmbed);
         })
     }
-    catch(error)
+    catch (error)
     {
         console.log(error);
         console.log("ded");
         message.channel.send("something went wrong :-(");
     }
-    
+
+}
+
+// add comma as thousand separator
+function ac(num)
+{
+    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+}
+
+// calculate the time
+function daysSince(joindate)
+{
+    var today = new Date();
+
+    var timeDiff = today - joindate;
+
+    var dayDiff = Math.round(timeDiff / (1000 * 3600 * 24));
+
+    return dayDiff;
+}
+
+// format the date to mm/dd/yyyy
+function formatDate(value)
+{
+    return value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
 }
 
 module.exports.stats = getStats;
