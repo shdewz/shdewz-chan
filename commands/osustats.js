@@ -7,7 +7,6 @@ const client = new Discord.Client();
 
 function getStats(message, args)
 {
-
     try
     {
         var uid = args[1];
