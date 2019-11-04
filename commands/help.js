@@ -15,8 +15,7 @@ function Help(message, args)
         .addField(`\`${prefix}roll [<value>]\``, '- Returns a random integer between 1 and a given value (default 100)')
         .addField(`\`${prefix}rroulette [start] [abort] [<bullets>] [<chambers>]\``, '- Plays a game of russian roulette. Default values are 1/6.')
         .addField(`\`${prefix}play <video>\``, `- Joins a voice channel and plays a YouTube video or adds it to the queue.\n- \`${prefix}stop\` and \`${prefix}skip\` can be used.`)
-        .addField(`\`${prefix}osu <username/id> [<taiko/ctb/mania>]\``, `- Displays simple stats for specified osu! account.`)
-        .addField(`\`${prefix}cards [<start/join/abort>]\``, `- Plays a card game.\n- Rules explained as game goes.\n- (!) WIP - DOESN'T WORK YET (!)`)
+        .addField(`\`${prefix}osu <username/id> [<taiko/catch/mania>]\``, `- Displays stats for specified osu! account.`)
     message.channel.send(helpEmbed);
     return;
 }
