@@ -20,7 +20,7 @@ function getStats(message, args)
         var score_map_title = [];
         var score_map_difficulty = [];
 
-        var uid = args[1];
+        var uid = args[2];
         var mode;
         var gamemode;
 
@@ -28,15 +28,15 @@ function getStats(message, args)
         var mod_binary;
         var mod_chars;
 
-        if (args[2])
+        if (args[3])
         {
-            switch (args[2].toLowerCase())
+            switch (args[3].toLowerCase())
             {
                 case "taiko": mode = 1; gamemode = "taiko"; break;
                 case "catch": mode = 2; gamemode = "catch the beat"; break;
                 case "mania": mode = 3; gamemode = "mania"; break;
                 default:
-                    message.channel.send(`Unrecognized gamemode \`${args[2]}\`\nUse \`taiko\`, \`catch\`, \`mania\` or leave empty for standard.`);
+                    message.channel.send(`Unrecognized gamemode \`${args[3]}\`\nUse \`taiko\`, \`catch\`, \`mania\` or leave empty for standard.`);
                     return;
             }
         }
@@ -201,6 +201,7 @@ function formatDate(value)
     return value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
 }
 
+/*
 function getMaps(callback)
 {
     const request = async () =>
@@ -217,6 +218,7 @@ function returnMaps(maps)
 {
     return maps;
 }
+*/
 
 module.exports.stats = getStats;
 

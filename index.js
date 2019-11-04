@@ -28,13 +28,30 @@ client.on('message', message =>
     switch (args[0].toLowerCase())
     {
         case "help":
-            help.help(message, args);
+            if (args[1])
+            {
+                switch (args[1].toLowerCase())
+                {
+                    case "osu":
+                        help.osuhelp(message, args);
+                        break;
+
+                    default:
+                        message.channel.send(`Unrecognized category.\nUse \`${prefix}help\` for a list of commands.`);
+                        break;
+                }
+            }
+            else
+            {
+                help.mainhelp(message, args);
+                break;
+            }
             break;
 
         case "roll":
             roll.roll(message, args);
             break;
-            
+
         case "rroulette":
             rr.rr(message, args);
             break;
@@ -82,9 +99,19 @@ client.on('message', message =>
             break;
 
         case "osu":
-            osustats.stats(message, args);
+            switch (args[1].toLowerCase())
+            {
+                case "stats":
+                    osustats.stats(message, args);
+                    break;
+
+                default:
+                    message.channel.send(`Unrecognized argument.\nUse \`${prefix}help\` for a list of commands.`);
+                    break;
+
+            }
             break;
-/*
+        /*
         case "cards":
             cardgame.cards(message, args);
             break;*/
