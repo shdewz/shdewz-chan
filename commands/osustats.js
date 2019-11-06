@@ -122,8 +122,8 @@ function getStats(message, args)
                     .setDescription(`*${gamemode} gamemode*`)
                     .setThumbnail(avatarurl)
                     .addField("Basic stats:", `\`\`\`xl\n#${ac(rank)} (#${ac(countryrank)} ${country})\n${ac(Math.round(pp))} pp\n${ac(playcount)} plays\n${Math.round(accuracy * 100) / 100}% accuracy\n${as(score)} ranked score\n\nJoined ${formatDate(joindate)}\n${ac(timeSince(joindate))}\`\`\``)
-                    .addField("Top plays:", `\`\`\`xl\n${ac(Math.round(score_pp[0]))} pp${score_mods[0]} / ${ac(timeSince(score_date[0]))}\n${ac(Math.round(score_pp[1]))} pp${score_mods[1]} / ${ac(timeSince(score_date[1]))}\n${ac(Math.round(score_pp[2]))} pp${score_mods[2]} / ${ac(timeSince(score_date[2]))}\n${ac(Math.round(score_pp[3]))} pp${score_mods[3]} / ${ac(timeSince(score_date[3]))}\n${ac(Math.round(score_pp[4]))} pp${score_mods[4]} / ${ac(timeSince(score_date[4]))}\`\`\``)
-                //.setFooter(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
+                    .addField("Top plays:", `\`\`\`xl\n${ac(Math.round(score_pp[0]))} pp${score_mods[0]}\n${ac(Math.round(score_pp[1]))} pp${score_mods[1]}\n${ac(Math.round(score_pp[2]))} pp${score_mods[2]}\n${ac(Math.round(score_pp[3]))} pp${score_mods[3]}\n${ac(Math.round(score_pp[4]))} pp${score_mods[4]}\n\`\`\``, true)
+                    .addField("Date achieved:", `\`\`\`xl\n${ac(timeSince(score_date[0]))}\n${ac(timeSince(score_date[1]))}\n${ac(timeSince(score_date[2]))}\n${ac(timeSince(score_date[3]))}\n${ac(timeSince(score_date[4]))}\n\`\`\``, true)
                 message.channel.send(statEmbed);
             }
             scoreRequest();
@@ -236,25 +236,6 @@ function formatDate(value)
 {
     return value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
 }
-
-/*
-function getMaps(callback)
-{
-    const request = async () =>
-    {
-        const response = await fetch(`https://osu.ppy.sh/api/get_beatmaps?k=${apikey}&b=${map_id}`);
-        const mapjson = await response.json();
-        //console.log(json);
-        callback(mapjson);
-    }
-    request();
-}
-
-function returnMaps(maps)
-{
-    return maps;
-}
-*/
 
 module.exports.stats = getStats;
 
