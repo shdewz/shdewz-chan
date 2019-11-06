@@ -60,6 +60,7 @@ function getStats(message, args)
                 var countryrank = userjson[u].pp_country_rank;
                 var country = userjson[u].country;
                 var accuracy = userjson[u].accuracy;
+                var score = userjson[u].ranked_score;
             }
 
             const scoreRequest = async () =>
@@ -120,9 +121,9 @@ function getStats(message, args)
                     .setTitle(`osu! stats for **${username}** :flag_${country.toLowerCase()}:`)
                     .setDescription(`*${gamemode} gamemode*`)
                     .setThumbnail(avatarurl)
-                    .addField("Basic stats:", `\`\`\`xl\n#${ac(rank)} (#${ac(countryrank)} ${country})\n${ac(Math.round(pp))} pp\n${ac(playcount)} plays\n${Math.round(accuracy * 100) / 100}% accuracy\n\nJoined ${formatDate(joindate)}\n${ac(timeSince(joindate))}\`\`\``)
+                    .addField("Basic stats:", `\`\`\`xl\n#${ac(rank)} (#${ac(countryrank)} ${country})\n${ac(Math.round(pp))} pp\n${ac(playcount)} plays\n${Math.round(accuracy * 100) / 100}% accuracy\n${as(score)} ranked score\n\nJoined ${formatDate(joindate)}\n${ac(timeSince(joindate))}\`\`\``)
                     .addField("Top plays:", `\`\`\`xl\n${ac(Math.round(score_pp[0]))} pp${score_mods[0]} / ${ac(timeSince(score_date[0]))}\n${ac(Math.round(score_pp[1]))} pp${score_mods[1]} / ${ac(timeSince(score_date[1]))}\n${ac(Math.round(score_pp[2]))} pp${score_mods[2]} / ${ac(timeSince(score_date[2]))}\n${ac(Math.round(score_pp[3]))} pp${score_mods[3]} / ${ac(timeSince(score_date[3]))}\n${ac(Math.round(score_pp[4]))} pp${score_mods[4]} / ${ac(timeSince(score_date[4]))}\`\`\``)
-                    //.setFooter(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
+                //.setFooter(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
                 message.channel.send(statEmbed);
             }
             scoreRequest();
@@ -143,19 +144,44 @@ function ac(num)
     return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
 }
 
-// calculate the time (obsolete)
-/*
-function daysSince(joindate)
+// add large number suffixes
+function as(num)
 {
-    var today = new Date();
-
-    var timeDiff = today - joindate;
-
-    var dayDiff = Math.round(timeDiff / (1000 * 3600 * 24));
-
-    return dayDiff;
+    if (num <= 100000)
+    {
+        return ac(num);
+    }
+    else if (num <= 1000000)
+    {
+        num /= 1000;
+        return ac(Math.round(num * 10) / 10) + "k";
+    }
+    else if (num <= 100000000)
+    {
+        num /= 1000000;
+        return ac(Math.round(num * 10) / 10) + "M";
+    }
+    else if (num <= 1000000000)
+    {
+        num /= 1000000;
+        return ac(Math.round(num)) + "M";
+    }
+    else if (num <= 100000000000)
+    {
+        num /= 1000000000;
+        return ac(Math.round(num * 100) / 100) + "B";
+    }
+    else if (num <= 1000000000000)
+    {
+        num /= 1000000000;
+        return ac(Math.round(num * 10) / 10) + "B";
+    }
+    else
+    {
+        num /= 1000000000;
+        return ac(Math.round(num)) + "B";
+    }
 }
-*/
 
 // new time calc
 function timeSince(past)
