@@ -147,36 +147,46 @@ function ac(num)
 // add large number suffixes
 function as(num)
 {
-    if (num <= 100000)
+    if (num <= 10000) // 1,000
     {
         return ac(num);
     }
-    else if (num <= 1000000)
+    else if (num <= 100000) // 10.0K
     {
         num /= 1000;
-        return ac(Math.round(num * 10) / 10) + "k";
+        return ac(Math.round(num * 10) / 10) + "K";
     }
-    else if (num <= 100000000)
+    else if (num <= 1000000) // 100K
+    {
+        num /= 1000;
+        return ac(num) + "K";
+    }
+    else if (num <= 10000000) // 1.00M
+    {
+        num /= 1000000;
+        return ac(Math.round(num * 100) / 100) + "M";
+    }
+    else if (num <= 100000000) // 10.0M
     {
         num /= 1000000;
         return ac(Math.round(num * 10) / 10) + "M";
     }
-    else if (num <= 1000000000)
+    else if (num <= 1000000000) // 100M
     {
         num /= 1000000;
         return ac(Math.round(num)) + "M";
     }
-    else if (num <= 100000000000)
+    else if (num <= 10000000000) // 1.00B
     {
         num /= 1000000000;
         return ac(Math.round(num * 100) / 100) + "B";
     }
-    else if (num <= 1000000000000)
+    else if (num <= 100000000000) // 10.0B
     {
         num /= 1000000000;
         return ac(Math.round(num * 10) / 10) + "B";
     }
-    else
+    else // 100B
     {
         num /= 1000000000;
         return ac(Math.round(num)) + "B";
