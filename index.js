@@ -71,24 +71,31 @@ client.on('message', message =>
                 queue: []
             };
 
-            var server = servers[message.guild.id];
+            server = servers[message.guild.id];
 
-            if (server.queue[0] || server.dispatcher)
+            try
             {
-                server.queue.push(args[1]);
-                message.channel.send(`Added song to queue\nSongs in queue: ${server.queue.length}\n\nUse \`${prefix}skip\` to skip the current song or \`${prefix}stop\` to stop playing`);
-            }
-            else
-            {
-                server.queue.push(args[1]);
-                message.channel.send(`Started playing song`);
-            }
+                if (!message.guild.voiceConnection) message.member.voiceChannel.join().then(function (connection)
+                {
+                    music.play(connection, message, args);
+                });
+                if (server.dispatcher)
+                {
+                    message.channel.send(`Added song to queue\nSongs in queue: ${server.queue.length}\n\nUse \`${prefix}skip\` to skip the current song or \`${prefix}stop\` to stop playing`);
+                }
+                else
+                {
+                    message.channel.send(`Started playing song`);
+                }
 
-            if (!message.guild.voiceConnection) message.member.voiceChannel.join().then(function (connection)
+                break;
+            }
+            catch (error)
             {
-                music.play(connection, message);
-            });
-            break;
+                message.channel.send(`\`${error}\``);
+                console.log(error);
+                return;
+            }
 
         case "skip":
             music.skip(message);

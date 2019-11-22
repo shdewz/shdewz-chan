@@ -6,27 +6,38 @@ const index = require("../index.js");
 const client = new Discord.Client();
 
 // ?play
-function Play(connection, message)
+function Play(connection, message, args)
 {
     try
     {
-        var server = servers[message.guild.id];
+        server.queue.push(args[1]);
+        server.queue = server.queue;
 
-        server.dispatcher = connection.playStream(ytdl(server.queue[0], { filter: "audioonly" }));
+        try
+        {
+            server.dispatcher = connection.playStream(ytdl(server.queue[0], { filter: "audioonly" }));
+        }
+        catch (error)
+        {
+            message.channel.send(`\`${error}\``);
+            console.log(error);
+            server.queue.pop();
+            return;
+        }
 
         server.queue.shift();
 
         server.dispatcher.on("end", function ()
         {
             if (server.queue[0]) Play(connection, message);
-            else connection.disconnect();
+            else connection.disconnect(); server.queue = [];
         });
         return;
     }
 
     catch (error)
     {
-        message.channel.send(`fuck, i have fallen\n\nError code: \`${error}\``);
+        message.channel.send(`\`${error}\``);
         console.log(error);
         return;
     }
@@ -37,15 +48,16 @@ module.exports.play = Play;
 function Skip(message)
 {
     var server = servers[message.guild.id];
-
     if (server.dispatcher) server.dispatcher.end();
+    message.channel.send(`Skipped current song\nSongs in queue: ${server.queue.length}\n\nUse \`${prefix}skip\` to skip the current song or \`${prefix}stop\` to stop playing`);
+    return;
 }
 module.exports.skip = Skip;
 
 // ?stop
 function Stop(message)
 {
-    if (message.guild.voiceConnection) message.guild.voiceConnection.disconnect();
+    if (message.guild.voiceConnection) message.guild.voiceConnection.disconnect(); server.queue = [];
     return;
 }
 module.exports.stop = Stop;
