@@ -1,22 +1,48 @@
 const Discord = require('discord.js');
-const { prefix, token } = require("./config.json");
 const fs = require("fs");
 const client = new Discord.Client();
 
 const bids = require("./bid.js");
 
-global.servers = {};
+// global.servers = {}; // will make useful later
 var stats;
 var stat;
 var biddingActive;
 var target;
+var prefix;
+var token;
+var currency;
+
+// change these according to rules
 var startmoney = 15000;
 var maxprice = 7500;
+
+function loadConfig()
+{
+    if (fs.existsSync("config.json"))
+    {
+        fs.readFile("config.json", "utf-8", function (err, result)
+        {
+            if (err) console.log("error", err);
+            config = JSON.parse(result);
+
+            prefix = config.prefix;
+            token = config.token;
+            currency = config.currency;
+
+            console.log("Config read succesfully\n" + JSON.stringify(config))
+            client.login(token);
+        });
+    }
+}
+loadConfig();
 
 client.once('ready', () =>
 {
     console.log("ready! :)");
-    client.user.setActivity(`@shdewz`);
+    client.user.setActivity(`test time`);
+
+    // load stats
     if (fs.existsSync("stats.json"))
     {
         fs.readFile("stats.json", "utf-8", function (err, result)
@@ -31,12 +57,12 @@ client.once('ready', () =>
     else
     {
         stat = {
-            "captains": {
-
-            },
-            "sold": {
-
-            }
+            "captains": [
+            ],
+            "sold": [
+            ],
+            "players": [
+            ]
         };
         stats = JSON.stringify(stat);
         fs.writeFile("stats.json", stats, function (err)
@@ -47,10 +73,184 @@ client.once('ready', () =>
     }
 })
 
+// receive message in chat
+
 client.on('message', message =>
 {
+    // get the bid active value or whatever from the other file
     biddingActive = bids.biddingActive;
-    if (message.author.bot) return;
+
+    if (message.author.bot) return; // ignore bot messages
+
+    if (!message.content.startsWith(prefix) && !biddingActive) return; // ignore non-commands
+
+    if (message.content.startsWith(prefix))
+    {
+        // normal commands here
+
+        convertedName = message.author.username.split(' ').join('_'); // replace spaces with underscores
+        console.log(convertedName);
+
+        const args = message.content.substring(prefix.length).split(" "); // split message to arguments
+
+        // start checking commands
+        try // obligatory "error handling"
+        {
+            switch (args[0].toLowerCase())
+            {
+                case "bid":
+                    return;
+
+                case "captains":
+                    if (args.length < 2) { message.channel.send(`Too few arguments.`); return; }
+
+                    switch (args[1].toLowerCase())
+                    {
+                        case "set":
+                            if (!message.member.hasPermission("ADMINISTRATOR"))
+                            {
+                                message.channel.send(`Insufficient permissions`);
+                                return;
+                            }
+                            if (args.length < 3)
+                            {
+                                message.channel.send(`Too few arguments.`);
+                                return;
+                            }
+
+                            var captainList = [];
+                            var cptListText = "";
+                            stat.captains = [];
+
+                            for (var i = 2; i < args.length; i++)
+                            {
+                                captainList.push(args[i]);
+                                cptListText += `\`${args[i]}\`, `
+
+                                // var cptindex = stat.captains.length;
+
+                                var obj = { "name": args[i], "money": startmoney, "slaves": [] }
+                                stat.captains.push(obj);
+                            }
+
+                            cptListText = cptListText.substring(0, cptListText.length - 2);
+
+                            var stats = JSON.stringify(stat);
+                            fs.writeFile("stats.json", stats, function (err)
+                            {
+                                if (err) console.log("error", err);
+                            });
+
+                            console.log(captainList);
+                            console.log(stat);
+
+                            message.channel.send(`Succesfully set ${cptListText} as captain(s).`);
+
+                            return;
+
+                        case "add":
+                            return;
+
+                        case "list":
+
+                            var cptListTextNames = "";
+                            var cptListTextMoney = "";
+
+                            for (var i = 0; i < stat.captains.length; i++)
+                            {
+                                cptListTextNames += `\`${stat.captains[i].name}\`\n`;
+                                cptListTextMoney += `\`${stat.captains[i].money}\` ${currency}\n`;
+                            }
+
+                            const captainListEmbed = new Discord.RichEmbed()
+                                .setColor('#ff007a')
+                                .setTitle(`**Current captains** (${stat.captains.length})`)
+                                .addField('*Name*', cptListTextNames, true)
+                                .addField('*Money*', cptListTextMoney, true)
+                            message.channel.send(captainListEmbed);
+
+                            return;
+
+                        default:
+                            message.channel.send(`Unrecognized argument \`${args[1]}\`.`);
+                            return;
+                    }
+
+                case "players":
+                    return;
+
+                case "sold":
+                    return;
+
+                case "config":
+                    return;
+
+                case "money":
+                    for (var i = 0; i < stat.captains.length; i++)
+                    {
+                        if (args.length > 1) convertedName = args[1];
+                        // see if name exists in captains list
+                        if (stat.captains[i].name == convertedName)
+                        {
+                            message.channel.send(`\`${convertedName}\` has \`${stat.captains[i].money}\` ${currency}`);
+                            return;
+                        }
+                    }
+                    message.channel.send(`\`${message.author.username}\` not recognized as a captain.`);
+                    return;
+
+                case "roll":
+                    try
+                    {
+                        if (args.length >= 2)
+                        {
+                            message.channel.send(`${message.author.username} rolls \`${Math.floor(Math.random() * args[1]) + 1}\`!`);
+                        }
+                        else
+                        {
+                            message.channel.send(`${message.author.username} rolls \`${Math.floor(Math.random() * 100) + 1}\`!`);
+                        }
+                        return;
+                    }
+                    catch (error)
+                    {
+                        console.log(error);
+                        message.channel.send(`Something happened!\n\`\`\`\n${error}\n\`\`\``) // send error as message
+                    }
+
+                default:
+                    message.channel.send(`Unrecognized command \`${message.content}\``)
+                    return;
+            }
+        }
+        catch (error)
+        {
+            console.log(error);
+            message.channel.send(`Something happened!\n\`\`\`\n${error}\n\`\`\``) // send error as message
+        }
+
+    }
+    // check if message is just a number and ignore large numbers (may fix images interfering with this)
+    else if (!isNaN(message.content) && parseInt(message.content) < 2 * startmoney)
+    {
+        // bidding functions here
+
+        convertedName = message.author.username.split(' ').join('_'); // replace spaces with underscores
+        console.log(convertedName);
+
+        const args = message.content.substring(prefix.length).split(" "); // split message to arguments
+
+    }
+    else { return; } // nothing checks out so return
+
+    return;
+
+    // -------------------------- //
+    // OLD SPAGHETTI STARTS HERE! //
+    // -------------------------- //
+
+
+
     if (biddingActive == false) // if nothing is happening
     {
         if (!message.content.startsWith(prefix) || message.author.bot) return;
@@ -467,5 +667,3 @@ function hasOwnPropertyCI(obj, property, returnType)
 }
 
 module.exports.hasOwnPropertyCI = hasOwnPropertyCI;
-
-client.login(token);
