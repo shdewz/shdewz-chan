@@ -2,7 +2,7 @@
 
 Private (currently) javascript discord bot to be used in osu! tournaments with a team drafting format.
 
-## Functions
+## Working functions
 
 #### Setup commands: (`< >` required, `[ ]` optional)
 
