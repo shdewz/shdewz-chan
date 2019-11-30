@@ -33,7 +33,7 @@ Same commands may be used for players by starting with `!players` (except for `a
 
 + [Node.js](https://nodejs.org/en/)
 + [Git](https://git-scm.com/)
-+ Discord bot created [here](https://discordapp.com/developers/applications/) for more realistic testing
++ Discord bot created [here](https://discordapp.com/developers/applications/). Refer to [this guide](https://discordjs.guide/) during setup.
 + A `config.json` file made as follows:
 ```json
 {
@@ -63,4 +63,11 @@ Make sure to switch to the **slave-market** branch!
 To fetch the latest update, use
 ```shell
 git pull
+```
+
+#### Running the bot
+
+In the main directory do
+```shell
+node index.js
 ```
