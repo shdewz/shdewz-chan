@@ -31,6 +31,7 @@ Same commands may be used for players by starting with `!players`. Additional pl
 ## Requirements
 
 + [Node.js](https://nodejs.org/en/)
++ [Git](https://git-scm.com/)
 + Discord bot created [here](https://discordapp.com/developers/applications/) for more realistic testing
 + A `config.json` file made as follows:
 ```json
@@ -44,6 +45,7 @@ Same commands may be used for players by starting with `!players`. Additional pl
 ```
 
 + Preferably a more advanced text editor such as [Visual Studio Code](https://code.visualstudio.com/)
++ A functioning brain
 + And probably something else that I just forgot
 
 ## Contributing
