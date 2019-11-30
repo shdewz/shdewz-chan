@@ -39,7 +39,6 @@ Same commands may be used for players by starting with `!players` (except for `a
 {
     "prefix": "!",
     "token": "your discord app token here",
-    "apikey": "osu api key, not used yet so no need",
     "currency": "coins",
     "startmoney": 15000
 }
@@ -67,7 +66,7 @@ git pull
 
 #### Running the bot
 
-In the main directory do
+In the main directory, do
 ```shell
 node index.js
 ```
