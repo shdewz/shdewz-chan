@@ -6,15 +6,15 @@ Private (currently) javascript discord bot to be used in osu! tournaments with a
 
 #### Setup commands: (`< >` required, `[ ]` optional)
 
-+ `!captains add <captain_1> ...` Adds captain(s) to the list. Use their osu! usernames, replacing any spaces with underscores `_`.
-+ `!captains remove <captain_1> ...` Removes captain(s) from the list.
-+ `!captains clear` Clears the entire list of captains.
-+ `!captains list` Displays a list of all captains along with their available money.
++ `!captains.add <captain_1> ...` Adds captain(s) to the list. Use their osu! usernames, replacing any spaces with underscores `_`.
++ `!captains.remove <captain_1> ...` Removes captain(s) from the list.
++ `!captains.clear` Clears the entire list of captains.
++ `!captains.list` Displays a list of all captains along with their available money.
 
 Same commands may be used for players by starting with `!players` (except for `add`). Additional player-based commands include:
-+ `!players add <player> ""<reason to be picked>""` Adds player with a reason enclosed in double-double quotes. Do this one by one and remember to replace spaces with underscores `_`.
-+ `!players sold` Displays a list of sold players, their owners and the sell price.
-+ `!players set-unsold [player1]` Sets player(s) to unsold state. Defaults to everyone. Use before starting an auction.
++ `!players.add <player> ""<reason to be picked>""` Adds player with a reason enclosed in double-double quotes. Do this one by one and remember to replace spaces with underscores `_`.
++ `!players.sold` Displays a list of sold players, their owners and the sell price.
++ `!players.set-unsold [player1]` Sets player(s) to unsold state. Defaults to everyone. Use before starting an auction.
 
 
 #### Other commands:
