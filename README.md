@@ -27,7 +27,7 @@ Same commands may be used for players by starting with `!players` (except for `a
 + Config commands, such as changing the command prefix and currency.
 + The actual bidding process and the related commands
 + Displaying users' osu! stats
-+ Some optimization
++ ~~Some optimization~~ (kind of done)
 
 ## Requirements
 
