@@ -1,3 +1,10 @@
+node_modules/
+
+# config file
 config.json
+
+# stats file
 stats.json
+
+# don't even know why this exists but ignore either way
 shdewz-chan.bat
