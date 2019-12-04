@@ -40,7 +40,8 @@ Same commands may be used for players by starting with `!players` (except for `a
 ```json
 {
     "prefix": "!",
-    "token": "your discord app token here",
+    "token": "your discord app token",
+    "apikey": "your osu! api key",
     "currency": "coins",
     "startmoney": 15000
 }
