@@ -10,7 +10,6 @@ module.exports = {
             if (fs.existsSync("stats.json"))
             {
                 var stat = JSON.parse(fs.readFileSync("stats.json", "utf-8"));
-                console.log(`Stats read succesfully:\n` + JSON.stringify(stat));
                 return stat;
             }
             else

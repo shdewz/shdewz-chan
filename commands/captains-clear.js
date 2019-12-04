@@ -14,7 +14,6 @@ module.exports = {
             if (err) console.log("error", err);
 
             message.channel.send(`Succesfully cleared all captains.`);
-            console.log(stat.captains);
             return;
         });
         return;
