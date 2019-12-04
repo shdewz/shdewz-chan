@@ -18,14 +18,14 @@ module.exports = {
             // check if in players
             for (var ii = 0; ii < stat.players.length; ii++)
             {
-                if (stat.players[ii].name == args[i])
+                if (stat.players[ii].name.toLowerCase() == args[i].toLowerCase())
                 {
                     found = true;
                     plrListText += `\`${args[i]}\`, `;
                     // check if in sold
                     for (var j = 0; j < stat.sold.length; j++)
                     {
-                        if (stat.sold[j].name == args[i])
+                        if (stat.sold[j].name.toLowerCase() == args[i].toLowerCase())
                         {
                             // remove from captain
                             findCaptains:
@@ -33,7 +33,7 @@ module.exports = {
                             {
                                 for (var k = 0; k < stat.captains[jj].slaves.length; k++)
                                 {
-                                    if (stat.captains[jj].slaves[k].name == args[i])
+                                    if (stat.captains[jj].slaves[k].name.toLowerCase() == args[i].toLowerCase())
                                     {
                                         stat.captains[jj].slaves.splice(k, 1);
                                         break findCaptains;
@@ -72,7 +72,6 @@ module.exports = {
             {
                 message.channel.send(`Succesfully removed ${plrListText} from players.`);
             }
-            console.log(stat.players);
             return;
         });
         return;
