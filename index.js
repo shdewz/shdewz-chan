@@ -18,7 +18,7 @@ for (const file of commandFiles)
 client.once("ready", async () =>
 {
     console.log("Ready!\n");
-    client.user.setActivity(`with fire`);
+    client.user.setActivity(`!stats <name>`);
 });
 
 // receive message in chat
@@ -28,14 +28,13 @@ client.on('message', async message =>
     if (message.channel.type !== "text") return; // ignore non-text-channels
     if (message.author.bot) return; // ignore bot messages
 
+    var biddingActive = false;
     // ignore non-commands, and normal non-numeric messages during bidding
     var prefix = config.prefix;
     if (!message.content.startsWith(prefix) && (!biddingActive && isNaN(message.content))) return;
 
     if (message.content.startsWith(prefix))
     {
-        // convertedName = message.author.username.split(' ').join('_'); // replace spaces with underscores
-
         // split message to arguments
         const args = message.content.slice(prefix.length).split(/ +/);
         const command = args.shift().toLowerCase();
@@ -48,6 +47,7 @@ client.on('message', async message =>
             // load stats and execute command
             var stat = client.commands.get("loadstats").execute();
             client.commands.get(command).execute(message, args, stat);
+            console.log(`Command '${command}' issued by ${message.author.username}`)
         }
         catch (error)
         {
