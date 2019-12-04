@@ -5,6 +5,8 @@ client.commands = new Discord.Collection();
 const fs = require("fs");
 const config = require("./config.json");
 
+global.biddingActive = false; // you can't stop me from doing this
+
 // read command files from folder
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
@@ -18,7 +20,7 @@ for (const file of commandFiles)
 client.once("ready", async () =>
 {
     console.log("Ready!\n");
-    client.user.setActivity(`!stats`);
+    client.user.setActivity(`-> !stats.random <-`);
 });
 
 // receive message in chat
@@ -28,7 +30,6 @@ client.on('message', async message =>
     if (message.channel.type !== "text") return; // ignore non-text-channels
     if (message.author.bot) return; // ignore bot messages
 
-    var biddingActive = false;
     // ignore non-commands, and normal non-numeric messages during bidding
     var prefix = config.prefix;
     if (!message.content.startsWith(prefix) && (!biddingActive && isNaN(message.content))) return;
@@ -46,6 +47,7 @@ client.on('message', async message =>
         {
             // load stats and execute command
             var stat = client.commands.get("loadstats").execute();
+            module.exports.client = client;
             client.commands.get(command).execute(message, args, stat);
             console.log(`Command '${command}' issued by ${message.author.username}`)
         }
@@ -56,9 +58,21 @@ client.on('message', async message =>
         }
     }
     // check if message is just a number and ignore large numbers (*may* fix images interfering with this)
-    else if (!isNaN(message.content) && parseInt(message.content) < 2 * startmoney)
+    else if (biddingActive && !isNaN(message.content) && parseInt(message.content) < 2 * config.startmoney)
     {
-        // bidding functions here
+        try
+        {
+            // return if too many arguments
+            if (message.content.split(/ +/).length > 1) return;
+
+            var stat = client.commands.get("loadstats").execute();
+            client.commands.get("bid.join").execute(message, message.content, stat);
+        }
+        catch (error)
+        {
+            console.error(error);
+            return message.reply(`Something happened!\n\`\`\`\n${error}\n\`\`\``);
+        }
     }
     else return; // nothing checks out so return
 })
