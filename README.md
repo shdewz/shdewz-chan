@@ -43,7 +43,10 @@ Same commands may be used for players by starting with `!players` (except for `a
     "token": "your discord app token",
     "apikey": "your osu! api key",
     "currency": "coins",
-    "startmoney": 15000
+    "startmoney": 15000,
+    "minbid": 100,
+    "maxbid": 2000,
+    "maxprice": 7500
 }
 ```
 
