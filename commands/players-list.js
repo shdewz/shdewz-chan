@@ -9,9 +9,9 @@ module.exports = {
         {
             for (var i = 0; i < stat.players.length; i++)
             {
-                if (stat.players[i].name == args[0])
+                if (stat.players[i].name.toLowerCase() == args[0].toLowerCase())
                 {
-                    message.channel.send(`**Player name:** \`${stat.players[i].name}\`\n**Reason to be bought:** *${stat.players[i].story}*`);
+                    message.channel.send(`**Player name:** \`${stat.players[i].name}\`\n**Pickup line:**    ${stat.players[i].story}`);
                     return;
                 }
             }
@@ -19,19 +19,12 @@ module.exports = {
         else
         {
             var plrListTextNames = "";
-            var plrListTextStory = "";
+            var plrListTextSold = "";
 
             for (var i = 0; i < stat.players.length; i++)
             {
                 plrListTextNames += `\`${stat.players[i].name}\`\n`;
-                if (stat.players[i].story.length > 30) // shorten too long stories
-                {
-                    plrListTextStory += `\`${stat.players[i].story.substring(0, 30)}...\`\n`;
-                }
-                else
-                {
-                    plrListTextStory += `\`${stat.players[i].story}\`\n`;
-                }
+                plrListTextSold += `\`${stat.players[i].sold}\`\n`;
             }
 
             if (plrListTextNames == "")
@@ -44,10 +37,8 @@ module.exports = {
                 .setColor('#ff007a')
                 .setTitle(`**Current players** (${stat.players.length})`)
                 .addField('*Name*', plrListTextNames, true)
-                .addField('*Why buy me?*', plrListTextStory, true)
+                .addField('*Sold?*', plrListTextSold, true)
             message.channel.send(playerListEmbed);
-
-            console.log(stat.players);
             return;
         }
 
