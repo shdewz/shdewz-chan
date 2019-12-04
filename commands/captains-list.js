@@ -21,7 +21,7 @@ module.exports = {
                         cptListTextSlaves += `\`${stat.captains[i].slaves[j].name}\`, `;
                     }
                     cptListTextSlaves = cptListTextSlaves.substring(0, cptListTextSlaves.length - 2);
-                    message.channel.send(`**Captain:** \`${stat.captains[i].name}\`\n**Slaves:** ${cptListTextSlaves} (${stat.captains[i].slaves.length})`);
+                    message.channel.send(`**Captain:** \`${stat.captains[i].name}\`\n**Funds:** ${stat.captains[i].money} ${config.currency}\n**Slaves:** ${cptListTextSlaves} (${stat.captains[i].slaves.length})`);
                     return;
                 }
             }
