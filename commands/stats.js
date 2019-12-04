@@ -5,12 +5,13 @@ const Discord = require('discord.js');
 module.exports = {
     name: 'stats',
     description: `Displays a user's osu! stats.`,
-    execute(message, args, stat)
+    execute(message, args, stat, player)
     {
         try
         {
             // use server nick if no arguments given
-            if (args.length < 1) convertedName = message.member.displayName.split(" ").join('_');
+            if (player != undefined) convertedName = player;
+            else if (args.length < 1) convertedName = message.member.displayName.split(" ").join('_');
             else convertedName = args.join('_');
 
             var playerstatus = `Not playing`;
@@ -21,16 +22,6 @@ module.exports = {
             // check the player's tourney status
             while (!playerfound)
             {
-                // check if captain
-                for (var i = 0; i < stat.captains.length; i++) // go through the list
-                {
-                    if (stat.captains[i].name.toLowerCase() == convertedName.toLowerCase()) // see if name exists in captains list
-                    {
-                        playerstatus = `Captain`;
-                        playerfound = true;
-                        break;
-                    }
-                }
                 // check if player
                 for (var i = 0; i < stat.players.length; i++) // go through the list
                 {
@@ -39,6 +30,16 @@ module.exports = {
                         badges = stat.players[i].badges;
                         rankText = "BWS Rank"
                         playerstatus = `Player`;
+                        playerfound = true;
+                        break;
+                    }
+                }
+                // check if captain
+                for (var i = 0; i < stat.captains.length; i++) // go through the list
+                {
+                    if (stat.captains[i].name.toLowerCase() == convertedName.toLowerCase()) // see if name exists in captains list
+                    {
+                        playerstatus = `Captain`;
                         playerfound = true;
                         break;
                     }
