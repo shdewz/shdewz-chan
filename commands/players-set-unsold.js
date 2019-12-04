@@ -5,7 +5,7 @@ module.exports = {
     description: 'Sets player(s) as unsold.',
     execute(message, args, stat)
     {
-        if (!message.member.hasPermission("ADMINISTRATOR")) { message.channel.send(`Insufficient permissions`); return; }
+        if (!message.member.hasPermission("ADMINISTRATOR")) { message.reply(`Insufficient permissions`); return; }
         if (args.length == 0)
         {
             stat.unsold = stat.players;

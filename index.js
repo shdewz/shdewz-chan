@@ -18,7 +18,7 @@ for (const file of commandFiles)
 client.once("ready", async () =>
 {
     console.log("Ready!\n");
-    client.user.setActivity(`!stats <name>`);
+    client.user.setActivity(`!stats`);
 });
 
 // receive message in chat
@@ -52,7 +52,7 @@ client.on('message', async message =>
         catch (error)
         {
             console.error(error);
-            message.reply(`Something happened!\n\`\`\`\n${error}\n\`\`\``);
+            return message.reply(`Something happened!\n\`\`\`\n${error}\n\`\`\``);
         }
     }
     // check if message is just a number and ignore large numbers (*may* fix images interfering with this)

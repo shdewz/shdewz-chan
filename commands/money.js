@@ -5,7 +5,7 @@ module.exports = {
     description: `Displays a captain's money.`,
     execute(message, args, stat)
     {
-        convertedName = message.author.username.split(' ').join('_'); // replace spaces with underscores
+        convertedName = message.member.displayName.split(' ').join('_'); // replace spaces with underscores
         if (args.length >= 1) convertedName = args[0]; // !money <someone else>
         for (var i = 0; i < stat.captains.length; i++) // go through the list
         {
@@ -15,7 +15,7 @@ module.exports = {
                 return;
             }
         }
-        message.channel.send(`\`${convertedName}\` not found from captains.`);
+        message.reply(`\`${convertedName}\` not found from captains.`);
         return;
     }
 };

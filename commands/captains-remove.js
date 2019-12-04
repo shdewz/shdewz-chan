@@ -5,8 +5,8 @@ module.exports = {
     description: 'Removes captain(s) from list.',
     execute(message, args, stat)
     {
-        if (!message.member.hasPermission("ADMINISTRATOR")) { message.channel.send(`Insufficient permissions`); return; } // return if no perms
-        if (args.length < 1) { message.channel.send(`Too few arguments.`); return; } // return if no args
+        if (!message.member.hasPermission("ADMINISTRATOR")) { message.reply(`Insufficient permissions`); return; } // return if no perms
+        if (args.length < 1) { message.reply(`Too few arguments.`); return; } // return if no args
 
         // declare some stuff
         var cptListText = "";

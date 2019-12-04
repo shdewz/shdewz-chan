@@ -5,8 +5,8 @@ module.exports = {
     description: 'Adds a player to the list.',
     execute(message, args, stat)
     {
-        if (!message.member.hasPermission("ADMINISTRATOR")) { message.channel.send(`Insufficient permissions`); return; }
-        if (args.length < 2) { message.channel.send(`Too few arguments.`); return; }
+        if (!message.member.hasPermission("ADMINISTRATOR")) { message.reply(`Insufficient permissions`); return; }
+        if (args.length < 2) { message.reply(`Too few arguments.`); return; }
 
         var playerList = [];
         var plrListText = "";

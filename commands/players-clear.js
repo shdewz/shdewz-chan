@@ -5,7 +5,7 @@ module.exports = {
     description: 'Clears all players.',
     execute(message, args, stat)
     {
-        if (!message.member.hasPermission("ADMINISTRATOR")) { message.channel.send(`Insufficient permissions`); return; }
+        if (!message.member.hasPermission("ADMINISTRATOR")) { message.reply(`Insufficient permissions`); return; }
 
         stat.players = [];
         stat.sold = [];

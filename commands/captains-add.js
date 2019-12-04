@@ -6,8 +6,8 @@ module.exports = {
     description: 'Adds captain(s) to the list.',
     execute(message, args, stat)
     {
-        if (!message.member.hasPermission("ADMINISTRATOR")) { message.channel.send(`Insufficient permissions`); return; } // return if no perms
-        if (args.length < 1) { message.channel.send(`Too few arguments.`); return; } // return if no args
+        if (!message.member.hasPermission("ADMINISTRATOR")) { message.reply(`Insufficient permissions`); return; } // return if no perms
+        if (args.length < 1) { message.reply(`Too few arguments.`); return; } // return if no args
 
         // declare some stuff
         var captainList = [];
@@ -42,7 +42,7 @@ module.exports = {
         if (cptListTextMissing != "")
         {
             cptListTextMissing = cptListTextMissing.substring(0, cptListTextMissing.length - 2);
-            message.channel.send(`\`${cptListTextMissing}\` already exist(s) as captain(s).`);
+            message.reply(`\`${cptListTextMissing}\` already exist(s) as captain(s).`);
         }
 
         if (cptListText != "")
