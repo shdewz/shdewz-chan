@@ -7,8 +7,8 @@ module.exports = {
     description: `Displays a user's osu! stats.`,
     execute(message, args, stat)
     {
-        if (args.length < 1) return;
-        convertedName = args[0].split(' ').join('_'); // not even needed but whatever
+        if (args.length < 1) return message.channel.send(`Use \`${config.prefix}stats <osu_username>\`.`);
+        convertedName = args.join('_');
         var playerstatus = `Not playing`;
         var playerfound = false;
         var badges = 0;
@@ -72,7 +72,7 @@ module.exports = {
                 .setAuthor(username, flagurl, url = `https://osu.ppy.sh/u/${userid}`)
                 .setColor('#ff007a')
                 .setThumbnail(avatarurl)
-                .setDescription(`*⯈ ${rankText}:*  **#${ac(bws_rank)}**\n*⯈ pp:*  **${ac(pp)}**\n*⯈ Accuracy:*  **${accuracy}%**\n*⯈ Playcount:*  **${ac(playcount)}**\n\n*⯈ Status:*  **${playerstatus}**`)
+                .setDescription(`*⯈ ${rankText}:*  **#${ac(bws_rank)}**\n*⯈ pp:*  **${ac(pp)}**\n*⯈ Accuracy:*  **${accuracy}%**\n*⯈ Playcount:*  **${ac(playcount)}**\n\n*⯈ Tournament Status:*  **${playerstatus}**`)
             message.channel.send(statEmbed);
 
         }
