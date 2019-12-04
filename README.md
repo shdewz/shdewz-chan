@@ -34,7 +34,7 @@ Same commands may be used for players by starting with `!players` (except for `a
 
 + [Node.js](https://nodejs.org/en/)
    + Modules `discord.js` and `node-fetch` needed
-+ [Git](https://git-scm.com/)
++ [Git](https://git-scm.com/) obviously
 + Discord bot created [here](https://discordapp.com/developers/applications/). Refer to [this guide](https://discordjs.guide/) during setup.
 + A `config.json` file made as follows:
 ```json
