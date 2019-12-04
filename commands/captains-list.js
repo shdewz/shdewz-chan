@@ -10,27 +10,46 @@ module.exports = {
         var cptListTextMoney = "";
         var cptListTextSlaves = "";
 
-        for (var i = 0; i < stat.captains.length; i++)
+        if (args.length >= 1) // single stats
         {
-            cptListTextNames += `\`${stat.captains[i].name}\`\n`;
-            cptListTextMoney += `\`${stat.captains[i].money}\`\n`;
-            cptListTextSlaves += `\`${stat.captains[i].slaves.length}\`\n`;
+            for (var i = 0; i < stat.captains.length; i++)
+            {
+                if (stat.captains[i].name.toLowerCase() == args[0].toLowerCase())
+                {
+                    for (var j = 0; j < stat.captains[i].slaves.length; j++)
+                    {
+                        cptListTextSlaves += `\`${stat.captains[i].slaves[j].name}\`, `;
+                    }
+                    cptListTextSlaves = cptListTextSlaves.substring(0, cptListTextSlaves.length - 2);
+                    message.channel.send(`**Captain:** \`${stat.captains[i].name}\`\n**Slaves:** ${cptListTextSlaves} (${stat.captains[i].slaves.length})`);
+                    return;
+                }
+            }
         }
-
-        if (cptListTextNames == "")
+        else // overall stats
         {
-            message.channel.send(`Captains list is probably empty.`);
+            for (var i = 0; i < stat.captains.length; i++)
+            {
+                cptListTextNames += `\`${stat.captains[i].name}\`\n`;
+                cptListTextMoney += `\`${stat.captains[i].money}\`\n`;
+                cptListTextSlaves += `\`${stat.captains[i].slaves.length}\`\n`;
+            }
+
+            if (cptListTextNames == "")
+            {
+                message.channel.send(`Captains list is probably empty.`);
+                return;
+            }
+
+            const captainListEmbed = new Discord.RichEmbed()
+                .setColor('#ff007a')
+                .setTitle(`**Current captains** (${stat.captains.length})`)
+                .addField('*Name*', cptListTextNames, true)
+                .addField(`*${config.currency}*`, cptListTextMoney, true)
+                .addField('*Slaves*', cptListTextSlaves, true)
+            message.channel.send(captainListEmbed);
+
             return;
         }
-
-        const captainListEmbed = new Discord.RichEmbed()
-            .setColor('#ff007a')
-            .setTitle(`**Current captains** (${stat.captains.length})`)
-            .addField('*Name*', cptListTextNames, true)
-            .addField(`*${config.currency}*`, cptListTextMoney, true)
-            .addField('*Slaves*', cptListTextSlaves, true)
-        message.channel.send(captainListEmbed);
-
-        return;
     }
 };
