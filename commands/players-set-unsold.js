@@ -1,4 +1,5 @@
 const fs = require("fs");
+const config = require("../config.json");
 
 module.exports = {
     name: 'players.set-unsold',
@@ -10,11 +11,16 @@ module.exports = {
         {
             stat.unsold = stat.players;
             stat.sold = [];
+            // clear captains slaves and money
+            for (var i = 0; i < stat.captains.length; i++)
+            {
+                stat.captains[i].money = config.startmoney;
+                stat.captains[i].slaves = [];
+            }
             fs.writeFile("stats.json", JSON.stringify(stat), function (err)
             {
                 if (err) console.log("error", err);
                 message.channel.send(`Succesfully set all players as unsold.`);
-                console.log(stat);
                 return;
             });
         }
