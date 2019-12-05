@@ -4,7 +4,7 @@ const Discord = require('discord.js');
 
 global.price = 0;
 global.maxprice;
-global.minbid ;
+global.minbid;
 global.maxbid;
 
 global.target; // player to be auctioned
@@ -18,6 +18,7 @@ module.exports = {
     {
         if (!message.member.hasPermission("ADMINISTRATOR")) return message.reply(`Insufficient permissions.`);
         if (args.length < 1) return message.reply(`Too few arguments.`);
+        if (biddingActive) return message.reply(`Auction already in progress.`);
 
         // check if player is a player
         for (var i = 0; i < stat.players.length; i++)
@@ -44,6 +45,20 @@ function startBid(message, args, stat, player)
     captains = [];
     highest = "";
     target = player;
+
+    for (var k = 0; k < stat.unsold.length; k++)
+    {
+        if (stat.unsold[k].name = target.name)
+        {
+            stat.unsold.splice(k, 1);
+        }
+    }
+
+    fs.writeFile("stats.json", JSON.stringify(stat), function (err)
+    {
+        if (err) return console.log("error", err);
+        return console.log("Save successful.");
+    });
 
     const bidEmbed = new Discord.RichEmbed()
         .setColor('#ff007a')
