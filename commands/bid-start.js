@@ -32,7 +32,7 @@ module.exports = {
                         return message.reply(`Player \`${stat.sold[j].name}\` has already been sold.`);
                     }
                 }
-                return startBid(message, args, stat, stat.players[i].name);
+                return startBid(message, args, stat, stat.players[i]);
             }
         }
         return message.reply(`Player \`${args[0]}\` is not set as a player.`);
@@ -47,7 +47,7 @@ function startBid(message, args, stat, player)
 
     const bidEmbed = new Discord.RichEmbed()
         .setColor('#ff007a')
-        .setDescription(`**${target}** is on sale starting at **100 ${config.currency}**!\nCaptains may start bidding by typing numbers.`)
+        .setDescription(`**${target.name}** is on sale starting at **100 ${config.currency}**!\nCaptains may start bidding by typing numbers.`)
     message.channel.send(bidEmbed);
 
     biddingActive = true;
