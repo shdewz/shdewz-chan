@@ -21,7 +21,7 @@ module.exports = {
                         cptListTextSlaves += `\`${stat.captains[i].slaves[j].name}\`, `;
                     }
                     cptListTextSlaves = cptListTextSlaves.substring(0, cptListTextSlaves.length - 2);
-                    message.channel.send(`**Captain:** \`${stat.captains[i].name}\`\n**Funds:** ${stat.captains[i].money} ${config.currency}\n**Slaves:** ${cptListTextSlaves} (${stat.captains[i].slaves.length})`);
+                    message.channel.send(`**Captain:** \`${stat.captains[i].name}\`\n**Funds:** \`${ac(stat.captains[i].money)} ${config.currency}\`\n**Slaves:** ${cptListTextSlaves} (${stat.captains[i].slaves.length})`);
                     return;
                 }
             }
@@ -31,7 +31,7 @@ module.exports = {
             for (var i = 0; i < stat.captains.length; i++)
             {
                 cptListTextNames += `\`${stat.captains[i].name}\`\n`;
-                cptListTextMoney += `\`${stat.captains[i].money}\`\n`;
+                cptListTextMoney += `\`${ac(stat.captains[i].money)}\`\n`;
                 cptListTextSlaves += `\`${stat.captains[i].slaves.length}\`\n`;
             }
 
@@ -53,3 +53,9 @@ module.exports = {
         }
     }
 };
+
+// add comma as thousand separator
+function ac(num)
+{
+    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+}

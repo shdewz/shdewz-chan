@@ -19,7 +19,7 @@ module.exports = {
 
                 cptListTextSlaves = cptListTextSlaves.substring(0, cptListTextSlaves.length - 2);
 
-                return message.channel.send(`**Captain:** \`${stat.captains[i].name}\`\n**Funds:** ${stat.captains[i].money} ${config.currency}\n**Slaves:** ${cptListTextSlaves} (${stat.captains[i].slaves.length})`);
+                return message.channel.send(`**Captain:** \`${stat.captains[i].name}\`\n**Funds:** \`${ac(stat.captains[i].money)} ${config.currency}\`\n**Slaves:** ${cptListTextSlaves} (${stat.captains[i].slaves.length})`);
             }
         }
 
@@ -33,3 +33,9 @@ module.exports = {
         return message.reply("you are not a player/captain.")
     }
 };
+
+// add comma as thousand separator
+function ac(num)
+{
+    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+}
