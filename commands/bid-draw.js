@@ -14,13 +14,5 @@ module.exports = {
 
         message.channel.send(`**Chosen player was:** \`${stat.unsold[rng].name}\`\n**Why buy them?** *${stat.unsold[rng].story}*`);
         index.client.commands.get("stats").execute(message, args, stat, stat.unsold[rng].name);
-
-        stat.unsold.splice(rng, 1);
-
-        fs.writeFileSync("stats.json", JSON.stringify(stat), function (err)
-        {
-            if (err) console.log("error", err);
-            return;
-        });
     }
 };
