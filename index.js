@@ -6,75 +6,57 @@ const fs = require("fs");
 const config = require("./config.json");
 
 global.biddingActive = false; // you can't stop me from doing this
-
-// read command files from folder
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-
-// set commands in the collection
-for (const file of commandFiles)
-{
-    const command = require(`./commands/${file}`);
-    client.commands.set(command.name, command);
-}
+var stat;
 
 client.once("ready", async () =>
 {
-    console.log("Ready!\n");
-    client.user.setActivity(`-> !stats.random <-`);
+    console.log("\nReady!\n");
+    client.user.setActivity(`nothing`);
 });
 
-// receive message in chat
+fs.readdir("./commands", (err, files) =>
+{
+    if (err) console.log(err);
+
+    let jsfile = files.filter(f => f.split(".").pop() === "js");
+    if (jsfile.length <= 0)
+    {
+        console.log("Couldn't find commands.");
+        return;
+    }
+    jsfile.forEach((f, i) =>
+    {
+        let props = require(`./commands/${f}`);
+        client.commands.set(props.help.name, props);
+
+        console.log(`${f} loaded!`);
+    })
+});
 
 client.on('message', async message =>
 {
     if (message.channel.type !== "text") return; // ignore non-text-channels
     if (message.author.bot) return; // ignore bot messages
 
-    // ignore non-commands, and normal non-numeric messages during bidding
+    // ignore non-commands
     var prefix = config.prefix;
-    if (!message.content.startsWith(prefix) && (!biddingActive && isNaN(message.content))) return;
+    if (!message.content.startsWith(prefix)) return;
 
-    if (message.content.startsWith(prefix))
+    //split and format message for use in commands
+    let messageArray = message.content.split(" ");
+    let command = messageArray[0].slice(prefix.length);
+    let args = messageArray.slice(1);
+
+    //find and run requested command
+    let commandfile = client.commands.get(command);
+
+    if (commandfile)
     {
-        // split message to arguments
-        const args = message.content.slice(prefix.length).split(/ +/);
-        const command = args.shift().toLowerCase();
-
-        // return if command doesn't exist
-        if (!client.commands.has(command)) return;
-
-        try
-        {
-            // load stats and execute command
-            var stat = client.commands.get("loadstats").execute();
-            module.exports.client = client;
-            client.commands.get(command).execute(message, args, stat);
-            console.log(`Command '${command}' issued by ${message.author.username}`)
-        }
-        catch (error)
-        {
-            console.error(error);
-            return message.reply(`Something happened!\n\`\`\`\n${error}\n\`\`\``);
-        }
+        commandfile.run(client, message, args);
     }
-    // check if message is just a number and ignore large numbers (*may* fix images interfering with this)
-    else if (biddingActive && !isNaN(message.content) && parseInt(message.content) < 2 * config.startmoney)
-    {
-        try
-        {
-            // return if too many arguments
-            if (message.content.split(/ +/).length > 1) return;
 
-            var stat = client.commands.get("loadstats").execute();
-            client.commands.get("bid.join").execute(message, message.content, stat);
-        }
-        catch (error)
-        {
-            console.error(error);
-            return message.reply(`Something happened!\n\`\`\`\n${error}\n\`\`\``);
-        }
-    }
-    else return; // nothing checks out so return
+    console.log(`Command '${command}' issued by ${message.author.username}`)
+
 })
 
 client.login(config.token);
