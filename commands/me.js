@@ -1,41 +1,37 @@
 const config = require("../config.json");
 
-module.exports = {
-    name: 'me',
-    description: `Displays own stats.`,
-    execute(message, args, stat)
+module.exports.run = async (client, message, args) =>
+{
+    convertedName = message.member.displayName.split(' ').join('_'); // replace spaces with underscores
+
+    var stat = client.commands.get("loadstats").run(); // load stats
+
+    for (var i = 0; i < stat.captains.length; i++)
     {
-        convertedName = message.member.displayName.split(' ').join('_'); // replace spaces with underscores
-
-        for (var i = 0; i < stat.captains.length; i++)
+        if (stat.captains[i].name.toLowerCase() == convertedName.toLowerCase())
         {
-            if (stat.captains[i].name.toLowerCase() == convertedName.toLowerCase())
+            var cptListTextSlaves = "";
+            for (var j = 0; j < stat.captains[i].slaves.length; j++)
             {
-                var cptListTextSlaves = "";
-                for (var j = 0; j < stat.captains[i].slaves.length; j++)
-                {
-                    cptListTextSlaves += `\`${stat.captains[i].slaves[j].name}\`, `;
-                }
-
-                cptListTextSlaves = cptListTextSlaves.substring(0, cptListTextSlaves.length - 2);
-
-                return message.channel.send(`**Captain:** \`${stat.captains[i].name}\`\n**Funds:** \`${ac(stat.captains[i].money)} ${config.currency}\`\n**Slaves:** ${cptListTextSlaves} (${stat.captains[i].slaves.length})`);
+                cptListTextSlaves += `\`${stat.captains[i].slaves[j].name}\`, `;
             }
-        }
 
-        for (var i = 0; i < stat.players.length; i++)
-        {
-            if (stat.players[i].name.toLowerCase() == convertedName.toLowerCase())
-            {
-                return message.channel.send(`**Player name:** \`${stat.players[i].name}\`\n**Pickup line:**    ${stat.players[i].story}\n**Sold?** ${stat.players[i].sold}`);
-            }
+            cptListTextSlaves = cptListTextSlaves.substring(0, cptListTextSlaves.length - 2);
+
+            return message.channel.send(`**Captain:** \`${stat.captains[i].name}\`\n**Funds:** \`${stat.captains[i].money.toLocaleString()} ${config.currency}\`\n**Slaves:** ${cptListTextSlaves} (${stat.captains[i].slaves.length})`);
         }
-        return message.reply("you are not a player/captain.")
     }
+
+    for (var i = 0; i < stat.players.length; i++)
+    {
+        if (stat.players[i].name.toLowerCase() == convertedName.toLowerCase())
+        {
+            return message.channel.send(`**Player name:** \`${stat.players[i].name}\`\n**Pickup line:**    ${stat.players[i].story}\n**Sold?** ${stat.players[i].sold}`);
+        }
+    }
+    return message.reply("you are not a player/captain.")
 };
 
-// add comma as thousand separator
-function ac(num)
-{
-    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+module.exports.help = {
+    name: "me"
 }
