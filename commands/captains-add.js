@@ -1,62 +1,59 @@
 const fs = require("fs");
 const config = require("../config.json");
 
-module.exports = {
-    name: 'captains.add',
-    description: 'Adds captain(s) to the list.',
-    execute(message, args, stat)
+module.exports.run = async (client, message, args) =>
+{
+    if (!message.member.hasPermission("ADMINISTRATOR")) { message.reply(`Insufficient permissions`); return; }
+    if (args.length < 2) { message.reply(`Too few arguments.`); return; }
+
+    var stat = client.commands.get("loadstats").run(); // load stats
+
+    var captainList = [];
+    var cptListText = "";
+    var cptListTextMissing = "";
+    var nameExists = false;
+    var startmoney = config.startmoney;
+
+    for (var i = 0; i < stat.captains.length; i++) // go through the list
     {
-        if (!message.member.hasPermission("ADMINISTRATOR")) { message.reply(`Insufficient permissions`); return; } // return if no perms
-        if (args.length < 1) { message.reply(`Too few arguments.`); return; } // return if no args
-
-        // declare some stuff
-        var captainList = [];
-        var cptListText = "";
-        var cptListTextMissing = "";
-        var nameExists = false;
-        var startmoney = config.startmoney;
-
-        for (var i = 0; i < args.length; i++)
+        if (stat.captains[i].name == args[0]) // see if name exists in players list
         {
-            nameExists = false;
-
-            for (var ii = 0; ii < stat.captains.length; ii++) // go through the list
-            {
-                if (stat.captains[ii].name == args[i]) // see if name exists in captains list
-                {
-                    cptListTextMissing += `\`${args[i]}\`, `;
-                    nameExists = true;
-                    break;
-                }
-            }
-
-            if (!nameExists)
-            {
-                captainList.push(args[i]);
-                cptListText += `\`${args[i]}\`, `;
-                var obj = { "name": args[i], "money": startmoney, "slaves": [] };
-                stat.captains.push(obj);
-            }
-        }
-
-        if (cptListTextMissing != "")
-        {
-            cptListTextMissing = cptListTextMissing.substring(0, cptListTextMissing.length - 2);
-            message.reply(`\`${cptListTextMissing}\` already exist(s) as captain(s).`);
-        }
-
-        if (cptListText != "")
-        {
-            cptListText = cptListText.substring(0, cptListText.length - 2);
-
-            fs.writeFile("stats.json", JSON.stringify(stat), function (err)
-            {
-                if (err) console.log("error", err);
-
-                message.channel.send(`Succesfully added ${cptListText} as captain(s).`);
-                console.log(stat.captains);
-                return;
-            });
+            plrListTextMissing += `\`${args[0]}\`, `;
+            nameExists = true;
+            break;
         }
     }
+
+    if (!nameExists)
+    {
+        captainList.push(args[0]);
+        cptListText += `\`${args[0]}\`, `;
+        var obj = { "name": args[0], "money": startmoney, "badges": parseInt(args[1]), "slaves": [] };
+        stat.captains.push(obj);
+    }
+
+    if (cptListTextMissing != "")
+    {
+        cptListTextMissing = cptListTextMissing.substring(0, cptListTextMissing.length - 2);
+        message.channel.send(`\`${cptListTextMissing}\` already exists as a captain.`);
+    }
+
+    if (cptListText != "")
+    {
+        cptListText = cptListText.substring(0, cptListText.length - 2);
+
+        fs.writeFile("stats.json", JSON.stringify(stat), function (err)
+        {
+            if (err) console.log("error", err);
+
+            message.channel.send(`Succesfully added ${cptListText} as a captain.`);
+            console.log(stat.captains);
+            return;
+        });
+    }
+    return;
 };
+
+module.exports.help = {
+    name: "captains.add"
+}
