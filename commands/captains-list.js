@@ -44,7 +44,7 @@ module.exports.run = async (client, message, args) =>
             .setColor('#ff007a')
             .setTitle(`**Current captains** (${stat.captains.length})`)
             .addField('*Name*', cptListTextNames, true)
-            .addField(`*${config.currency}*`, cptListTextMoney, true)
+            .addField(`*${config.currency[0].toUpperCase() + config.currency.substring(1)}*`, cptListTextMoney, true)
             .addField('*Slaves*', cptListTextSlaves, true)
         message.channel.send(captainListEmbed);
 
