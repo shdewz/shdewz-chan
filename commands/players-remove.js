@@ -15,42 +15,42 @@ module.exports.run = async (client, message, args) =>
     {
         found = false;
         // check if in players
-        for (var ii = 0; ii < stat.players.length; ii++)
+        for (var j = 0; j < stat.players.length; j++)
         {
-            if (stat.players[ii].name.toLowerCase() == args[i].toLowerCase())
+            if (stat.players[j].name.toLowerCase() == args[i].toLowerCase())
             {
                 found = true;
                 plrListText += `\`${args[i]}\`, `;
                 // check if in sold
-                for (var j = 0; j < stat.sold.length; j++)
+                for (var k = 0; k < stat.sold.length; k++)
                 {
-                    if (stat.sold[j].name.toLowerCase() == args[i].toLowerCase())
+                    if (stat.sold[k].name.toLowerCase() == args[i].toLowerCase())
                     {
                         // remove from captain
                         findCaptains:
-                        for (var jj = 0; jj < stat.captains.length; jj++)
+                        for (var l = 0; l < stat.captains.length; l++)
                         {
-                            for (var k = 0; k < stat.captains[jj].slaves.length; k++)
+                            for (var m = 0; m < stat.captains[l].slaves.length; m++)
                             {
-                                if (stat.captains[jj].slaves[k].name.toLowerCase() == args[i].toLowerCase())
+                                if (stat.captains[l].slaves[m].name.toLowerCase() == args[i].toLowerCase())
                                 {
-                                    stat.captains[jj].slaves.splice(k, 1);
+                                    stat.captains[l].slaves.splice(m, 1);
                                     break findCaptains;
                                 }
                             }
                         }
-                        stat.sold.splice(j, 1);
+                        stat.sold.splice(k, 1);
                     }
                 }
                 // remove from unsold if exists
-                for (var kk = 0; kk < stat.unsold.length; kk++)
+                for (var n = 0; n < stat.unsold.length; n++)
                 {
-                    if (stat.unsold[kk].name != undefined && stat.unsold[kk].name == args[i])
+                    if (stat.unsold[n].name != undefined && stat.unsold[n].name == args[i])
                     {
-                        stat.unsold.splice(kk, 1);
+                        stat.unsold.splice(n, 1);
                     }
                 }
-                stat.players.splice(ii, 1);
+                stat.players.splice(j, 1);
             }
         }
         if (!found) plrListTextMissing += `\`${args[i]}\`, `;
