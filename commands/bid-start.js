@@ -18,7 +18,7 @@ module.exports.run = async (client, message, args) =>
             // check if in sold
             for (var j = 0; j < stat.sold.length; j++)
             {
-                if (stat.sold[j].name == args[i])
+                if (stat.sold[j].name.toLowerCase() == args[0].toLowerCase())
                 {
                     return message.reply(`player \`${stat.sold[j].name}\` has already been sold.`);
                 }
@@ -33,9 +33,11 @@ function startBid(message, args, stat, target)
 {
     for (var i = 0; i < stat.unsold.length; i++)
     {
-        if (stat.unsold[i].name = target.name)
+        if (stat.unsold[i].name == target.name)
         {
+            console.log("removed " + stat.unsold[i].name);
             stat.unsold.splice(i, 1);
+            break;
         }
     }
 
@@ -78,7 +80,10 @@ function startBid(message, args, stat, target)
         {
             if (stat.players[i].name == target.name)
             {
-                stat.players[i].sold = " - "
+                stat.players[i].sold = "///"
+
+                var soldObj = { name: target.name, owner: "-", price: "-" };
+                stat.sold.push(soldObj);
                 break;
             }
         }
@@ -130,7 +135,7 @@ function startBid(message, args, stat, target)
             {
                 if (stat.players[i].name == target.name)
                 {
-                    stat.players[i].sold = " + "
+                    stat.players[i].sold = "YES"
                     break;
                 }
             }
@@ -140,7 +145,8 @@ function startBid(message, args, stat, target)
             {
                 if (stat.captains[i].name == bidder.name)
                 {
-                    stat.captains[i].slaves.push(target);
+                    var obj = { name: target.name };
+                    stat.captains[i].slaves.push(obj);
                     stat.captains[i].money -= price;
                     break;
                 }
