@@ -41,7 +41,7 @@ module.exports.run = async (client, message, args) =>
     {
         playerList.push(args[0]);
         plrListText += `\`${args[0]}\`, `;
-        var obj = { "name": args[0], "story": story, "sold": "   ", "badges": parseInt(args[1]) };
+        var obj = { "name": args[0], "story": story, "sold": " - ", "badges": parseInt(args[1]) };
         stat.players.push(obj);
     }
 

@@ -9,20 +9,21 @@ module.exports.run = async (client, message, args) =>
 
     if (args.length == 0)
     {
-        stat.unsold = stat.players;
+        stat.unsold = [];
         stat.sold = [];
 
         // clear sold status
         for (var i = 0; i < stat.players.length; i++)
         {
-            stat.players[i].sold = "   ";
+            stat.players[i].sold = " - ";
+            var obj = { name: stat.players[i].name };
+            stat.unsold.push(obj);
         }
 
         // clear captains slaves and money
         for (var i = 0; i < stat.captains.length; i++)
         {
             stat.captains[i].money = config.startmoney;
-            stat.captains[i].slaves = [];
         }
 
         fs.writeFile("stats.json", JSON.stringify(stat), function (err)
@@ -44,7 +45,7 @@ module.exports.run = async (client, message, args) =>
             {
                 if (stat.players[j].name == args[i])
                 {
-                    var obj = { "name": stat.players[j].name, "story": stat.players[j].story };
+                    var obj = { "name": stat.players[j].name };
                     stat.unsold.push(obj);
                     plrListText += `\`${args[i]}\`, `;
 
