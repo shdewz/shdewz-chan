@@ -12,7 +12,7 @@ module.exports.run = async (client, message, args) =>
             if (stat.players[i].name.toLowerCase() == args[0].toLowerCase())
             {
                 // player is sold
-                if (stat.players[i].sold != "   ")
+                if (stat.players[i].sold != " - ")
                 {
                     for (var j = 0; j < stat.sold.length; j++)
                     {
@@ -38,11 +38,14 @@ module.exports.run = async (client, message, args) =>
         {
             var plrListTextNames = "";
             var plrListTextSold = "";
+            var plrListMPLinks = "";
 
             for (var i = 0; i < stat.players.length; i++)
             {
-                plrListTextNames += `\`${stat.players[i].name}\`\n`;
-                plrListTextSold += `\`${stat.players[i].sold}\`\n`;
+                plrListTextNames += `${stat.players[i].name}\n`;
+                plrListTextSold += `${stat.players[i].sold}\n`;
+                if (stat.players[i].mp && stat.players[i].mp != "") plrListMPLinks += `[mp link](${stat.players[i].mp})\n`;
+                else plrListMPLinks += `-\n`;
             }
 
             if (plrListTextNames == "")
@@ -56,6 +59,7 @@ module.exports.run = async (client, message, args) =>
                 .setTitle(`**Current players** (${stat.players.length})`)
                 .addField('*Name*', plrListTextNames, true)
                 .addField('*Sold?*', plrListTextSold, true)
+                .addField('*mp link*', plrListMPLinks, true)
             message.channel.send(playerListEmbed);
             return;
         }
