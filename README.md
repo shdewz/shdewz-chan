@@ -29,3 +29,4 @@ The `.remove`, `.clear` and `.list` commands work the same way for players. Addi
 + `!stats.random` Displays a random tournament player's osu !statistics.
 + `!me` Displays your tourney stats (player and captain accessible). Same function as `!captains.list` and `!players.list`.
 + `!set <username>` Links your discord account to a specified player. Required for captains, optional for players.
++ `!mp <link>` Adds MP link to profile.
