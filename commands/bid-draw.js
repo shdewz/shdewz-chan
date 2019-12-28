@@ -10,8 +10,19 @@ module.exports.run = async (client, message, args) =>
     if (stat.unsold.length == 0) return message.reply(`Unsold list empty.`);
 
     var rng = Math.floor(Math.random() * stat.unsold.length);
+    var mplink;
 
-    message.channel.send(`**Chosen player was:** \`${stat.unsold[rng].name}\``);
+    for (var i = 0; i < stat.players.length; i++)
+    {
+        if (stat.players[i].name = stat.unsold[rng].name)
+        {
+            if (typeof stat.players[i].mp !== "undefined" && stat.players[i].mp != "") mplink = `<${stat.players[i].mp}>`;
+            else mplink = "N/A";
+            break;
+        }
+    }
+
+    message.channel.send(`**Chosen player was:** \`${stat.unsold[rng].name}\`\n**Optional mp link:** ${mplink}`);
     client.commands.get("stats").run(client, message, args, stat.unsold[rng].name);
 };
 
