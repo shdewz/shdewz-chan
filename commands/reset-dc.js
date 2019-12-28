@@ -6,6 +6,8 @@ module.exports.run = async (client, message, args) =>
 
     var stat = client.commands.get("loadstats").run(); // load stats
 
+    stat.bidders = [];
+
     for (var i = 0; i < stat.captains.length; i++)
     {
         stat.captains[i].dc = "";
@@ -14,11 +16,6 @@ module.exports.run = async (client, message, args) =>
     for (var i = 0; i < stat.players.length; i++)
     {
         stat.players[i].dc = "";
-    }
-
-    for (var i = 0; i < stat.unsold.length; i++)
-    {
-        stat.unsold[i].dc = "";
     }
 
     fs.writeFile("stats.json", JSON.stringify(stat), function (err)
