@@ -1,0 +1,11 @@
+{
+    "prefix": "!",
+    "token": "discord bot token here",
+    "apikey": "osu! api key here",
+    "currency": "coins",
+    "startmoney": 15000,
+    "minbid": 100,
+    "maxbid": 2000,
+    "maxprice": 7500,
+    "timer": 20000
+}
