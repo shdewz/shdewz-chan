@@ -39,7 +39,7 @@ module.exports.run = async (client, message, args, player) =>
                 if (stat.captains[i].name.toLowerCase() == convertedName.toLowerCase()) // see if name exists in captains list
                 {
                     playerstatus = `Captain`;
-                    badges = stat.captains[i].badges;
+                    badges = parseInt(stat.captains[i].badges);
                     playerfound = true;
                     break;
                 }
@@ -61,12 +61,12 @@ module.exports.run = async (client, message, args, player) =>
                 var userid = userjson[u].user_id;
                 var playcount = parseInt(userjson[u].playcount);
                 var pp = Math.round(userjson[u].pp_raw);
-                var rank = userjson[u].pp_rank;
+                var rank = parseInt(userjson[u].pp_rank);
                 var country = userjson[u].country;
                 var accuracy = Math.round(userjson[u].accuracy * 100) / 100;
             }
 
-            var bws_rank = Math.round(Math.pow(rank, Math.pow(0.9921, (badges * (badges + 1) / 2))));
+            var bws_rank = Math.round(Math.pow(parseInt(rank), Math.pow(0.9921, (parseInt(badges) * (parseInt(badges) + 1) / 2))));
 
             // get profile picture and flag
             var avatarurl = `https://a.ppy.sh/${userid}`;
@@ -79,7 +79,7 @@ module.exports.run = async (client, message, args, player) =>
                     .setAuthor(username, flagurl, url = `https://osu.ppy.sh/u/${userid}`)
                     .setColor('#ff007a')
                     .setThumbnail(avatarurl)
-                    .setDescription(`*⯈ Rank:*  **#${bws_rank.toLocaleString()}** *(${badges} badges)*\n*⯈ pp:*  **${pp.toLocaleString()}pp**\n*⯈ Accuracy:*  **${accuracy}%**\n*⯈ Playcount:*  **${playcount.toLocaleString()}**\n\n*⯈ Tournament Status:*  **${playerstatus}**${story}`)
+                    .setDescription(`*⯈ BWS:*  **#${bws_rank.toLocaleString()}** *(${badges} badges)*\n*⯈ pp:*  **${pp.toLocaleString()}pp**\n*⯈ Accuracy:*  **${accuracy}%**\n*⯈ Playcount:*  **${playcount.toLocaleString()}**\n\n*⯈ Tournament Status:*  **${playerstatus}**${story}`)
                 message.channel.send(statEmbed);
             }
             else
