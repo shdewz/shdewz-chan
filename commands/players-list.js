@@ -5,7 +5,7 @@ module.exports.run = async (client, message, args) =>
 {
     var stat = client.commands.get("loadstats").run(); // load stats
 
-    if (args.length >= 1) // single player
+    if (args.length >= 1 && !args.includes("-p")) // single player
     {
         for (var i = 0; i < stat.players.length; i++)
         {
@@ -22,11 +22,11 @@ module.exports.run = async (client, message, args) =>
                             var price = stat.sold[j].price;
                         }
                     }
-                    return message.channel.send(`**Player name:** \`${stat.players[i].name}\`\n**Pickup line:** ${stat.players[i].story}\n**Sold?** Yes, to ${owner} for ${price} ${config.currency}`);
+                    return message.channel.send(`**Player name:** ${stat.players[i].name.replace(/([_*~])/g, "\\$1")}\n**Pickup line:** ${stat.players[i].story}\n**Sold?** Yes, to ${owner} for ${price} ${config.currency}`);
                 }
                 else
                 {
-                    return message.channel.send(`**Player name:** \`${stat.players[i].name}\`\n**Pickup line:** ${stat.players[i].story}\n**Sold?** No`);
+                    return message.channel.send(`**Player name:** ${stat.players[i].name.replace(/([_*~])/g, "\\$1")}\n**Pickup line:** ${stat.players[i].story}\n**Sold?** No`);
                 }
             }
         }
@@ -40,9 +40,30 @@ module.exports.run = async (client, message, args) =>
             var plrListTextSold = "";
             var plrListMPLinks = "";
 
-            for (var i = 0; i < stat.players.length; i++)
+            var pageStart;
+            var pageEnd;
+            var pages = Math.ceil(stat.players.length / 50)
+            var page;
+
+            if (args.includes("-p") && !isNaN(args[args.length - 1]))
             {
-                plrListTextNames += `${stat.players[i].name}\n`;
+                page = args[args.length - 1];
+                if (args[args.length - 1] > pages) return message.channel.send(`Not enough pages.`);
+                pageStart = 50 * (page - 1);
+                pageEnd = 50 + (50 * (page - 1));
+            }
+            else
+            {
+                page = 1;
+                pageStart = 0;
+                pageEnd = 50;
+            }
+
+            if (pageEnd > stat.players.length) pageEnd = stat.players.length;
+
+            for (var i = pageStart; i < pageEnd; i++)
+            {
+                plrListTextNames += `${stat.players[i].name.replace(/([_*~])/g, "\\$1")}\n`;
                 plrListTextSold += `${stat.players[i].sold}\n`;
                 if (stat.players[i].mp && stat.players[i].mp != "") plrListMPLinks += `[mp link](${stat.players[i].mp})\n`;
                 else plrListMPLinks += `-\n`;
@@ -57,6 +78,7 @@ module.exports.run = async (client, message, args) =>
             const playerListEmbed = new Discord.RichEmbed()
                 .setColor('#ff007a')
                 .setTitle(`**Current players** (${stat.players.length})`)
+                .setDescription(`*Page ${page} of ${pages}*`)
                 .addField('*Name*', plrListTextNames, true)
                 .addField('*Sold?*', plrListTextSold, true)
                 .addField('*mp link*', plrListMPLinks, true)

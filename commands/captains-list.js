@@ -17,10 +17,10 @@ module.exports.run = async (client, message, args) =>
             {
                 for (var j = 0; j < stat.captains[i].slaves.length; j++)
                 {
-                    cptListTextSlaves += `\`${stat.captains[i].slaves[j].name}\`, `;
+                    cptListTextSlaves += `\`${stat.captains[i].slaves[j].name.replace(/([_*~])/g, "\\$1")}\`, `;
                 }
                 cptListTextSlaves = cptListTextSlaves.substring(0, cptListTextSlaves.length - 2);
-                message.channel.send(`**Captain:** \`${stat.captains[i].name}\`\n**Funds:** \`${stat.captains[i].money.toLocaleString()} ${config.currency}\`\n**Slaves:** ${cptListTextSlaves} (${stat.captains[i].slaves.length})`);
+                message.channel.send(`**Captain:** ${stat.captains[i].name.replace(/([_*~])/g, "\\$1")}\n**Funds:** \`${stat.captains[i].money.toLocaleString()} ${config.currency}\`\n**Slaves:** ${cptListTextSlaves} (${stat.captains[i].slaves.length})`);
                 return;
             }
         }
@@ -29,9 +29,9 @@ module.exports.run = async (client, message, args) =>
     {
         for (var i = 0; i < stat.captains.length; i++)
         {
-            cptListTextNames += `\`${stat.captains[i].name}\`\n`;
-            cptListTextMoney += `\`${stat.captains[i].money.toLocaleString()}\`\n`;
-            cptListTextSlaves += `\`${stat.captains[i].slaves.length}\`\n`;
+            cptListTextNames += `${stat.captains[i].name.replace(/([_*~])/g, "\\$1")}\n`;
+            cptListTextMoney += `${stat.captains[i].money.toLocaleString()}\n`;
+            cptListTextSlaves += `${stat.captains[i].slaves.length}\n`;
         }
 
         if (cptListTextNames == "")
