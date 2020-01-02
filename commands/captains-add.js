@@ -18,7 +18,7 @@ module.exports.run = async (client, message, args) =>
     {
         if (stat.captains[i].name == args[0]) // see if name exists in players list
         {
-            plrListTextMissing += `\`${args[0]}\`, `;
+            cptListTextMissing += `\`${args[0]}\`, `;
             nameExists = true;
             break;
         }
@@ -28,7 +28,7 @@ module.exports.run = async (client, message, args) =>
     {
         captainList.push(args[0]);
         cptListText += `\`${args[0]}\`, `;
-        var obj = { "name": args[0], "money": startmoney, "badges": parseInt(args[1]), "slaves": [] };
+        var obj = { "name": args[0], "money": startmoney, "badges": parseInt(args[1]), "slaves": [], "dc": "" };
         stat.captains.push(obj);
     }
 
