@@ -29,7 +29,7 @@ module.exports.run = async (client, message, args) =>
             return message.channel.send(`**Player name:** \`${stat.players[i].name}\`\n**Pickup line:** ${stat.players[i].story}\n**Sold?** ${stat.players[i].sold}`);
         }
     }
-    return message.reply(`your account doesn't seem to be linked yet. Do \`!set <username>\` to link it.`);
+    return message.reply(`your account doesn't seem to be linked yet. Do \`${config.prefix}set <username>\` to link it.`);
 };
 
 module.exports.help = {

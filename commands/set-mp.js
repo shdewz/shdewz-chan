@@ -32,7 +32,7 @@ module.exports.run = async (client, message, args) =>
         }
     }
 
-    return message.reply(`your account doesn't seem to be linked yet. Do \`!set <username>\` to link it.`);
+    return message.reply(`your account doesn't seem to be linked yet. Do \`${config.prefix}set <username>\` to link it.`);
 }
 
 module.exports.help = {

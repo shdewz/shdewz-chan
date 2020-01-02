@@ -28,7 +28,7 @@ module.exports.run = async (client, message, args, player) =>
                     break findPlayer;
                 }
             }
-            return message.reply(`your account doesn't seem to be linked yet. Do \`!set <username>\` to link it.`);
+            return message.reply(`your account doesn't seem to be linked yet. Do \`${config.prefix}set <username>\` to link it.`);
         }
 
         else convertedName = args.join('_');
