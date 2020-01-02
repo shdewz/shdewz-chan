@@ -8,9 +8,29 @@ module.exports.run = async (client, message, args, player) =>
     {
         var stat = client.commands.get("loadstats").run(); // load stats
 
-        // use server nick if no arguments given
+        findPlayer:
         if (typeof player !== "undefined") convertedName = player;
-        else if (args.length < 1) convertedName = message.member.displayName.split(" ").join('_');
+        else if (args.length < 1)
+        {
+            for (var i = 0; i < stat.captains.length; i++)
+            {
+                if (stat.captains[i].dc == message.author.id)
+                {
+                    convertedName = stat.captains[i].name;
+                    break findPlayer;
+                }
+            }
+            for (var i = 0; i < stat.players.length; i++)
+            {
+                if (stat.players[i].dc == message.author.id)
+                {
+                    convertedName = stat.players[i].name;
+                    break findPlayer;
+                }
+            }
+            return message.reply(`your account doesn't seem to be linked yet. Do \`!set <username>\` to link it.`);
+        }
+
         else convertedName = args.join('_');
 
         var playerstatus = `Not playing`;

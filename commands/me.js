@@ -2,13 +2,13 @@ const config = require("../config.json");
 
 module.exports.run = async (client, message, args) =>
 {
-    convertedName = message.member.displayName.split(' ').join('_'); // replace spaces with underscores
+    var id = message.author.id;
 
     var stat = client.commands.get("loadstats").run(); // load stats
 
     for (var i = 0; i < stat.captains.length; i++)
     {
-        if (stat.captains[i].name.toLowerCase() == convertedName.toLowerCase())
+        if (stat.captains[i].dc == id)
         {
             var cptListTextSlaves = "";
             for (var j = 0; j < stat.captains[i].slaves.length; j++)
@@ -24,12 +24,12 @@ module.exports.run = async (client, message, args) =>
 
     for (var i = 0; i < stat.players.length; i++)
     {
-        if (stat.players[i].name.toLowerCase() == convertedName.toLowerCase())
+        if (stat.players[i].dc == id)
         {
-            return message.channel.send(`**Player name:** \`${stat.players[i].name}\`\n**Pickup line:**    ${stat.players[i].story}\n**Sold?** ${stat.players[i].sold}`);
+            return message.channel.send(`**Player name:** \`${stat.players[i].name}\`\n**Pickup line:** ${stat.players[i].story}\n**Sold?** ${stat.players[i].sold}`);
         }
     }
-    return message.reply("you are not a player/captain.")
+    return message.reply(`your account doesn't seem to be linked yet. Do \`!set <username>\` to link it.`);
 };
 
 module.exports.help = {
