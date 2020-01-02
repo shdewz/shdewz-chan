@@ -24,6 +24,7 @@ module.exports.run = async (client, message, args) =>
         for (var i = 0; i < stat.captains.length; i++)
         {
             stat.captains[i].money = config.startmoney;
+            stat.captains[i].slaves = [];
         }
 
         fs.writeFile("stats.json", JSON.stringify(stat), function (err)
