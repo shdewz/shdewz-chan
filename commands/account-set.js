@@ -33,7 +33,6 @@ module.exports.run = async (client, message, args) =>
             }
 
             return message.reply(`insufficient permissions.`);
-            break captain;
         }
     }
 
@@ -59,8 +58,7 @@ module.exports.run = async (client, message, args) =>
                 break player;
             }
 
-            message.reply(`insufficient permissions.`);
-            break player;
+            return message.reply(`insufficient permissions.`);
         }
     }
 
