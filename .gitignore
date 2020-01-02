@@ -6,5 +6,10 @@ config.json
 # stats file
 stats.json
 
+# you can't have the fun
+msg.js
+force-captain.js
+netpp.js
+
 # don't even know why this exists but ignore either way
 shdewz-chan.bat
