@@ -17,7 +17,7 @@ module.exports.run = async (client, message, args) =>
 
     if (plrListTextNames == "")
     {
-        message.channel.send(`Sold list is probably empty.`);
+        message.channel.send(`No sold players.`);
         return;
     }
 
