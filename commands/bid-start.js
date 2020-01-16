@@ -2,6 +2,8 @@ const fs = require("fs");
 const config = require("../config.json");
 const Discord = require('discord.js');
 
+var biddingActive = false;
+
 module.exports.run = async (client, message, args) =>
 {
     if (!message.member.hasPermission("ADMINISTRATOR")) return message.reply(`Insufficient permissions.`);
