@@ -13,7 +13,7 @@ module.exports.run = async (client, message, args) =>
     {
         for (var i = 0; i < stat.captains.length; i++)
         {
-            if (stat.captains[i].name.toLowerCase() == args[0].toLowerCase())
+            if (stat.captains[i].name.toLowerCase() == args.join(" ").toLowerCase())
             {
                 for (var j = 0; j < stat.captains[i].slaves.length; j++)
                 {
