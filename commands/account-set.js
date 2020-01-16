@@ -1,10 +1,9 @@
 const fs = require("fs");
 
-module.exports.run = async (client, message, args) =>
-{
+module.exports.run = async (client, message, args) => {
     if (!args) return;
 
-    var name = args[0]
+    var name = args.join("_");
     var id = message.author.id;
     var found = false;
 
@@ -12,20 +11,16 @@ module.exports.run = async (client, message, args) =>
 
     // see if captain
     captain:
-    for (var i = 0; i < stat.captains.length; i++) // go through the list
-    {
-        if (stat.captains[i].name == name) // see if name exists in captains list
-        {
-            if (message.member.roles.some(role => role.name === 'Slave Owner') || message.member.roles.some(role => role.name === 'Aspiring Slave Owner'))
-            {
-                if (stat.captains[i].dc) return message.channel.send(`${name} already connected to someone else. Ping shdewz if this is wrong.`);
+    for (var i = 0; i < stat.captains.length; i++) {
+        if (stat.captains[i].name.split(" ").join("_") == name) {
+            if (message.member.roles.some(role => role.name === 'Slave Owner') || message.member.roles.some(role => role.name === 'Aspiring Slave Owner')) {
+                if (stat.captains[i].dc) return message.channel.send(`${name} already connected to someone else.`);
 
                 stat.captains[i].dc = id;
                 message.channel.send(`Succesfully linked ${message.author} to captain ${name}.`)
                 found = true;
 
-                fs.writeFile("stats.json", JSON.stringify(stat), function (err)
-                {
+                fs.writeFile("stats.json", JSON.stringify(stat), function (err) {
                     if (err) return console.log("error", err);
                     return console.log("Save successful.");
                 });
@@ -38,20 +33,16 @@ module.exports.run = async (client, message, args) =>
 
     // see if player
     player:
-    for (var i = 0; i < stat.players.length; i++) // go through the list
-    {
-        if (stat.players[i].name == name) // see if name exists in players list
-        {
-            if (message.member.roles.some(r => r.name === "Slave"))
-            {
-                if (stat.players[i].dc) return message.channel.send(`${name} already connected to someone else. Ping shdewz if this is wrong.`);
+    for (var i = 0; i < stat.players.length; i++) {
+        if (stat.players[i].name.split(" ").join("_") == name) {
+            if (message.member.roles.some(r => r.name === "Slave")) {
+                if (stat.players[i].dc) return message.channel.send(`${name} already connected to someone else.`);
 
                 stat.players[i].dc = id;
                 message.channel.send(`Succesfully linked ${message.author} to player ${name}.`)
                 found = true;
 
-                fs.writeFile("stats.json", JSON.stringify(stat), function (err)
-                {
+                fs.writeFile("stats.json", JSON.stringify(stat), function (err) {
                     if (err) return console.log("error", err);
                     return console.log("Save successful.");
                 });
