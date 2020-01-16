@@ -1,7 +1,6 @@
 const fs = require("fs");
 
-module.exports.run = async (client, message, args) =>
-{
+module.exports.run = async (client, message, args) => {
     if (!args) return;
     if (!message.member.roles.some(r => r.name === "Slave")) return;
 
@@ -9,26 +8,49 @@ module.exports.run = async (client, message, args) =>
 
     // check if link is correct
     if (!/(https?:\/\/)?osu\.ppy\.sh\/(mp|community\/matches)\/[0-9]*\/?/g.test(mplink)) return message.reply(`your mp link is formatted incorrectly.`);
-    
-    var id = message.author.id;
 
     var stat = client.commands.get("loadstats").run(); // load stats
 
-    // check if account linked
-    for (var i = 0; i < stat.players.length; i++)
-    {
-        if (stat.players[i].dc == id)
-        {
-            // set link
-            stat.players[i].mp = mplink;
+    // if more players
+    if (args.length > 1) {
+        if (!message.member.hasPermission("ADMINISTRATOR")) return message.reply(`Insufficient permissions.`);
+        args.shift();
+        var players = args;
 
-            fs.writeFile("stats.json", JSON.stringify(stat), function (err)
-            {
-                if (err) return console.log("error", err);
-                return console.log("Save successful.");
-            });
+        // go through listed players
+        for (var i = 0; i < players.length; i++) {
+            // find player in stats
+            for (var j = 0; j < stat.players.length; j++) {
+                if (stat.players[j].name == players[i]) {
+                    // set link
+                    stat.players[j].mp = mplink;
+                }
+            }
+        }
 
-            return message.reply(`succesfully set mp link.`);
+        fs.writeFile("stats.json", JSON.stringify(stat), function (err) {
+            if (err) return console.log("error", err);
+            return console.log("Save successful.");
+        });
+
+        return message.reply(`succesfully set mp link for players ${players.join(", ")}.`);
+    }
+    else {
+        var id = message.author.id;
+
+        // check if account linked
+        for (var i = 0; i < stat.players.length; i++) {
+            if (stat.players[i].dc == id) {
+                // set link
+                stat.players[i].mp = mplink;
+
+                fs.writeFile("stats.json", JSON.stringify(stat), function (err) {
+                    if (err) return console.log("error", err);
+                    return console.log("Save successful.");
+                });
+
+                return message.reply(`succesfully set mp link.`);
+            }
         }
     }
 
