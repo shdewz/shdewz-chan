@@ -1,7 +1,6 @@
 const fs = require("fs");
 
-module.exports.run = async (client, message, args) =>
-{
+module.exports.run = async (client, message, args) => {
     if (!message.member.hasPermission("ADMINISTRATOR")) { message.reply(`Insufficient permissions`); return; }
     if (args.length < 2) { message.reply(`Too few arguments.`); return; }
 
@@ -12,14 +11,11 @@ module.exports.run = async (client, message, args) =>
     var plrListTextMissing = "";
     var nameExists = false;
     var story = "unspecified";
-    if (args.length > 2)
-    {
-        try
-        {
+    if (args.length > 2) {
+        try {
             story = message.content.match(/""([^""]+)""/)[1];
         }
-        catch (error)
-        {
+        catch (error) {
             console.log(error);
             story = "unspecified/error";
         }
@@ -37,30 +33,25 @@ module.exports.run = async (client, message, args) =>
         }
     }
 
-    if (!nameExists)
-    {
+    if (!nameExists) {
         playerList.push(args[0]);
         plrListText += `\`${args[0]}\`, `;
-        var obj = { "name": args[0], "story": story, "sold": " - ", "badges": parseInt(args[1]) };
+        var obj = { "name": args[0], "story": story, "badges": args[1], "sold": " - ", "dc": "" };
         stat.players.push(obj);
     }
 
-    if (plrListTextMissing != "")
-    {
+    if (plrListTextMissing != "") {
         plrListTextMissing = plrListTextMissing.substring(0, plrListTextMissing.length - 2);
         message.channel.send(`\`${plrListTextMissing}\` already exist(s) as player(s).`);
     }
 
-    if (plrListText != "")
-    {
+    if (plrListText != "") {
         plrListText = plrListText.substring(0, plrListText.length - 2);
 
-        fs.writeFile("stats.json", JSON.stringify(stat), function (err)
-        {
+        fs.writeFile("stats.json", JSON.stringify(stat), function (err) {
             if (err) console.log("error", err);
 
             message.channel.send(`Succesfully added ${plrListText} as player(s).`);
-            console.log(stat.players);
             return;
         });
     }
