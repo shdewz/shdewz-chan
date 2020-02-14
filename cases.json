@@ -1,0 +1,120 @@
+[
+    {
+        "name": "Weapon Case 1",
+        "price": 20.45,
+        "items": [
+            {
+                "name": "Rare Special Item",
+                "rarity": 0,
+                "minfloat": 0.00,
+                "maxfloat": 1.00,
+                "price": [
+                    999.99,
+                    999.99,
+                    999.99,
+                    999.99,
+                    999.99
+                ]
+            },
+            {
+                "name": "AWP | Lightning Strike",
+                "rarity": 1,
+                "minfloat": 0.00,
+                "maxfloat": 0.08,
+                "price": [
+                    137.02,
+                    173.00
+                ]
+            },
+            {
+                "name": "AK-47 | Case Hardened",
+                "rarity": 2,
+                "minfloat": 0.00,
+                "maxfloat": 1.00,
+                "price": [
+                    105.09,
+                    77.35,
+                    61.40,
+                    50.24,
+                    44.19
+                ]
+            },
+            {
+                "name": "Desert Eagle | Hypnotic",
+                "rarity": 2,
+                "minfloat": 0.00,
+                "maxfloat": 0.08,
+                "price": [
+                    33.61,
+                    42.70
+                ]
+            },
+            {
+                "name": "Glock-18 | Dragon Tattoo",
+                "rarity": 3,
+                "minfloat": 0.00,
+                "maxfloat": 0.08,
+                "price": [
+                    28.51,
+                    21.64
+                ]
+            },
+            {
+                "name": "USP-S | Dark Water",
+                "rarity": 3,
+                "minfloat": 0.10,
+                "maxfloat": 0.26,
+                "price": [
+                    0.00,
+                    18.22,
+                    15.65
+                ]
+            },
+            {
+                "name": "M4A1-S | Dark Water",
+                "rarity": 3,
+                "minfloat": 0.10,
+                "maxfloat": 0.26,
+                "price": [
+                    0.00,
+                    16.54,
+                    14.44
+                ]
+            },
+            {
+                "name": "SG 553 | Ultraviolet",
+                "rarity": 4,
+                "minfloat": 0.06,
+                "maxfloat": 0.80,
+                "price": [
+                    54.81,
+                    7.89,
+                    2.56,
+                    2.39,
+                    2.55
+                ]
+            },
+            {
+                "name": "AUG | Wings",
+                "rarity": 4,
+                "minfloat": 0.00,
+                "maxfloat": 0.14,
+                "price": [
+                    2.56,
+                    2.87
+                ]
+            },
+            {
+                "name": "MP7 | Skulls",
+                "rarity": 4,
+                "minfloat": 0.10,
+                "maxfloat": 0.26,
+                "price": [
+                    0.00,
+                    2.37,
+                    2.18
+                ]
+            }
+        ]
+    }
+]
