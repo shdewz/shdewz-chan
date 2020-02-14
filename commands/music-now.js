@@ -10,8 +10,8 @@ module.exports.run = async (message, args) => {
     if (!server || !server.dispatcher) return message.reply("not currently playing anything!");
 
     var current = new Date();
-    var timeNow = moment(server.now.timeNow).format("hh:mm:ss a")
-    var progress = moment(moment(current).diff(moment(server.now.playingSince))).format("mm:ss");
+    var timeNow = moment.utc(server.now.timeNow).format("hh:mm:ss A [UTC]")
+    var progress = moment.utc(moment(current).diff(moment.utc(server.now.playingSince))).format("mm:ss");
 
     let embed = {
         color: 0xe84393,
