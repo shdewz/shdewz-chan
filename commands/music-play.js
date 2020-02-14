@@ -67,7 +67,7 @@ function play(connection, message) {
 
     var playingSince = new Date();
     server.now.playingSince = playingSince;
-    var timeNow = moment(server.now.timeNow).format("hh:mm:ss a")
+    var timeNow = moment.utc(server.now.timeNow).format("hh:mm:ss A [UTC]")
 
     let embed = {
         color: 0xe84393,
