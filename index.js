@@ -7,6 +7,8 @@ const fs = require("fs");
 const config = require("./config.json");
 const osu = require("./osu.js");
 
+global.servers = {};
+
 client.once("ready", async () => {
     osu.init(config.apikey);
     console.log("\nReady!\n");
