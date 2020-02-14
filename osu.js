@@ -5,7 +5,7 @@ const moment = require("moment");
 let api = "";
 let apikey = "";
 
-const rankemojis = ["<:rankingX:662679799638130698>", "<:rankingXH:662679800862736415>", "<:rankingS:662679799113842690>", "<:rankingSH:662679799453450240>", "<:rankingA:662679799256580096>", "<:rankingB:662679799323688970>", "<:rankingC:662679799294066719>", "<:rankingD:662679799063642129>", "<:rankingD:662679799063642129>"];
+const rankemojis = ["<:rankingX:662679799638130698>", "<:rankingXH:662679800862736415>", "<:rankingS:662679799113842690>", "<:rankingSH:662679799453450240>", "<:rankingA:662679799256580096>", "<:rankingB:662679799323688970>", "<:rankingC:662679799294066719>", "<:rankingD:662679799063642129>", "<:rankingD:662679799063642129>"]; // replace F at some point!
 const ranknames = ["X", "XH", "S", "SH", "A", "B", "C", "D", "F"];
 
 const mods_enum = {
