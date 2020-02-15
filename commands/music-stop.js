@@ -16,7 +16,6 @@ module.exports.run = async (message, args) => {
             const collector = sentMsg.createReactionCollector(filter, { max: 1, time: 10000 });
 
             collector.on('end', collected => {
-                console.log(collected);
                 if (collected.size > 0) {
                     return stop(message, server);
                 }
@@ -30,14 +29,16 @@ module.exports.run = async (message, args) => {
 };
 
 function stop(message, server) {
+    var server = servers[message.guild.id];
     if (message.guild.voiceConnection) {
-        for (var i = server.queue.length - 1; i >= 0; i--) {
+        for (var i = server.queue.length - 1; i >= 0; i--){
             server.queue.splice(i, 1);
         }
+        server.queuestats = [];
         server.dispatcher.end();
         message.channel.send("**Disconnecting...**");
     }
-    if (message.guild.voiceConnection) message.guild.voiceConnection.disconnect();
+    if (message.guild.connection) message.guild.voiceConnection.disconnect();
     return;
 }
 
