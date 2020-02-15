@@ -34,6 +34,7 @@ module.exports.run = async (message, args) => {
     // add the video to the queue
     var timeNow = new Date();
     video.timeNow = timeNow;
+    video.requester = message.member.displayName;
     server.queue.push(link);
     server.queuestats.push(video);
 
@@ -63,11 +64,14 @@ function play(connection, message) {
     server.now = server.queuestats[0];
 
     // download the audio of the video
-    server.dispatcher = connection.playStream(ytdl(server.queue[0], { filter: "audio", quality: "highestaudio", highWaterMark: 1024 * 1024 * 4 }));
+    server.dispatcher = connection.playStream(ytdl(server.queue[0], { filter: "audio" }));
+
+    // shift the queue
+    server.queue.shift();
 
     var playingSince = new Date();
     server.now.playingSince = playingSince;
-    var timeNow = moment.utc(server.now.timeNow).format("hh:mm:ss A [UTC]")
+    var timeNow = moment.utc(server.now.timeNow).format("HH:mm:ss [UTC]")
 
     let embed = {
         color: 0xe84393,
@@ -96,24 +100,19 @@ function play(connection, message) {
             url: server.now.thumbnail,
         },
         footer: {
-            text: `Requested by ${message.member.displayName} at ${timeNow}`
+            text: `Requested by ${server.now.requester} at ${timeNow}`
         }
     }
 
     message.channel.send({ embed: embed });
 
-    // shift the queue
-    server.queue.shift();
-
     // play next after end if in queue
-    server.dispatcher.on("end", (skip) => {
+    server.dispatcher.on("end", () => {
         server.now = {};
         server.queuestats.shift();
-        if (skip == "yes") message.channel.send("**Skipping current video...**");
         if (server.queue[0]) play(connection, message);
         else {
-            message.channel.send("Queue empty, disconnecting.")
-            return connection.disconnect()
+            return connection.disconnect();
         };
     })
 }
