@@ -10,7 +10,7 @@ module.exports.run = async (message, args) => {
     if (!server || !server.dispatcher) return message.reply("not currently playing anything!");
 
     var current = new Date();
-    var timeNow = moment.utc(server.now.timeNow).format("hh:mm:ss A [UTC]")
+    var timeNow = moment.utc(server.now.timeNow).format("HH:mm:ss [UTC]")
     var progress = moment.utc(moment(current).diff(moment.utc(server.now.playingSince))).format("mm:ss");
 
     let embed = {
@@ -32,7 +32,7 @@ module.exports.run = async (message, args) => {
             },
         ],
         footer: {
-            text: `Requested by ${message.member.displayName} at ${timeNow}`
+            text: `Requested by ${server.now.requester} at ${timeNow}`
         }
     }
 
