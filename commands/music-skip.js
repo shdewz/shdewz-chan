@@ -1,9 +1,8 @@
-module.exports.run = async (message, args) => {
+module.exports.run = async (message) => {
 
     var server = servers[message.guild.id];
-    var skip = "yes";
     if (!server) return message.reply("not currently playing anything!");
-    else if (server.dispatcher) return server.dispatcher.end(skip);
+    else if (server.dispatcher) return server.dispatcher.end();
     else return message.reply("not currently playing anything!");
 };
 
