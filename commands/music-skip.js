@@ -7,5 +7,7 @@ module.exports.run = async (message) => {
 };
 
 module.exports.help = {
-    name: "skip"
+    name: "skip",
+    description: "Skip the current song",
+    category: "Music"
 }

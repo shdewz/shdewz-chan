@@ -31,7 +31,7 @@ module.exports.run = async (message, args) => {
 function stop(message, server) {
     var server = servers[message.guild.id];
     if (message.guild.voiceConnection) {
-        for (var i = server.queue.length - 1; i >= 0; i--){
+        for (var i = server.queue.length - 1; i >= 0; i--) {
             server.queue.splice(i, 1);
         }
         server.queuestats = [];
@@ -44,5 +44,7 @@ function stop(message, server) {
 
 module.exports.help = {
     name: "stop",
-    aliases: ["end", "disconnect"]
+    aliases: ["end", "disconnect"],
+    description: "Stop playing, clear the queue and disconnect the bot",
+    category: "Music"
 }

@@ -39,5 +39,7 @@ module.exports.run = async (message, args) => {
 
 module.exports.help = {
     name: "queue",
-    aliases: ["playlist"]
+    aliases: ["playlist"],
+    description: "Shows the list of videos waiting to be played",
+    category: "Music"
 }

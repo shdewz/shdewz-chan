@@ -41,5 +41,7 @@ module.exports.run = async (message, args) => {
 
 module.exports.help = {
     name: "now",
-    aliases: ["current"]
+    aliases: ["current"],
+    description: "Displays the song that is currently playing",
+    category: "Music"
 }

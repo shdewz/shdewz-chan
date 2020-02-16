@@ -119,5 +119,9 @@ function play(connection, message) {
 
 module.exports.help = {
     name: "play",
-    aliases: ["music", "youtube", "yt"]
+    aliases: ["music", "youtube", "yt"],
+    description: "Joins the bot to a voice channel and starts playing a youtube video",
+    usage: "play <link/search query>",
+    example: "play loli breathing",
+    category: "Music"
 }
