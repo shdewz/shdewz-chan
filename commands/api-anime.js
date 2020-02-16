@@ -16,7 +16,7 @@ module.exports.run = async (message, args) => {
 
     if (args[args.length - 1] == "/familyfriendly") { args.pop(); args = (`${args.join(" ")} -ass -bikini -cleavage`).split(" "); }
 
-    var filters = ["furry", "decapitation", "tentacles", "gay", "goat", "gore", "zombie", "dead"];
+    var filters = ["furry", "decapitation", "tentacles", "gay", "goat", "gore", "zombie", "dead", "bull", "insects", "maggots", "cockroach"];
 
     if (filters.some(filter => args.join(" ").toLowerCase().includes(filter))) {
         var mutedrole = message.guild.roles.find(role => role.name === "muted");
@@ -78,5 +78,9 @@ module.exports.run = async (message, args) => {
 };
 
 module.exports.help = {
-    name: "anime"
+    name: "anime",
+    description: "Searches gelbooru based on the given tags. Defaults to non-nsfw content. Use \`/nsfw\` at the end to show them or \`/familyfriendly\` for even more strict results.",
+    usage: "anime <tags> [</nsfw, /familyfriendly>]",
+    example: "anime ke-ta touhou /nsfw",
+    category: "Api"
 }
