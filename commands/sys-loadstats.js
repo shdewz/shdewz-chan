@@ -14,5 +14,6 @@ module.exports.run = function () {
 };
 
 module.exports.help = {
-    name: "loadstats"
+    name: "loadstats",
+    category: "sys"
 }

@@ -11,5 +11,7 @@ module.exports.run = async (message) => {
 };
 
 module.exports.help = {
-    name: "dog"
+    name: "dog",
+    description: "Fetches a photo of a dog",
+    category: "Api"
 }

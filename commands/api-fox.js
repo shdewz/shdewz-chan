@@ -11,5 +11,7 @@ module.exports.run = async (message) => {
 };
 
 module.exports.help = {
-    name: "fox"
+    name: "fox",
+    description: "A wild fox invades the chat",
+    category: "Api"
 }

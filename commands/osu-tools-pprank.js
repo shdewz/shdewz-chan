@@ -41,5 +41,9 @@ module.exports.run = async (message, args) => {
 };
 
 module.exports.help = {
-    name: "pprank"
+    name: "pprank",
+    description: "Convert rank to pp or the other way around",
+    usage: "pprank <r, p> <rank, pp>",
+    example: "pprank r 999",
+    category: "osu!"
 }

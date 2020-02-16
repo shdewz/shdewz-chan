@@ -20,5 +20,7 @@ module.exports.run = async (message) => {
 };
 
 module.exports.help = {
-    name: "norris"
+    name: "norris",
+    description: "Chuck norris fact on demand",
+    category: "Api"
 }

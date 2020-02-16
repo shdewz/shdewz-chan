@@ -20,5 +20,9 @@ module.exports.run = async (message, args) => {
 
 module.exports.help = {
     name: "roll",
-    aliases: ["rng", "random"]
+    aliases: ["rng", "random"],
+    description: "Selects a random integer between 1 and the selected maximum (defaults to 100)",
+    usage: "roll [<max>]",
+    example: "roll 69",
+    category: "Tools"
 }

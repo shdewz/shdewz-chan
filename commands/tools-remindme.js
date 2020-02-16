@@ -17,5 +17,9 @@ module.exports.run = async (message, args) =>
 };
 
 module.exports.help = {
-    name: "remindme"
+    name: "remindme",
+    description: "Set a short time reminder",
+    usage: "remindme <seconds> \"<reason>\"",
+    example: "remindme 300 \"fix the bot again\"",
+    category: "Tools"
 }

@@ -49,5 +49,9 @@ module.exports.run = async (message, args, client) => {
 };
 
 module.exports.help = {
-    name: "weather"
+    name: "weather",
+    description: "Weather for a specific country/state/city. Non-english characters are not supported.",
+    category: "Api",
+    usage: "weather <city> [<state>] [<country code>]",
+    example: "weather Hell US"
 }

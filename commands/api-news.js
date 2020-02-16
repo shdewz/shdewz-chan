@@ -63,5 +63,9 @@ module.exports.run = async (message, args) => {
 };
 
 module.exports.help = {
-    name: "news"
+    name: "news",
+    description: "Searches the news. You can either get the top headlines in a specific country with its 2 character country code or search the news with a specific search query.",
+    category: "Api",
+    usage: "news <top, search> <country, \"search query\">",
+    example: "news search \"osu! gamer\""
 }

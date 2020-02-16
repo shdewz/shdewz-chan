@@ -54,5 +54,6 @@ module.exports.run = async (member, channel, server) => {
 };
 
 module.exports.help = {
-    name: "serverjoin"
+    name: "serverjoin",
+    category: "sys"
 }

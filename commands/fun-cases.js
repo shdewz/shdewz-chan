@@ -130,5 +130,8 @@ module.exports.run = async (message, args) => {
 };
 
 module.exports.help = {
-    name: "case"
+    name: "case",
+    description: "Open the Weapon Case 1",
+    usage: "case open",
+    category: "Fun"
 }

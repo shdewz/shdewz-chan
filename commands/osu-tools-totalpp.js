@@ -82,5 +82,9 @@ module.exports.run = async (message, args, client) => {
 };
 
 module.exports.help = {
-    name: "totalpp"
+    name: "totalpp",
+    description: "Calculate the total pp across all gamemodes for the selected user",
+    usage: "totalpp [<user>]",
+    example: "totalpp shdewz",
+    category: "osu!"
 }

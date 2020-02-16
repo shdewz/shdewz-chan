@@ -179,5 +179,9 @@ module.exports.run = async (message, args, client) => {
 };
 
 module.exports.help = {
-    name: "netpp"
+    name: "netpp",
+    description: "Calculate how much a new play would affect your total pp",
+    usage: "netpp [<user>] <raw pp> [<taiko/ctb/mania>]",
+    example: "netpp shdewz 500",
+    category: "osu!"
 }

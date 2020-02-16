@@ -15,5 +15,9 @@ module.exports.run = async (message, args, client) => {
 };
 
 module.exports.help = {
-    name: "osuset"
+    name: "osuset",
+    description: "Link your osu! account to your discord account",
+    usage: "osuset <user>",
+    example: "osuset shdewz",
+    category: "osu!"
 }

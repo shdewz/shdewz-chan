@@ -22,5 +22,7 @@ module.exports.run = async (message, args) => {
 };
 
 module.exports.help = {
-    name: "bird"
+    name: "bird",
+    description: "Summons a bird to the chat.",
+    category: "Api"
 }

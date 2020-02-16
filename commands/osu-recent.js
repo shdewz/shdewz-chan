@@ -27,5 +27,9 @@ module.exports.run = async (message, args, client) => {
 
 module.exports.help = {
     name: "recent",
-    aliases: ["r", "rs"]
+    aliases: ["r", "rs"],
+    description: "Show a user's most recent play on osu! (Note: still WIP)",
+    usage: "recent [<user>]",
+    example: "recent shdewz",
+    category: "osu!"
 }

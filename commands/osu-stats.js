@@ -27,5 +27,9 @@ module.exports.run = async (message, args, client) => {
 
 module.exports.help = {
     name: "osu",
-    aliases: ["stats"]
+    aliases: ["stats"],
+    description: "Show osu! stats of someone",
+    usage: "osu [<user>]",
+    example: "osu shdewz",
+    category: "osu!"
 }

@@ -19,5 +19,7 @@ module.exports.run = async (message, args) => {
 
 module.exports.help = {
     name: "time",
-    aliases: ["utc"]
+    aliases: ["utc"],
+    description: "Tells the time in UTC and some other info about the current day",
+    category: "Tools"
 }

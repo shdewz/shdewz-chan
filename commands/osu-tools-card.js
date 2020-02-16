@@ -232,5 +232,9 @@ function as(num) {
 }
 
 module.exports.help = {
-    name: "card"
+    name: "card",
+    description: "Make an osu! profile card",
+    usage: "card [<user>]",
+    example: "card shdewz",
+    category: "osu!"
 }
