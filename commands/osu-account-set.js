@@ -9,8 +9,7 @@ module.exports.run = async (message, args, client) => {
         return osu.setUser(args.join("_"), message, client);
     }
     catch (error) {
-        console.log(error);
-        return message.channel.send(`Something happened!\n\`\`\`\n${error}\n\`\`\``) // send error as message
+        return console.log(error);
     }
 };
 
