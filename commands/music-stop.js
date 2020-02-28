@@ -31,9 +31,7 @@ module.exports.run = async (message, args) => {
 function stop(message, server) {
     var server = servers[message.guild.id];
     if (message.guild.voiceConnection) {
-        for (var i = server.queue.length - 1; i >= 0; i--) {
-            server.queue.splice(i, 1);
-        }
+        server.queue = [];
         server.queuestats = [];
         server.dispatcher.end();
         message.channel.send("**Disconnecting...**");
