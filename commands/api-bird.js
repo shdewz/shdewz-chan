@@ -1,6 +1,7 @@
 const axios = require("axios");
 
 module.exports.run = async (message, args) => {
+
     const api = axios.create({
         baseURL: 'http://shibe.online/api',
     });
@@ -14,7 +15,7 @@ module.exports.run = async (message, args) => {
     else count = 1;
 
     api.get('/birds', { params: { count: count } }).then(response => {
-        for (var i = 0; i < count; i++){
+        for (var i = 0; i < count; i++) {
             message.channel.send(response.data[i]);
         }
         return;
