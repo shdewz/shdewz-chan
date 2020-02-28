@@ -4,6 +4,7 @@ const moment = require("moment");
 
 let api = "";
 let apikey = "";
+let timezone = 2;
 
 const rankemojis = ["<:rankingX:662679799638130698>", "<:rankingXH:662679800862736415>", "<:rankingS:662679799113842690>", "<:rankingSH:662679799453450240>", "<:rankingA:662679799256580096>", "<:rankingB:662679799323688970>", "<:rankingC:662679799294066719>", "<:rankingD:662679799063642129>", "<:rankingD:662679799063642129>"]; // replace F at some point!
 const ranknames = ["X", "XH", "S", "SH", "A", "B", "C", "D", "F"];
@@ -193,20 +194,32 @@ module.exports = {
 
                 let beatmap = eventdata.beatmap_id;
                 let score = eventdata.score;
+
+                let c50 = eventdata.count50;
+                let c100 = eventdata.count100;
+                let c300 = eventdata.count300;
+                let cmiss = eventdata.countmiss;
+                let combo = eventdata.maxcombo;
+                let acc = (getAcc(c300, c100, c50, cmiss) * 100).toFixed(2);
+
                 let mods = eventdata.enabled_mods;
-                let modsText = getMods(mods);
+                let modsNames = getMods(mods).join("");
+                let modsText = "";
+                if (mods != 0) modsText = ` **+${modsNames}**`;
+
                 let modsParam = '0';
-                if (modsText.includes("HR")) modsParam = '16';
-                else if (modsText.includes("DT") || modsText.includes("NC")) modsParam = '64';
-                else if (modsText.includes("HT")) modsParam = '256';
-                else if (modsText.includes("EZ")) modsParam = '2';
-                let rank = rankemojis[ranknames.indexOf(eventdata.rank)];;
-                let sincePlay = moment(new Date(eventdata.date)).fromNow();
+                if (modsNames.includes("HR")) modsParam = '16';
+                else if (modsNames.includes("DT") || modsText.includes("NC")) modsParam = '64';
+                else if (modsNames.includes("HT")) modsParam = '256';
+                else if (modsNames.includes("EZ")) modsParam = '2';
+
+                let grade = rankemojis[ranknames.indexOf(eventdata.rank)];
+                let sincePlay = moment(new Date(eventdata.date)).add(timezone, 'h').fromNow();
 
                 api.get('/get_beatmaps', { params: { k: apikey, b: beatmap, mods: modsParam } }).then(response => {
                     response = response.data;
 
-                    if (response.length == 0) {
+                    if (!response || response.length == 0) {
                         return message.channel.send(`Beatmap *${beatmap}* not found.`);
                     }
                     let mapdata = response[0];
@@ -215,6 +228,7 @@ module.exports = {
                     let title = mapdata.title;
                     let artist = mapdata.artist;
                     let mapper = mapdata.creator;
+                    let maxcombo = mapdata.max_combo;
                     let bpm = mapdata.bpm;
                     let stars = Number(mapdata.difficultyrating).toFixed(2);
                     let beatmapset = mapdata.beatmapset_id;
@@ -223,7 +237,7 @@ module.exports = {
                     let embed = {
                         color: 0xe84393,
                         author: {
-                            name: `Recent osu! play for ${username}`,
+                            name: `Most recent osu! play for ${username}:`,
                             icon_url: `${avatar}?${+new Date()}`,
                             url: url
                         },
@@ -231,7 +245,8 @@ module.exports = {
                             url: banner,
                         },
                         description: `**[${artist} - ${title}](https://osu.ppy.sh/b/${beatmap})**
-                        [${diff}] **+${modsText.join("")}** (${stars}★)`,
+                        [${diff}]${modsText} (${stars}★) ${acc}%
+                        ${grade} — **x${combo.toLocaleString()}/${maxcombo.toLocaleString()}** — [${c300}/${c100}/${c50}/${cmiss}]`,
                         footer: {
                             text: `Play set ${sincePlay}`
                         }
@@ -272,14 +287,18 @@ function getMods(mods) {
         if ((mods_enum[mod] & mods) != 0)
             result.push(mod);
     }
-    return sanitizeMods(result);
+    return cleanMods(result);
 }
 
-function sanitizeMods(mods) {
+function cleanMods(mods) {
     let result = mods;
     if (mods.includes("NC") && mods.includes("DT"))
         result.splice(mods.indexOf("DT"), 1);
     if (mods.includes("PF") && mods.includes("SD"))
         result.splice(mods.indexOf("SD"), 1);
     return result;
+}
+
+function getAcc(c300, c100, c50, cmiss){
+	return (c300 * 300 + c100 * 100 + c50 * 50) / (c300 * 300 + c100 * 300 + c50 * 300 + cmiss * 300);
 }
