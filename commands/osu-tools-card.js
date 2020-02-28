@@ -8,7 +8,7 @@ module.exports.run = async (message, args, client) => {
     try {
         var mode = 0
 
-        Canvas.registerFont('./fonts/Rubik-Bold.ttf', { family: 'Rubik-Medium' });
+        Canvas.registerFont('./fonts/Rubik-Medium.ttf', { family: 'Rubik-Medium' });
         Canvas.registerFont('./fonts/Rubik-Italic.ttf', { family: 'Rubik-Italic' });
 
         const canvas = Canvas.createCanvas(600, 200);
