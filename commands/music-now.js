@@ -8,6 +8,7 @@ module.exports.run = async (message, args) => {
 
     var server = servers[message.guild.id];
     if (!server || !server.dispatcher) return message.reply("not currently playing anything!");
+    if (!server.now) return message.reply("not currently playing anything!");
 
     var current = new Date();
     var timeNow = moment.utc(server.now.timeNow).format("HH:mm:ss [UTC]")
