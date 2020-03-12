@@ -11,7 +11,7 @@ module.exports.run = async (message, args) => {
 
     if (args[args.length - 1] == "/familyfriendly") { args.pop(); args = (`${args.join(" ")} -ass -bikini -cleavage`).split(" "); }
 
-    var searchfilters = ["furry", "decapitation", "tentacles", "gay", "goat", "gore", "zombie", "dead", "bull", "insects", "maggots", "cockroach", "impregnation", "toddler", "obese", "rape", "gangbang", "prolapse", "inflation"];
+    var searchfilters = ["furry", "decapitation", "tentacles", "gay", "goat", "gore", "zombie", "dead", "bull", "insects", "maggots", "cockroach", "impregnation", "toddler", "obese", "rape", "gangbang", "prolapse", "inflation", "horse", "pegging"];
 
     if (searchfilters.some(filter => args.includes(filter))) return message.channel.send("<:WideWeirdChamp3:669996507726086174>");
 
