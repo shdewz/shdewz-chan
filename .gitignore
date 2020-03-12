@@ -2,8 +2,7 @@
 config.json
 stats.json
 settings.json
-sys-msg.js
-sys-updateprices.js
+sys-p-*.js
 
 # Logs
 logs
