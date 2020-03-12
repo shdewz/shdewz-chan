@@ -5,7 +5,7 @@ module.exports.run = async (message, args) => {
     var server = servers[message.guild.id];
     if (!server || !server.dispatcher) return message.reply("not currently playing anything!");
 
-    if (server.queue.length > 0) {
+    if (server.queue.length > 0 || (server.queue.length > 1 && server.repeat == false)) {
         message.reply(`there are still **${server.queue.length}** video(s) in the queue!\nTo confirm stopping, please react with ✅.`).then(sentMsg => {
             sentMsg.react("✅");
 

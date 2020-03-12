@@ -63,7 +63,7 @@ module.exports.run = async (message, args) => {
         message.channel.send("error");
         return console.error(err);
     }
-    
+
 };
 
 function play(connection, message) {
@@ -72,9 +72,6 @@ function play(connection, message) {
 
     // download the audio of the video
     server.dispatcher = connection.playStream(ytdl(server.queue[0], { filter: "audio", highWaterMark: 1000 * 1000 * 16 }));
-
-    // shift the queue
-    server.queue.shift();
 
     var playingSince = new Date();
     server.now.playingSince = playingSince;
@@ -115,13 +112,18 @@ function play(connection, message) {
 
     // play next after end if in queue
     server.dispatcher.on("end", () => {
-        server.now = {};
-        server.queuestats.shift();
-        if (server.queue[0]) play(connection, message);
+        if (server.repeat) play(connection, message);
         else {
-            delete server.dispatcher;
-            return connection.disconnect();
-        };
+            server.queue.shift();
+            server.now = {};
+            server.queuestats.shift();
+            if (server.queue[0]) play(connection, message);
+            else {
+                delete server.dispatcher;
+                server.queue = [];
+                return connection.disconnect();
+            };
+        }
     })
 }
 
