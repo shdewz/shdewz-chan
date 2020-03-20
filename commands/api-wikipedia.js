@@ -31,7 +31,7 @@ module.exports.run = async (message, args, client) => {
             }
 
             let embed = {
-                color: 0xe84393,
+                color: message.member.displayColor,
                 author: {
                     name: `Wikipedia results for '${args.join(" ")}':`,
                 },
@@ -98,7 +98,7 @@ function getPage(position, results, message) {
             else desc = "---"
 
             let embed = {
-                color: 0xe84393,
+                color: message.member.displayColor,
                 author: {
                     name: data.titles.normalized,
                     url: data.content_urls.desktop.page

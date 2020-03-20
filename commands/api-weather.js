@@ -28,7 +28,7 @@ module.exports.run = async (message, args, client) => {
             var country = result.sys.country;
 
             let embed = {
-                color: 0xe84393,
+                color: message.member.displayColor,
                 author: {
                     name: `Weather for ${city}, ${country}`,
                     icon_url: `https://osu.ppy.sh/images/flags/${country}.png`,

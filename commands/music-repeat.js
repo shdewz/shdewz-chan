@@ -8,7 +8,7 @@ module.exports.run = async (message, args) => {
         server.repeat = true;
 
         let embed = {
-            color: 0xe84393,
+            color: message.member.displayColor,
             author: {
                 name: `Repeat turned on!`
             }
@@ -20,7 +20,7 @@ module.exports.run = async (message, args) => {
         server.repeat = false;
 
         let embed = {
-            color: 0xe84393,
+            color: message.member.displayColor,
             author: {
                 name: `Repeat turned off!`
             }

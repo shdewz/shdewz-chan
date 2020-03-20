@@ -15,7 +15,7 @@ module.exports.run = async (message, args) => {
     var progress = moment.utc(moment(current).diff(moment.utc(server.now.playingSince))).format("mm:ss");
 
     let embed = {
-        color: 0xe84393,
+        color: message.member.displayColor,
         author: {
             name: `Currently playing:`
         },

@@ -29,7 +29,7 @@ module.exports.run = async (message, args) => {
 
         // make the embed
         let embed = {
-            color: 0xe84393,
+            color: message.member.displayColor,
             fields: [
                 {
                     name: `*Items in the case **${cases[0].name}:***`,

@@ -15,7 +15,7 @@ module.exports.run = async (message, args, client) => {
             else var usage = command.help.usage;
 
             let embed = {
-                color: 0xe84393,
+                color: message.member.displayColor,
                 author: {
                     name: `${config.prefix}${command.help.name}`
                 },
@@ -59,7 +59,7 @@ module.exports.run = async (message, args, client) => {
         }
 
         let embed = {
-            color: 0xe84393,
+            color: message.member.displayColor,
             author: {
                 name: `shdewz-chan command list`,
                 icon_url: `https://i.imgur.com/VUeXUCY.jpg`

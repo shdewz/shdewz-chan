@@ -8,7 +8,6 @@ module.exports.run = async (message, args, client) => {
         var stat = client.commands.get("loadstats").run(); // load stats
         var mode = 0
 
-        findPlayer:
         if (!args || args.length < 1) return message.channel.send(`Correct usage: \`${config.prefix}netpp [<username>] <raw pp> [<taiko/ctb/mania>]\``);
         else if (args.length <= 1) {
             var ppraw = args[0];

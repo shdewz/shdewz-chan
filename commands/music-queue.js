@@ -23,7 +23,7 @@ module.exports.run = async (message, args) => {
         }
 
         let embed = {
-            color: 0xe84393,
+            color: message.member.displayColor,
             author: {
                 name: `Current queue:`
             },

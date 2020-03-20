@@ -45,7 +45,7 @@ module.exports.run = async (message, args) => {
         var date = new Date(article.publishedAt);
 
         let embed = {
-            color: 0xe84393,
+            color: message.member.displayColor,
             author: {
                 name: article.title,
                 url: article.url

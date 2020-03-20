@@ -46,7 +46,7 @@ module.exports.run = async (message, args) => {
         // display queue message
         if (queue) {
             let embed = {
-                color: 0xe84393,
+                color: message.member.displayColor,
                 author: {
                     name: `Added to queue at position ${server.queue.length}:`
                 },
@@ -71,14 +71,14 @@ function play(connection, message) {
     server.now = server.queuestats[0];
 
     // download the audio of the video
-    server.dispatcher = connection.playStream(ytdl(server.queue[0], { filter: "audio", highWaterMark: 1000 * 1000 * 16 }));
+    server.dispatcher = connection.playStream(ytdl(server.queue[0], { filter: "audio", highWaterMark: 1<<25 }));
 
     var playingSince = new Date();
     server.now.playingSince = playingSince;
     var timeNow = moment.utc(server.now.timeNow).format("HH:mm:ss [UTC]")
 
     let embed = {
-        color: 0xe84393,
+        color: message.member.displayColor,
         author: {
             name: `Started playing:`
         },

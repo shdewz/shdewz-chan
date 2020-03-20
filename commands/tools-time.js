@@ -58,7 +58,7 @@ module.exports.run = async (message, args, client) => {
                             var time = now.format("HH:mm");
 
                             let embed = {
-                                color: 0xe84393,
+                                color: message.member.displayColor,
                                 author: {
                                     name: `It is currently ${time} for ${response[0].username}`,
                                     icon_url: `https://a.ppy.sh/${response[0].user_id}?${+new Date()}`,
@@ -88,7 +88,7 @@ module.exports.run = async (message, args, client) => {
                         //var date = now.format("dddd, MMMM Do, YYYY");
 
                         let embed = {
-                            color: 0xe84393,
+                            color: message.member.displayColor,
                             author: {
                                 name: `It is currently ${time} for ${response[0].username}`,
                                 icon_url: `https://a.ppy.sh/${response[0].user_id}?${+new Date()}`,
@@ -111,7 +111,7 @@ module.exports.run = async (message, args, client) => {
             var detailed = now.format("DDDo [day of the year / Week] w");
 
             let embed = {
-                color: 0xe84393,
+                color: message.member.displayColor,
                 description: `**${time} UTC**
                     ${date}
                     ${detailed}`
