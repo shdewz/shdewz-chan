@@ -1,12 +1,20 @@
 const math = require("mathjs");
 
 module.exports.run = async (message, args) => {
-    let equation = args.join(" ");
-    let answer = math.evaluate(equation);
-    if (countDecimals(answer) > 2) {
-        return message.reply(`**${equation}** is **${answer}** *≈ ${answer.toFixed(2)}*`);
+    let equation;
+    try {
+        equation = args.join(" ");
+        let answer = math.evaluate(equation);
+        if (countDecimals(answer) > 2) {
+            return message.reply(`**${equation}** is **${answer}** *≈ ${answer.toFixed(2)}*`);
+        }
+        else return message.reply(`**${equation}** is **${answer}**`);
     }
-    else return message.reply(`**${equation}** is **${answer}**`);
+    catch (err)
+ {
+     message.reply(`error processing equation \`${equation}\`.`);
+     return console.log(err);
+ }    
 };
 
 module.exports.help = {
