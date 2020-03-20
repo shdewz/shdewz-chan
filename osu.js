@@ -1,6 +1,8 @@
 const axios = require("axios");
 const fs = require("fs");
 const moment = require("moment");
+const readline = require("readline");
+const osu = require("ojsama");
 
 let api = "";
 let apikey = "";
@@ -85,7 +87,7 @@ module.exports = {
             let sinceJoin = `${timediff.years()} years, ${timediff.months()} months and ${timediff.days()} days ago`;
 
             let embed = {
-                color: 0xe84393,
+                color: message.member.displayColor,
                 author: {
                     name: `osu! stats for ${username}`,
                     icon_url: `https://osu.ppy.sh/images/flags/${country}.png`,
@@ -94,13 +96,13 @@ module.exports = {
                 thumbnail: {
                     url: avatar,
                 },
-                description: `**Rank:** *#${rank.toLocaleString()} (#${countryrank.toLocaleString()} ${country})*
-                **PP:** *${pp.toLocaleString()}pp*
-                **Accuracy:** *${acc}%*
-                **Playcount:** *${playcount.toLocaleString()}*
-                **Ranked Score:** *${abbreviateNumber(score)}*
-                **Playtime:** *${playtime} hours*
-                **Level:** *${Math.floor(level)} (${progress}%)*`
+                description: `**Rank** — *#${rank.toLocaleString()} (#${countryrank.toLocaleString()} ${country})*
+                **PP** — *${pp.toLocaleString()}pp*
+                **Accuracy** — *${acc}%*
+                **Playcount** — *${playcount.toLocaleString()}*
+                **Ranked Score** — *${abbreviateNumber(score)}*
+                **Playtime** — *${playtime} hours*
+                **Level** — *${Math.floor(level)} (${progress}%)*`
             }
 
             return message.channel.send({ embed: embed });
@@ -129,7 +131,7 @@ module.exports = {
             let avatar = `https://a.ppy.sh/${id}`;
 
             let embed = {
-                color: 0xe84393,
+                color: message.member.displayColor,
                 author: {
                     name: `Succesfully linked to osu! account ${username}!`,
                     icon_url: `${avatar}?${+new Date()}`,
@@ -186,7 +188,7 @@ module.exports = {
                 response = response.data;
 
                 if (response.length == 0) {
-                    return message.channel.send(`No recent plays found for *${user}*.`);
+                    return message.channel.send(`No recent plays found for ${username}.`);
                 }
 
                 if (!position) position = 0;
@@ -235,7 +237,7 @@ module.exports = {
                     let banner = `https://assets.ppy.sh/beatmaps/${beatmapset}/covers/list@2x.jpg`
 
                     let embed = {
-                        color: 0xe84393,
+                        color: message.member.displayColor,
                         author: {
                             name: `Most recent osu! play for ${username}:`,
                             icon_url: `${avatar}?${+new Date()}`,
@@ -268,7 +270,7 @@ module.exports = {
 
 function abbreviateNumber(value) {
     let newValue = value;
-    const suffixes = ["", "k", "m", "b", "t"];
+    const suffixes = ["", " thousand", " million", " billion", " trillion"];
     let suffixNum = 0;
     while (newValue >= 1000) {
         newValue /= 1000;
