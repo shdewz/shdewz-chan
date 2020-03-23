@@ -22,7 +22,7 @@ module.exports.run = async (message, args, client) => {
         if (!found) return message.channel.send(`Looks like you haven't linked your account yet.\nLink it with the command \`${config.prefix}osuset <user>\`.`)
     }
 
-    return osu.recent(username, message, position);
+    return osu.recent(username, message, position, client);
 };
 
 module.exports.help = {
