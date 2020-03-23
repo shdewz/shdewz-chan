@@ -8,8 +8,8 @@ module.exports.run = async (message, args, client) => {
     try {
         var mode = 0
 
-        Canvas.registerFont('./fonts/Rubik-Medium.ttf', { family: 'Rubik-Medium' });
-        Canvas.registerFont('./fonts/Rubik-Italic.ttf', { family: 'Rubik-Italic' });
+        Canvas.registerFont('./fonts/B2-Medium.ttf', { family: 'B2-Medium' });
+        Canvas.registerFont('./fonts/B2-Bold.ttf', { family: 'B2-Bold' });
 
         const canvas = Canvas.createCanvas(600, 200);
         const c = canvas.getContext('2d');
@@ -66,12 +66,15 @@ module.exports.run = async (message, args, client) => {
 
                 // draw everything
 
+                /*
                 var grd = c.createLinearGradient(0, 0, 600, 0);
                 grd.addColorStop(0, "#c31432");
                 grd.addColorStop(1, "#240b36");
-
                 c.fillStyle = grd;
-                c.fillRect(0, 0, 600, 200);
+                c.fillRect(0, 0, 600, 200);*/
+
+                var bg = await Canvas.loadImage("https://wallpaperaccess.com/full/1761712.jpg");
+                c.drawImage(bg, 0, 0, 600, 200);
 
                 c.fillStyle = "#FFFFFF";
 
@@ -79,44 +82,60 @@ module.exports.run = async (message, args, client) => {
                 c.shadowBlur = "8";
 
                 var uoffset = 0;
-                if (username.length >= 17) { c.font = "25px Rubik-Medium"; uoffset = -3; }
-                else if (username.length >= 13) { c.font = "30px Rubik-Medium"; uoffset = -2; }
-                else if (username.lenght >= 11) { c.font = "35px Rubik-Medium"; uoffset = -1; }
-                else { c.font = "40px Rubik-Medium"; }
+                if (username.length >= 17) { c.font = "25px B2-Medium"; uoffset = -3; }
+                else if (username.length >= 13) { c.font = "30px B2-Medium"; uoffset = -2; }
+                else if (username.lenght >= 11) { c.font = "35px B2-Medium"; uoffset = -1; }
+                else { c.font = "40px B2-Medium"; }
 
                 c.fillText(username, 140, 45 + uoffset);
 
-                c.font = "14px Rubik-Italic";
+                c.font = "14px B2-Medium";
+                c.fillStyle = "#000000";
+                c.strokeText(`${modetext} stats`, 140, 65);
+                c.strokeText(`Joined ${formatDate(joindate)} (${timeSince(joindate)})`, 140, 85);
+                c.fillStyle = "#FFFFFF";
                 c.fillText(`${modetext} stats`, 140, 65);
                 c.fillText(`Joined ${formatDate(joindate)} (${timeSince(joindate)})`, 140, 85);
 
-                c.font = "14px Rubik-Medium";
+                c.font = "14px B2-Medium";
+                c.fillStyle = "#000000";
+                c.strokeText(`Accuracy:  ${Math.round(accuracy * 100) / 100}%`, 15, 150);
+                c.strokeText(`Playcount:  ${parseInt(playcount).toLocaleString()}`, 15, 170);
+                c.strokeText(`Ranked score:  ${as(score)}`, 15, 190);
+                c.fillStyle = "#FFFFFF";
                 c.fillText(`Accuracy:  ${Math.round(accuracy * 100) / 100}%`, 15, 150);
                 c.fillText(`Playcount:  ${parseInt(playcount).toLocaleString()}`, 15, 170);
                 c.fillText(`Ranked score:  ${as(score)}`, 15, 190);
 
                 var roffset = 0;
-                if (rank.length >= 6) { c.font = "40px Rubik-Medium"; roffset = -2; }
-                else if (rank.lenght >= 5) { c.font = "45px Rubik-Medium"; }
-                else { c.font = "50px Rubik-Medium"; }
+                if (rank.length >= 6) { c.font = "40px B2-Bold"; roffset = -2; }
+                else if (rank.lenght >= 5) { c.font = "45px B2-Bold"; }
+                else { c.font = "50px B2-Bold"; }
 
                 c.textAlign = "right";
                 c.fillText(`#${parseInt(rank).toLocaleString()}`, 590, 50 + roffset);
 
-                c.font = "30px Rubik-Medium";
-                c.fillText(`#${parseInt(countryrank).toLocaleString()}`, 540, 86);
+                c.font = "30px B2-Bold";
+                c.fillText(`#${parseInt(countryrank).toLocaleString()}`, 532, 86);
 
-                c.font = "20px Rubik-Medium";
+                c.font = "20px B2-Medium";
+                c.fillStyle = "#000000";
+                c.strokeText(`${Math.round(pp).toLocaleString()} pp`, 590, 116);
+                c.fillStyle = "#FFFFFF";
                 c.fillText(`${Math.round(pp).toLocaleString()} pp`, 590, 116);
 
                 c.fillRect(140, 95, 200, 30);
 
-                c.fillStyle = "#de354f";
+                c.fillStyle = "#2c54b6";
                 c.fillRect(145, 100, 190 * (level % Math.floor(level)), 20);
 
-                c.fillStyle = "#FFFFFF";
                 c.textAlign = "center";
+                c.shadowBlur = "2";
+                c.fillStyle = "#000000";
+                c.strokeText(`Level ${Math.floor(level)}`, 238, 117);
+                c.fillStyle = "#FFFFFF";
                 c.fillText(`Level ${Math.floor(level)}`, 238, 117);
+                c.shadowBlur = "8";
 
                 c.textAlign = "left";
 
@@ -124,7 +143,7 @@ module.exports.run = async (message, args, client) => {
                 c.drawImage(pfp, 15, 15, 110, 110);
 
                 var flag = await Canvas.loadImage(`https://osu.ppy.sh/images/flags/${country.toUpperCase()}.png`);
-                c.drawImage(flag, 550, 60, 40, 30);
+                c.drawImage(flag, 542, 60, 48, 30);
 
                 const attachment = new Discord.Attachment(canvas.toBuffer(), 'statcard.png');
                 message.channel.send(attachment);
@@ -179,56 +198,19 @@ function formatDate(value) {
 }
 
 // add large number suffixes
-function as(num) {
-    if (num <= 10000) // 1,000
-    {
-        return num.toLocaleString();
+function as(value) {
+    let newValue = value;
+    const suffixes = ["", " thousand", " million", " billion", " trillion"];
+    let suffixNum = 0;
+    while (newValue >= 1000) {
+        newValue /= 1000;
+        suffixNum++;
     }
-    else if (num <= 100000) // 10.0K
-    {
-        num /= 1000;
-        return (Math.round(num * 10) / 10).toLocaleString() + "K";
-    }
-    else if (num <= 1000000) // 100K
-    {
-        num /= 1000;
-        return num.toLocaleString() + "K";
-    }
-    else if (num <= 10000000) // 1.00M
-    {
-        num /= 1000000;
-        return (Math.round(num * 100) / 100).toLocaleString() + "M";
-    }
-    else if (num <= 100000000) // 10.0M
-    {
-        num /= 1000000;
-        return (Math.round(num * 10) / 10).toLocaleString() + "M";
-    }
-    else if (num <= 1000000000) // 100M
-    {
-        num /= 1000000;
-        return Math.round(num).toLocaleString() + "M";
-    }
-    else if (num <= 10000000000) // 1.00B
-    {
-        num /= 1000000000;
-        return (Math.round(num * 100) / 100).toLocaleString() + "B";
-    }
-    else if (num <= 100000000000) // 10.0B
-    {
-        num /= 1000000000;
-        return (Math.round(num * 10) / 10).toLocaleString() + "B";
-    }
-    else if (num <= 1000000000000) // 100B
-    {
-        num /= 1000000000;
-        return Math.round(num).toLocaleString() + "B";
-    }
-    else // 1.00T
-    {
-        num /= 1000000000000;
-        return Math.round(num).toLocaleString() + "T";
-    }
+
+    newValue = newValue.toPrecision(3);
+
+    newValue += suffixes[suffixNum];
+    return newValue;
 }
 
 module.exports.help = {
