@@ -1,77 +1,176 @@
 const axios = require("axios");
+const covid = require("novelcovid");
+const moment = require("moment");
+
+const corrections = {
+    "KR": "S. Korea",
+    "GB": "UK",
+    "IR": "Iran",
+    "US": "USA",
+    "FO": "Faeroe Islands",
+    "VA": "Vatican City"
+}
+
+
+const queryCorrections = {
+    "UK": "GB"
+}
 
 module.exports.run = async (message, args) => {
     try {
         const api = axios.create({
-            baseURL: 'https://coronavirus-19-api.herokuapp.com',
+            baseURL: 'https://corona.lmao.ninja',
         });
 
         if (args.length == 0) {
             api.get("/all").then(response => {
-                response = response.data;
+                data = response.data;
                 let embed = {
                     color: message.member.displayColor,
                     author: {
-                        name: `Coronavirus statistics:`
+                        name: `Coronavirus overall statistics:`
                     },
                     fields: [
                         {
-                            name: "Cases", value: `**${response.cases.toLocaleString()}**`
+                            name: "Cases", value: `**${data.cases.toLocaleString()}**
+                            ▸ *${((data.cases / 7700000000) * 100).toFixed(4).toLocaleString()}% of everyone*
+                            ▸ *${Math.round(((data.cases / 7700000000) * 100) * 1000000).toLocaleString()} out of 1 million*`
                         },
                         {
-                            name: "Deaths", value: `**${response.deaths.toLocaleString()}**`
+                            name: "Deaths", value: `**${data.deaths.toLocaleString()}**
+                            ▸ *${((data.deaths / data.cases) * 100).toFixed(2).toLocaleString()}% of cases*`
                         },
                         {
-                            name: "Recovered", value: `**${response.recovered.toLocaleString()}**`
+                            name: "Recovered", value: `**${data.recovered.toLocaleString()}**
+                            ▸ *${((data.recovered / data.cases) * 100).toFixed(2).toLocaleString()}% of cases*`
                         }
-                    ]
+                    ],
+                    footer: {
+                        text: `Updated ${moment.utc(data.updated).fromNow()}`
+                    }
                 }
                 return message.channel.send({ embed: embed });
             }).catch(err => {
-                message.channel.send("error fetching data");
-                return console.error(err);
+                return console.log(err);
+            });
+        }
+        else if (args[0].toLowerCase() == "-countries"){
+            api.get("/countries").then(response => {
+                data = response.data;
+
+                let countries = [];
+                for (var i = 0; i < data.length; i++){
+                    countries.push(data[i].country);
+                }
+
+                countries.sort();
+
+                let embed = {
+                    color: message.member.displayColor,
+                    author: {
+                        name: `All supported countries:`
+                    },
+                    description: `${countries.join(", ")}`
+                }
+                return message.channel.send({ embed: embed });
+            }).catch(err => {
+                return console.log(err);
             });
         }
         else {
-            let country = args.join(" ");
-            api.get("/countries/" + country).then(response => {
-                response = response.data;
-                country = response.country;
-
-                const apiCountry = axios.create({
-                    baseURL: 'https://restcountries.eu/rest/v2/name/',
-                });
-
-                apiCountry.get(country).then(countries => {
-                    countries = countries.data;
-                    let countryCode = countries[0].alpha2Code;
-                    let embed = {
-                        color: message.member.displayColor,
-                        author: {
-                            name: `Coronavirus in ${response.country}:`,
-                            icon_url: `https://osu.ppy.sh/images/flags/${countryCode}.png`,
-                        },
-                        fields: [
-                            {
-                                name: "Cases", value: `**${response.cases.toLocaleString()}** *(+${response.todayCases.toLocaleString()})*`
-                            },
-                            {
-                                name: "Deaths", value: `**${response.deaths.toLocaleString()}** *(+${response.todayDeaths.toLocaleString()})*`
-                            },
-                            {
-                                name: "Recovered", value: `**${response.recovered.toLocaleString()}**`
-                            }
-                        ]
-                    }
-                    return message.channel.send({ embed: embed });
-                });
-            }).catch(err => {
-                message.channel.send("error fetching data");
-                return console.error(err);
+            const apiCountry = axios.create({
+                baseURL: 'https://restcountries.eu/rest/v2',
             });
+
+            if (args.length == 1 && args[0].length == 2) {
+                // search by code
+                let query = args[0].toUpperCase();
+                if (Object.keys(queryCorrections).includes(query)) query = queryCorrections[query];
+
+                apiCountry.get("/alpha/" + query).then(countries => {
+                    countries = countries.data;
+
+                    let country = countries.name;
+                    let code = countries.alpha2Code;
+                    if (Object.keys(corrections).includes(code)) country = corrections[code];
+
+                    api.get("/countries/" + country).then(response => {
+                        data = response.data;
+
+                        let embed = {
+                            color: message.member.displayColor,
+                            author: {
+                                name: `Coronavirus in ${data.country}:`,
+                                icon_url: `https://osu.ppy.sh/images/flags/${code}.png`
+                            },
+                            fields: [
+                                {
+                                    name: "Cases", value: `**${data.cases.toLocaleString()}** *(+${data.todayCases.toLocaleString()})*
+                                    ▸ *${((data.cases / countries.population) * 100).toFixed(4).toLocaleString()}% of country*
+                                    ▸ *${data.casesPerOneMillion.toLocaleString()} out of 1 million*`
+                                },
+                                {
+                                    name: "Deaths", value: `**${data.deaths.toLocaleString()}** *(+${data.todayDeaths.toLocaleString()})*
+                                    ▸ *${((data.deaths / data.cases) * 100).toFixed(2).toLocaleString()}% of cases*`
+                                },
+                                {
+                                    name: "Recovered", value: `**${data.recovered.toLocaleString()}**
+                                    ▸ *${((data.recovered / data.cases) * 100).toFixed(2).toLocaleString()}% of cases*`
+                                }
+                            ]
+                        }
+                        return message.channel.send({ embed: embed });
+                    }).catch(err => {
+                        return console.log(err);
+                    });
+                }).catch(err => {
+                    return console.log(err);
+                });
+            }
+            else {
+                // search by name
+                let query = args.join(" ");
+                apiCountry.get("/name/" + query).then(countries => {
+                    countries = countries.data[0];
+
+                    let country = countries.name;
+                    let code = countries.alpha2Code;
+                    if (Object.keys(corrections).includes(code)) country = corrections[code];
+
+                    api.get("/countries/" + country).then(response => {
+                        data = response.data;
+
+                        let embed = {
+                            color: message.member.displayColor,
+                            author: {
+                                name: `Coronavirus in ${data.country}:`,
+                                icon_url: `https://osu.ppy.sh/images/flags/${code}.png`
+                            },
+                            fields: [
+                                {
+                                    name: "Cases", value: `**${data.cases.toLocaleString()}** *(+${data.todayCases.toLocaleString()})*
+                                    ▸ *${((data.cases / countries.population) * 100).toFixed(4)}% of country*
+                                    ▸ *${data.casesPerOneMillion.toLocaleString()} out of 1 million*`
+                                },
+                                {
+                                    name: "Deaths", value: `**${data.deaths.toLocaleString()}** *(+${data.todayDeaths.toLocaleString()})*
+                                    ▸ *${((data.deaths / data.cases) * 100).toFixed(2)}% of cases*`
+                                },
+                                {
+                                    name: "Recovered", value: `**${data.recovered.toLocaleString()}**
+                                    ▸ *${((data.recovered / data.cases) * 100).toFixed(2)}% of cases*`
+                                }
+                            ]
+                        }
+                        return message.channel.send({ embed: embed });
+                    }).catch(err => {
+                        return console.log(err);
+                    });
+                }).catch(err => {
+                    return console.log(err);
+                });
+            }
         }
-
-
     }
     catch (err) {
         message.channel.send("error fetching data");
