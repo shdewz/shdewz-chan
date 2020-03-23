@@ -1,15 +1,17 @@
 const axios = require("axios");
 const fs = require("fs");
 const moment = require("moment");
+
 const readline = require("readline");
+const request = require('request');
 const osu = require("ojsama");
 
 let api = "";
 let apikey = "";
 let timezone = 2;
 
-const rankemojis = ["<:rankingX:662679799638130698>", "<:rankingXH:662679800862736415>", "<:rankingS:662679799113842690>", "<:rankingSH:662679799453450240>", "<:rankingA:662679799256580096>", "<:rankingB:662679799323688970>", "<:rankingC:662679799294066719>", "<:rankingD:662679799063642129>", "<:rankingD:662679799063642129>"]; // replace F at some point!
-const ranknames = ["X", "XH", "S", "SH", "A", "B", "C", "D", "F"];
+const rankemojis = ["<:rankingF:691413465830522912>", "<:rankingD:691413465834717237>", "<:rankingC:691413466036043777>", "<:rankingB:691413466040238170>", "<:rankingA:691413466019397693>", "<:rankingS:691413466048626709>", "<:rankingSH:691413466061209720>", "<:rankingX:691413467634335895>", "<:rankingXH:691413465813745756>"];
+const ranknames = ["F", "D", "C", "B", "A", "S", "SH", "X", "XH"];
 
 const mods_enum = {
     'No Mods': 0,
@@ -56,7 +58,7 @@ module.exports = {
     },
 
     getUser: async function (user, message) {
-        api.get('/get_user', { params: { k: apikey, u: user } }).then(response => {
+        api.get('/get_user', { params: { k: apikey, u: user } }).then(async response => {
             response = response.data;
 
             if (response.length == 0) {
@@ -117,7 +119,7 @@ module.exports = {
     },
 
     setUser: async function (user, message, client) {
-        api.get('/get_user', { params: { k: apikey, u: user } }).then(response => {
+        api.get('/get_user', { params: { k: apikey, u: user } }).then(async response => {
             response = response.data;
 
             if (response.length == 0) {
@@ -169,8 +171,8 @@ module.exports = {
         });
     },
 
-    recent: async function (user, message, position) {
-        api.get('/get_user', { params: { k: apikey, u: user } }).then(response => {
+    recent: async function (user, message, position, client) {
+        api.get('/get_user', { params: { k: apikey, u: user } }).then(async response => {
             response = response.data;
 
             if (response.length == 0) {
@@ -184,7 +186,7 @@ module.exports = {
             let url = `https://osu.ppy.sh/users/${id}`;
             let avatar = `https://a.ppy.sh/${id}`;
 
-            api.get('/get_user_recent', { params: { k: apikey, u: user } }).then(response => {
+            api.get('/get_user_recent', { params: { k: apikey, u: user } }).then(async response => {
                 response = response.data;
 
                 if (response.length == 0) {
@@ -218,7 +220,7 @@ module.exports = {
                 let grade = rankemojis[ranknames.indexOf(eventdata.rank)];
                 let sincePlay = moment(new Date(eventdata.date)).add(timezone, 'h').fromNow();
 
-                api.get('/get_beatmaps', { params: { k: apikey, b: beatmap, mods: modsParam } }).then(response => {
+                api.get('/get_beatmaps', { params: { k: apikey, b: beatmap, mods: modsParam } }).then(async response => {
                     response = response.data;
 
                     if (!response || response.length == 0) {
@@ -236,6 +238,16 @@ module.exports = {
                     let beatmapset = mapdata.beatmapset_id;
                     let banner = `https://assets.ppy.sh/beatmaps/${beatmapset}/covers/list@2x.jpg`
 
+                    let pp = await getPP(beatmap, mods, combo, acc, cmiss);
+                    let ppText = `**${pp.toFixed(2)}pp**`;
+
+                    if (combo != maxcombo) {
+                        let fcpp = await getFCPP(beatmap, mods, acc);
+                        ppText = `**${pp.toFixed(2)}pp** / ${fcpp.toFixed(2)}pp`;
+                    }
+
+                    addLastMap(message, beatmap, client);
+
                     let embed = {
                         color: message.member.displayColor,
                         author: {
@@ -247,8 +259,9 @@ module.exports = {
                             url: banner,
                         },
                         description: `**[${artist} - ${title}](https://osu.ppy.sh/b/${beatmap})**
-                        [${diff}]${modsText} (${stars}★) ${acc}%
-                        ${grade} — **x${combo.toLocaleString()}/${maxcombo.toLocaleString()}** — [${c300}/${c100}/${c50}/${cmiss}]`,
+                        [${diff}]${modsText} (${stars}★) — ${acc}%
+                        ${grade} — **x${combo.toLocaleString()}/${maxcombo.toLocaleString()}** — [${c300}/${c100}/${c50}/${cmiss}]
+                        ${ppText}`,
                         footer: {
                             text: `Play set ${sincePlay}`
                         }
@@ -266,6 +279,91 @@ module.exports = {
             return;
         });
     }
+}
+
+async function getPP(mapID, mods, combo, acc, cmiss) {
+    return new Promise(resolve => {
+        cmiss = parseInt(cmiss);
+        combo = parseInt(combo);
+        acc = parseFloat(acc);
+
+        var parser = new osu.parser();
+        readline.createInterface({
+            input: request.get("https://osu.ppy.sh/osu/" + mapID), terminal: false
+        })
+            .on("line", parser.feed_line.bind(parser))
+            .on("close", function () {
+
+                var map = parser.map;
+                var stars = new osu.diff().calc({ map: map, mods: mods });
+                var max_combo = map.max_combo();
+
+                var pp = osu.ppv2({
+                    stars: stars,
+                    combo: combo,
+                    nmiss: cmiss,
+                    acc_percent: acc,
+                });
+
+                resolve(pp.total);
+            });
+    });
+}
+
+function getFCPP(mapID, mods, acc) {
+    return new Promise(resolve => {
+        var cmiss = 0;
+
+        var parser = new osu.parser();
+        readline.createInterface({
+            input: request.get("https://osu.ppy.sh/osu/" + mapID), terminal: false
+        })
+            .on("line", parser.feed_line.bind(parser))
+            .on("close", function () {
+
+                var map = parser.map;
+                var stars = new osu.diff().calc({ map: map, mods: mods });
+                var max_combo = map.max_combo();
+
+                var pp = osu.ppv2({
+                    stars: stars,
+                    combo: max_combo,
+                    nmiss: cmiss,
+                    acc_percent: acc,
+                });
+
+                resolve(pp.total);
+            });
+    });
+}
+
+function addLastMap(message, mapID, client) {
+    var stat = client.commands.get("loadstats").run(); // load stats
+
+    var exists = false;
+    for (var i = 0; i < stat.serverstats.length; i++) {
+        if (stat.serverstats[i].id == message.channel.guild.id) {
+            for (var j = 0; j < stat.serverstats[i].channels.length; j++) {
+                if (stat.serverstats[i].channels[j].id == message.channel.id) {
+                    exists = true;
+                    stat.serverstats[i].channels[j].content.lastBeatmap = mapID;
+                }
+            }
+            if (!exists) {
+                var obj = { "id": message.channel.id, "content": { "lastBeatmap": mapID } };
+                stat.serverstats[i].channels.push(obj);
+                exists = true;
+            }
+        }
+    }
+    if (!exists) {
+        var obj = { "id": message.channel.guild.id, "channels": [{ "id": message.channel.id, "content": { "lastBeatmap": mapID } }] };
+        stat.serverstats.push(obj);
+    }
+    fs.writeFile("stats.json", JSON.stringify(stat), function (err) {
+        if (err) return console.log("error", err);
+    });
+    return;
 }
 
 function abbreviateNumber(value) {
@@ -301,6 +399,6 @@ function cleanMods(mods) {
     return result;
 }
 
-function getAcc(c300, c100, c50, cmiss){
-	return (c300 * 300 + c100 * 100 + c50 * 50) / (c300 * 300 + c100 * 300 + c50 * 300 + cmiss * 300);
+function getAcc(c300, c100, c50, cmiss) {
+    return (c300 * 300 + c100 * 100 + c50 * 50) / (c300 * 300 + c100 * 300 + c50 * 300 + cmiss * 300);
 }
