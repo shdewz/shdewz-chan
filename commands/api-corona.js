@@ -54,12 +54,12 @@ module.exports.run = async (message, args) => {
                 return console.log(err);
             });
         }
-        else if (args[0].toLowerCase() == "-countries"){
+        else if (args[0].toLowerCase() == "-countries") {
             api.get("/countries").then(response => {
                 data = response.data;
 
                 let countries = [];
-                for (var i = 0; i < data.length; i++){
+                for (var i = 0; i < data.length; i++) {
                     countries.push(data[i].country);
                 }
 
@@ -71,6 +71,72 @@ module.exports.run = async (message, args) => {
                         name: `All supported countries:`
                     },
                     description: `${countries.join(", ")}`
+                }
+                return message.channel.send({ embed: embed });
+            }).catch(err => {
+                return console.log(err);
+            });
+        }
+        else if (args[0].toLowerCase() == "-top10cases") {
+            api.get("/countries").then(response => {
+                data = response.data;
+
+                data.sort(GetSortOrder("cases"));
+                data.reverse();
+
+                let countryText = "";
+                let valueText = "";
+                for (var i = 0; i < 10; i++) {
+                    countryText += `**#${i + 1} ${data[i].country}**\n`
+                    valueText += `${data[i].cases.toLocaleString()}\n`
+                }
+
+                let embed = {
+                    color: message.member.displayColor,
+                    author: {
+                        name: `Top 10 by cases:`
+                    },
+                    fields: [
+                        {
+                            name: "Country", value: countryText, inline: true
+                        },
+                        {
+                            name: "Cases", value: valueText, inline: true
+                        }
+                    ]
+                }
+                return message.channel.send({ embed: embed });
+            }).catch(err => {
+                return console.log(err);
+            });
+        }
+        else if (args[0].toLowerCase() == "-top10deaths") {
+            api.get("/countries").then(response => {
+                data = response.data;
+
+                data.sort(GetSortOrder("deaths"));
+                data.reverse();
+
+                let countryText = "";
+                let valueText = "";
+                for (var i = 0; i < 10; i++) {
+                    countryText += `**#${i + 1} ${data[i].country}**\n`
+                    valueText += `${data[i].deaths.toLocaleString()}\n`
+                }
+
+                let embed = {
+                    color: message.member.displayColor,
+                    author: {
+                        name: `Top 10 by deaths:`
+                    },
+                    fields: [
+                        {
+                            name: "Country", value: countryText, inline: true
+                        },
+                        {
+                            name: "Deaths", value: valueText, inline: true
+                        }
+                    ]
                 }
                 return message.channel.send({ embed: embed });
             }).catch(err => {
@@ -177,6 +243,17 @@ module.exports.run = async (message, args) => {
         return console.error(err);
     }
 };
+
+function GetSortOrder(prop) {  
+    return function(a, b) {  
+        if (a[prop] > b[prop]) {  
+            return 1;  
+        } else if (a[prop] < b[prop]) {  
+            return -1;  
+        }  
+        return 0;  
+    }  
+} 
 
 module.exports.help = {
     name: "corona",
