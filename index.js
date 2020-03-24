@@ -39,6 +39,7 @@ fs.readdir("./commands", (err, files) => {
 client.on('message', async message => {
     if (message.channel.type !== "text") return; // ignore non-text-channels
     if (message.author.bot) return; // ignore bot messages
+    if (config.blacklisted_users.includes(message.author.id)) return; // ignore blacklisted users
 
     // ignore non-commands
     let prefix = config.prefix;
