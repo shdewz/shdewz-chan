@@ -56,7 +56,7 @@ module.exports.run = async (message, args, client) => {
 
     if (args[args.length - 1] == "/familyfriendly") { args.pop(); args = (`${args.join(" ")} -ass -bikini -cleavage`).split(" "); }
 
-    var searchfilters = ["furry", "decapitation", "tentacles", "gay", "goat", "gore", "zombie", "dead", "bull", "insects", "maggots", "cockroach", "impregnation", "toddler", "obese", "rape", "gangbang", "prolapse", "inflation", "horse", "pegging", "futanari", "baby"];
+    var searchfilters = ["furry", "decapitation", "tentacles", "gay", "goat", "gore", "zombie", "dead", "bull", "insects", "maggots", "cockroach", "impregnation", "toddler", "rape", "gangbang", "prolapse", "inflation", "horse", "pegging", "futanari", "baby", "futa", "futanari"];
 
     if (searchfilters.some(filter => args.includes(filter))) return message.channel.send("<:WideWeirdChamp3:669996507726086174>");
 
@@ -102,7 +102,7 @@ module.exports.run = async (message, args, client) => {
                 if (err) return console.log("error", err);
             });
 
-            if (result[rng].tags.split(" ").includes("loli")) return message.channel.send("hey <@157532486883213312> got some loli content for you here\nprovided by " + message.author + " this time");
+            if (result[rng].tags.split(" ").includes("loli")) return message.channel.send("hey <@110538906637721600> got some loli content for you here");
             else return;
         }
         catch (err) {

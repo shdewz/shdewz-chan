@@ -7,6 +7,8 @@ const corrections = {
     "GB": "UK",
     "IR": "Iran",
     "US": "USA",
+    "IN": "India",
+    "RU": "Russia",
     "FO": "Faeroe Islands",
     "VA": "Vatican City"
 }
