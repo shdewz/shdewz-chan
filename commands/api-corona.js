@@ -35,8 +35,8 @@ module.exports.run = async (message, args) => {
                     fields: [
                         {
                             name: "Cases", value: `**${data.cases.toLocaleString()}**
-                            ▸ *${((data.cases / 7700000000) * 100).toFixed(4).toLocaleString()}% of everyone*
-                            ▸ *${Math.round(((data.cases / 7700000000) * 100) * 1000000).toLocaleString()} out of 1 million*`
+                            ▸ *${((data.cases /  7773486625) * 100).toFixed(4).toLocaleString()}% of everyone*
+                            ▸ *= ${Math.round((data.cases /  7773486625) * 1000000).toLocaleString()} out of 1 million*`
                         },
                         {
                             name: "Deaths", value: `**${data.deaths.toLocaleString()}**
@@ -175,7 +175,7 @@ module.exports.run = async (message, args) => {
                                 {
                                     name: "Cases", value: `**${data.cases.toLocaleString()}** *(+${data.todayCases.toLocaleString()})*
                                     ▸ *${((data.cases / countries.population) * 100).toFixed(4).toLocaleString()}% of country*
-                                    ▸ *${data.casesPerOneMillion.toLocaleString()} out of 1 million*`
+                                    ▸ *= ${Math.round((data.cases / countries.population) * 100 * 1000000).toLocaleString()} out of 1 million*`
                                 },
                                 {
                                     name: "Deaths", value: `**${data.deaths.toLocaleString()}** *(+${data.todayDeaths.toLocaleString()})*
@@ -218,7 +218,7 @@ module.exports.run = async (message, args) => {
                                 {
                                     name: "Cases", value: `**${data.cases.toLocaleString()}** *(+${data.todayCases.toLocaleString()})*
                                     ▸ *${((data.cases / countries.population) * 100).toFixed(4)}% of country*
-                                    ▸ *${data.casesPerOneMillion.toLocaleString()} out of 1 million*`
+                                    ▸ *= ${Math.round((data.cases / countries.population) * 1000000).toLocaleString()} out of 1 million*`
                                 },
                                 {
                                     name: "Deaths", value: `**${data.deaths.toLocaleString()}** *(+${data.todayDeaths.toLocaleString()})*
