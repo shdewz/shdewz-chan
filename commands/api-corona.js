@@ -24,6 +24,10 @@ module.exports.run = async (message, args) => {
             baseURL: 'https://corona.lmao.ninja',
         });
 
+        const apiCountry = axios.create({
+            baseURL: 'https://restcountries.eu/rest/v2',
+        });
+
         if (args.length == 0) {
             api.get("/all").then(response => {
                 data = response.data;
@@ -35,8 +39,8 @@ module.exports.run = async (message, args) => {
                     fields: [
                         {
                             name: "Cases", value: `**${data.cases.toLocaleString()}**
-                            ▸ *${((data.cases /  7773486625) * 100).toFixed(4).toLocaleString()}% of everyone*
-                            ▸ *= ${Math.round((data.cases /  7773486625) * 1000000).toLocaleString()} out of 1 million*`
+                            ▸ *${((data.cases / 7773486625) * 100).toFixed(4).toLocaleString()}% of everyone*
+                            ▸ *1 in every ${Math.round(1 / (data.cases / 7773486625)).toLocaleString()}*`
                         },
                         {
                             name: "Deaths", value: `**${data.deaths.toLocaleString()}**
@@ -145,11 +149,53 @@ module.exports.run = async (message, args) => {
                 return console.log(err);
             });
         }
-        else {
-            const apiCountry = axios.create({
-                baseURL: 'https://restcountries.eu/rest/v2',
-            });
+        else if (args[0].toLowerCase() == "-top10cases%") {
+            api.get("/countries").then(async response => {
+                var data = response.data;
+                message.channel.send("Calculating, will take a while.");
 
+                for (var i = 0; i < data.length; i++) {
+                    if (!data[i].countryInfo.iso2 || data[i].countryInfo.iso2 == null) {
+                        data[i].percent = 0;
+                        continue;
+                    }
+                    await apiCountry.get("/alpha/" + data[i].countryInfo.iso2).then(countries => {
+                        var population = countries.data.population;
+                        data[i].percent = data[i].cases / population;
+                        console.log(`${i + 1} / ${data.length}`);
+                    });
+                }
+
+                data.sort(GetSortOrder("percent"));
+                if (args[1] != "-reverse") data.reverse();
+
+                let countryText = "";
+                let valueText = "";
+                for (var i = 0; i < 10; i++) {
+                    countryText += `**#${i + 1} ${data[i].country}**\n`
+                    valueText += `${(data[i].percent * 100).toFixed(4).toLocaleString()}%\n`
+                }
+
+                let embed = {
+                    color: message.member.displayColor,
+                    author: {
+                        name: `Top 10 by % infected:`
+                    },
+                    fields: [
+                        {
+                            name: "Country", value: countryText, inline: true
+                        },
+                        {
+                            name: "Cases", value: valueText, inline: true
+                        }
+                    ]
+                }
+                return message.channel.send({ embed: embed });
+            }).catch(err => {
+                return console.log(err);
+            });
+        }
+        else {
             if (args.length == 1 && args[0].length == 2) {
                 // search by code
                 let query = args[0].toUpperCase();
@@ -175,7 +221,7 @@ module.exports.run = async (message, args) => {
                                 {
                                     name: "Cases", value: `**${data.cases.toLocaleString()}** *(+${data.todayCases.toLocaleString()})*
                                     ▸ *${((data.cases / countries.population) * 100).toFixed(4).toLocaleString()}% of country*
-                                    ▸ *= ${Math.round((data.cases / countries.population) * 100 * 1000000).toLocaleString()} out of 1 million*`
+                                    ▸ *1 in every ${Math.round(1 / (data.cases / countries.population)).toLocaleString()}*`
                                 },
                                 {
                                     name: "Deaths", value: `**${data.deaths.toLocaleString()}** *(+${data.todayDeaths.toLocaleString()})*
@@ -218,7 +264,7 @@ module.exports.run = async (message, args) => {
                                 {
                                     name: "Cases", value: `**${data.cases.toLocaleString()}** *(+${data.todayCases.toLocaleString()})*
                                     ▸ *${((data.cases / countries.population) * 100).toFixed(4)}% of country*
-                                    ▸ *= ${Math.round((data.cases / countries.population) * 1000000).toLocaleString()} out of 1 million*`
+                                    ▸ *1 in every ${Math.round(1 / (data.cases / countries.population)).toLocaleString()}*`
                                 },
                                 {
                                     name: "Deaths", value: `**${data.deaths.toLocaleString()}** *(+${data.todayDeaths.toLocaleString()})*
@@ -246,16 +292,16 @@ module.exports.run = async (message, args) => {
     }
 };
 
-function GetSortOrder(prop) {  
-    return function(a, b) {  
-        if (a[prop] > b[prop]) {  
-            return 1;  
-        } else if (a[prop] < b[prop]) {  
-            return -1;  
-        }  
-        return 0;  
-    }  
-} 
+function GetSortOrder(prop) {
+    return function (a, b) {
+        if (a[prop] > b[prop]) {
+            return 1;
+        } else if (a[prop] < b[prop]) {
+            return -1;
+        }
+        return 0;
+    }
+}
 
 module.exports.help = {
     name: "corona",
