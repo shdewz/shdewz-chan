@@ -10,7 +10,8 @@ const corrections = {
     "IN": "India",
     "RU": "Russia",
     "FO": "Faeroe Islands",
-    "VA": "Vatican City"
+    "VA": "Vatican City",
+    "SS": "Sudan"
 }
 
 
@@ -187,6 +188,48 @@ module.exports.run = async (message, args) => {
                         },
                         {
                             name: "Cases", value: valueText, inline: true
+                        }
+                    ]
+                }
+                return message.channel.send({ embed: embed });
+            }).catch(err => {
+                return console.log(err);
+            });
+        }
+        else if (args[0].toLowerCase() == "-top10deaths%") {
+            if (args[1] && args[1].toLowerCase() == "-ignorelowvalues") var removeLow = true;
+            api.get("/countries").then(async response => {
+                var data = response.data;
+
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].deaths == 0 || (removeLow && data[i].cases < 20)) {
+                        data.splice(i, 1);
+                        i--;
+                    }
+                    else data[i].percent = data[i].deaths / data[i].cases;
+                }
+
+                data.sort(GetSortOrder("percent"));
+                if (args[1] != "-reverse") data.reverse();
+
+                let countryText = "";
+                let valueText = "";
+                for (var i = 0; i < 10; i++) {
+                    countryText += `**#${i + 1} ${data[i].country}**\n`
+                    valueText += `${(data[i].percent * 100).toFixed(2).toLocaleString()}%\n`
+                }
+
+                let embed = {
+                    color: message.member.displayColor,
+                    author: {
+                        name: `Top 10 by death %:`
+                    },
+                    fields: [
+                        {
+                            name: "Country", value: countryText, inline: true
+                        },
+                        {
+                            name: "Deaths", value: valueText, inline: true
                         }
                     ]
                 }
