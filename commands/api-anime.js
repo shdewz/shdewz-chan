@@ -48,13 +48,13 @@ module.exports.run = async (message, args, client) => {
     }
 
     args = args.map(x => { return x.toLowerCase() });
-    if (args[args.length - 1] == "/nsfw") {
-        if (message.channel.nsfw) { args.pop(); args.push("-rating:safe"); }
+    if (args.includes("/nsfw")) {
+        if (message.channel.nsfw) { args.splice(args.indexOf("/nsfw")); args.push("-rating:safe"); }
         else return message.channel.send("NOT HERE " + message.author);
     }
     else args.push("rating:safe");
 
-    if (args[args.length - 1] == "/familyfriendly") { args.pop(); args = (`${args.join(" ")} -ass -bikini -cleavage`).split(" "); }
+    if (args.includes("/familyfriendly")) { args.splice(args.indexOf("/familyfriendly"), 1); args = (`${args.join(" ")} -ass -bikini -cleavage`).split(" "); }
 
     var searchfilters = ["furry", "decapitation", "tentacles", "gay", "goat", "gore", "zombie", "dead", "bull", "insects", "maggots", "cockroach", "impregnation", "toddler", "rape", "gangbang", "prolapse", "inflation", "horse", "pegging", "futanari", "baby", "futa", "futanari"];
 
@@ -102,8 +102,12 @@ module.exports.run = async (message, args, client) => {
                 if (err) return console.log("error", err);
             });
 
-            if (result[rng].tags.split(" ").includes("loli")) return message.channel.send("hey <@110538906637721600> got some loli content for you here");
-            else return;
+            // it's pinging time
+            if (result[rng].tags.includes("loli")) message.channel.send("hey <@110538906637721600> got some loli content for you here"); // LwL
+            if (result[rng].tags.includes("feet")) message.channel.send("hey <@184753701519360001> have feet"); // bart
+            if (result[rng].tags.includes("idol") && result[rng].tags.includes("armpit") && !result[rng].tags.includes("loli")) message.channel.send("hey <@117555792894361602> idols o wo"); // bart
+            
+            return;
         }
         catch (err) {
             if (err.type == "invalid-json") message.channel.send("No images found.");
