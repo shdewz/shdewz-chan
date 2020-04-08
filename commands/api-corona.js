@@ -11,7 +11,8 @@ const corrections = {
     "RU": "Russia",
     "FO": "Faeroe Islands",
     "VA": "Vatican City",
-    "SS": "Sudan"
+    "SS": "Sudan",
+    "SX": "Sint Maarten"
 }
 
 
@@ -197,12 +198,13 @@ module.exports.run = async (message, args) => {
             });
         }
         else if (args[0].toLowerCase() == "-top10deaths%") {
-            if (args[1] && args[1].toLowerCase() == "-ignorelowvalues") var removeLow = true;
+            var removeLow = 0;
+            if (args.includes("-ignorelowvalues")) removeLow = args[args.indexOf("-ignorelowvalues") + 1];
             api.get("/countries").then(async response => {
                 var data = response.data;
 
                 for (var i = 0; i < data.length; i++) {
-                    if (data[i].deaths == 0 || (removeLow && data[i].cases < 20)) {
+                    if (data[i].deaths == 0 || (removeLow != 0 && data[i].cases < removeLow)) {
                         data.splice(i, 1);
                         i--;
                     }
@@ -210,7 +212,7 @@ module.exports.run = async (message, args) => {
                 }
 
                 data.sort(GetSortOrder("percent"));
-                if (args[1] != "-reverse") data.reverse();
+                if (!args.includes("-reverse")) data.reverse();
 
                 let countryText = "";
                 let valueText = "";
