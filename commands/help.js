@@ -10,6 +10,7 @@ module.exports.run = async (message, args, client) => {
 
             var exampletext = "";
             if (command.help.example) exampletext = `\n**Example:** \`${config.prefix}${command.help.example}\``;
+            if (command.help.example2) exampletext += `\n**Example:** \`${config.prefix}${command.help.example2}\``;
 
             if (!command.help.usage) var usage = command.help.name;
             else var usage = command.help.usage;
