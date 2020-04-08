@@ -13,8 +13,8 @@ module.exports.run = async (message, args) => {
         if (args[0].match(/(https?:\/\/)?(www.)?youtu\.?be(.com)?\/(watch\?v=)?.{11}/)) {
             link = args[0];
             var videoid = link.match(/[a-zA-Z0-9_-]{11}/)[0];
-            const r = await search(videoid); // search for video
-            var video = r.videos[0];
+            const r = await search({ videoId: videoid }); // search for video
+            var video = r;
         }
         // try to find a video by searching
         else {
@@ -48,7 +48,7 @@ module.exports.run = async (message, args) => {
             let embed = {
                 color: message.member.displayColor,
                 author: {
-                    name: `Added to queue at position ${server.queue.length}:`
+                    name: `Added to queue at position ${server.queue.length - 1}:`
                 },
                 description: `**[${video.title}](${video.url})**`,
                 thumbnail: {
@@ -71,7 +71,7 @@ function play(connection, message) {
     server.now = server.queuestats[0];
 
     // download the audio of the video
-    server.dispatcher = connection.playStream(ytdl(server.queue[0], { filter: "audio", highWaterMark: 1<<25 }));
+    server.dispatcher = connection.playStream(ytdl(server.queue[0], { filter: "audio", highWaterMark: 1 << 25 }));
 
     var playingSince = new Date();
     server.now.playingSince = playingSince;
