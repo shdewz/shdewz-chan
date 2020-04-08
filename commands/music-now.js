@@ -1,10 +1,6 @@
-const config = require("../config.json");
-const ytdl = require("ytdl-core");
-const search = require("yt-search");
-const opusscript = require("opusscript");
 const moment = require("moment");
 
-module.exports.run = async (message, args) => {
+module.exports.run = async (message) => {
 
     var server = servers[message.guild.id];
     if (!server || !server.dispatcher) return message.reply("not currently playing anything!");
@@ -28,7 +24,7 @@ module.exports.run = async (message, args) => {
             },
             {
                 name: `*Queue length*`,
-                value: `**${server.queue.length} video(s)**`,
+                value: `**${server.queue.length - 1} video(s)**`,
                 inline: true,
             },
         ],
