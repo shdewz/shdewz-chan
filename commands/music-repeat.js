@@ -1,4 +1,4 @@
-module.exports.run = async (message, args) => {
+module.exports.run = async (message) => {
 
     var server = servers[message.guild.id];
     if (!server || !server.dispatcher) return message.reply("not currently playing anything!");
