@@ -1,12 +1,10 @@
-const config = require("../config.json");
-
-module.exports.run = async (message, args) => {
+module.exports.run = async (message) => {
 
     var server = servers[message.guild.id];
     if (!server || !server.dispatcher) return message.reply("not currently playing anything!");
 
     if ((server.queue.length > 0 && server.repeat == true) || (server.queue.length > 1 && server.repeat == false)) {
-        message.reply(`there are still **${server.queue.length}** video(s) in the queue!\nTo confirm stopping, please react with ✅.`).then(sentMsg => {
+        message.reply(`there are still **${server.queue.length - 1}** video(s) in the queue!\nTo confirm stopping, please react with ✅.`).then(sentMsg => {
             sentMsg.react("✅");
 
             const filter = (reaction, user) => {
