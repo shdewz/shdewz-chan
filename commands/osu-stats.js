@@ -5,6 +5,13 @@ module.exports.run = async (message, args, client) => {
     try {
         let username;
         let found;
+
+        var useID = false;
+        if (args.includes("-id")) {
+            args.splice(args.indexOf("-id"), 1);
+            useID = true;
+        }
+
         if (args.length > 0) username = args.join("_");
         else {
             var stat = client.commands.get("loadstats").run(); // load stats
@@ -18,7 +25,7 @@ module.exports.run = async (message, args, client) => {
             if (!found) return message.channel.send(`Looks like you haven't linked your account yet.\nLink it with the command \`${config.prefix}osuset <user>\`.`)
         }
 
-        return osu.getUser(username, message);
+        return osu.getUser(username, message, useID);
     }
     catch (error) {
         return console.log(error);
