@@ -40,13 +40,14 @@ module.exports.run = async (message, args) => {
                     },
                     fields: [
                         {
-                            name: "Cases", value: `**${data.cases.toLocaleString()}**
+                            name: "Cases", value: `**${data.cases.toLocaleString()}** *(+${data.todayCases.toLocaleString()})*
                             ▸ *${((data.cases / 7773486625) * 100).toFixed(4).toLocaleString()}% of everyone*
                             ▸ *1 in every ${Math.round(1 / (data.cases / 7773486625)).toLocaleString()}*`
                         },
                         {
-                            name: "Deaths", value: `**${data.deaths.toLocaleString()}**
-                            ▸ *${((data.deaths / data.cases) * 100).toFixed(2).toLocaleString()}% of cases*`
+                            name: "Deaths", value: `**${data.deaths.toLocaleString()}** *(+${data.todayDeaths.toLocaleString()})*
+                            ▸ *${((data.deaths / data.cases) * 100).toFixed(2).toLocaleString()}% of cases*
+                            ▸ *${((data.deaths / 50000000) * 100).toFixed(2).toLocaleString()}% of the Spanish flu*`
                         },
                         {
                             name: "Recovered", value: `**${data.recovered.toLocaleString()}**
