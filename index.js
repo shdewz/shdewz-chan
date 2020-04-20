@@ -1,8 +1,8 @@
-const Discord = require('discord.js');
+const Discord = require("discord.js");
 const client = new Discord.Client();
-
 client.commands = new Discord.Collection();
 client.aliases = new Discord.Collection();
+
 const fs = require("fs");
 const config = require("./config.json");
 const osu = require("./osu.js");
@@ -12,17 +12,15 @@ global.servers = {};
 client.once("ready", async () => {
     osu.init(config.apikey);
     console.log("\nReady!\n");
-    client.user.setActivity(`nothing`);
+    client.user.setActivity("nothing");
 });
 
 fs.readdir("./commands", (err, files) => {
     if (err) console.log(err);
 
     let jsfile = files.filter(f => f.split(".").pop() === "js");
-    if (jsfile.length <= 0) {
-        console.log("Couldn't find commands.");
-        return;
-    }
+    if (jsfile.length <= 0) return console.log("Couldn't find commands.");
+
     jsfile.forEach((f, i) => {
         let props = require(`./commands/${f}`);
         client.commands.set(props.help.name, props);
@@ -36,11 +34,10 @@ fs.readdir("./commands", (err, files) => {
     })
 });
 
-client.on('message', async message => {
+client.on("message", async message => {
     if (message.channel.type !== "text") return; // ignore non-text-channels
     if (message.author.bot) return; // ignore bot messages
-    if (config.blacklisted_users.includes(message.author.id)) return; // ignore blacklisted users
-
+    
     // ignore non-commands
     let prefix = config.prefix;
     if (!message.content.startsWith(prefix)) return;
@@ -63,11 +60,8 @@ client.on('message', async message => {
 
 })
 
-client.on('guildMemberAdd', async member => {
-    const server = member.guild;
-    var channel;
-    channel = server.channels.find(ch => ch.name === 'ricma');
-    if (!channel) channel = server.channels.find(ch => ch.name === 'general');
+client.on("guildMemberAdd", async member => {
+    const channel = member.guild.channels.find(ch => ch.name === "general");
     if (!channel) return;
     client.commands.get("serverjoin").run(member, channel, server);
 })
