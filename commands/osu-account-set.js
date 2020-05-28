@@ -1,12 +1,12 @@
 const config = require("../config.json");
 const osu = require("../osu.js");
 
-module.exports.run = async (message, args, client) => {
+module.exports.run = async (message, args) => {
 
     if (args.length == 0) message.reply(`Correct usage: \`${config.prefix}osuset <username>\``);
 
     try {
-        return osu.setUser(args.join("_"), message, client);
+        return osu.setUser(args.join("_"), message);
     }
     catch (error) {
         return console.log(error);
