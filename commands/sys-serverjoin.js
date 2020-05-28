@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const Canvas = require('canvas');
 
 module.exports.run = async (member, channel, server) => {
+    if (server.id == "556936947491143682") return;
     try {
         const canvas = Canvas.createCanvas(400, 540);
         const c = canvas.getContext('2d');
