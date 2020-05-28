@@ -1,30 +1,23 @@
 const fs = require("fs");
 
-module.exports.run = async (message, args, client) => {
+module.exports.run = async (message, args) => {
     if (args.length == 0) return;
     else if (isNaN(args[0]) || !args[0].match(/[\+\-]?[0-9]{1,2}/) || args[0].match(/[0-9]{1,2}/)[0] > 13) return;
     else {
         var zone = args[0].match(/[\+\-]?[0-9]{1,2}/)[0];
-        console.log(zone);
-        var stat = client.commands.get("loadstats").run(); // load stats
         var exists = false;
 
-        for (var i = 0; i < stat.users.length; i++) {
-            if (stat.users[i].discord == message.author.id) {
-                stat.users[i].timezone = zone;
+        for (var i = 0; i < statObj.users.length; i++) {
+            if (statObj.users[i].discord == message.author.id) {
+                statObj.users[i].timezone = zone;
                 exists = true;
                 break;
             }
         }
         if (!exists) {
             var obj = { "discord": message.author.id, "timezone": zone };
-            stat.users.push(obj);
+            statObj.users.push(obj);
         }
-
-        fs.writeFile("stats.json", JSON.stringify(stat), function (err) {
-            if (err) return console.log("error", err);
-            return message.reply(`succesfully set your timezone to **${zone}**!`);
-        });
     }
 };
 

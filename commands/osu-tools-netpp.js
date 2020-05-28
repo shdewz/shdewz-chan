@@ -3,9 +3,8 @@ const fetch = require('node-fetch');
 const Discord = require('discord.js');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
-module.exports.run = async (message, args, client) => {
+module.exports.run = async (message, args) => {
     try {
-        var stat = client.commands.get("loadstats").run(); // load stats
         var mode = 0
 
         if (!args || args.length < 1) return message.channel.send(`Correct usage: \`${config.prefix}netpp [<username>] <raw pp> [<taiko/ctb/mania>]\``);
@@ -13,10 +12,9 @@ module.exports.run = async (message, args, client) => {
             var ppraw = args[0];
 
             let found;
-            var stat = client.commands.get("loadstats").run(); // load stats
-            for (var i = 0; i < stat.users.length; i++) {
-                if (stat.users[i].discord == message.author.id) {
-                    uid = stat.users[i].osu_id;
+            for (var i = 0; i < statObj.users.length; i++) {
+                if (statObj.users[i].discord == message.author.id) {
+                    uid = statObj.users[i].osu_id;
                     found = true;
                     break;
                 }

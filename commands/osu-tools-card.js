@@ -4,24 +4,20 @@ const Discord = require('discord.js');
 const Canvas = require('canvas');
 const registerFont = require('canvas');
 
-module.exports.run = async (message, args, client) => {
+module.exports.run = async (message, args) => {
     try {
         var mode = 0
 
         Canvas.registerFont('./fonts/B2-Medium.ttf', { family: 'B2-Medium' });
         Canvas.registerFont('./fonts/B2-Bold.ttf', { family: 'B2-Bold' });
 
-        const canvas = Canvas.createCanvas(600, 200);
-        const c = canvas.getContext('2d');
-
         var uid;
 
         if (args.length < 1) {
             let found;
-            var stat = client.commands.get("loadstats").run(); // load stats
-            for (var i = 0; i < stat.users.length; i++) {
-                if (stat.users[i].discord == message.author.id) {
-                    uid = stat.users[i].osu_id;
+            for (var i = 0; i < statObj.users.length; i++) {
+                if (statObj.users[i].discord == message.author.id) {
+                    uid = statObj.users[i].osu_id;
                     found = true;
                     break;
                 }
@@ -73,77 +69,94 @@ module.exports.run = async (message, args, client) => {
                 c.fillStyle = grd;
                 c.fillRect(0, 0, 600, 200);*/
 
-                var bg = await Canvas.loadImage("https://wallpaperaccess.com/full/1761712.jpg");
-                c.drawImage(bg, 0, 0, 600, 200);
+                let design = args.includes("-d") ? args[args.indexOf("-d") + 1] : 0;
 
-                c.fillStyle = "#FFFFFF";
+                switch (design) {
 
-                c.shadowColor = "#000000";
-                c.shadowBlur = "8";
+                    case 0:
+                        var canvas = Canvas.createCanvas(600, 200);
+                        var c = canvas.getContext('2d');
 
-                var uoffset = 0;
-                if (username.length >= 17) { c.font = "25px B2-Medium"; uoffset = -3; }
-                else if (username.length >= 13) { c.font = "30px B2-Medium"; uoffset = -2; }
-                else if (username.lenght >= 11) { c.font = "35px B2-Medium"; uoffset = -1; }
-                else { c.font = "40px B2-Medium"; }
+                        var bg = await Canvas.loadImage("https://wallpaperaccess.com/full/1761712.jpg");
+                        c.drawImage(bg, 0, 0, 600, 200);
 
-                c.fillText(username, 140, 45 + uoffset);
+                        c.fillStyle = "#FFFFFF";
 
-                c.font = "14px B2-Medium";
-                c.fillStyle = "#000000";
-                c.strokeText(`${modetext} stats`, 140, 65);
-                c.strokeText(`Joined ${formatDate(joindate)} (${timeSince(joindate)})`, 140, 85);
-                c.fillStyle = "#FFFFFF";
-                c.fillText(`${modetext} stats`, 140, 65);
-                c.fillText(`Joined ${formatDate(joindate)} (${timeSince(joindate)})`, 140, 85);
+                        c.shadowColor = "#000000";
+                        c.shadowBlur = "8";
 
-                c.font = "14px B2-Medium";
-                c.fillStyle = "#000000";
-                c.strokeText(`Accuracy:  ${Math.round(accuracy * 100) / 100}%`, 15, 150);
-                c.strokeText(`Playcount:  ${parseInt(playcount).toLocaleString()}`, 15, 170);
-                c.strokeText(`Ranked score:  ${as(score)}`, 15, 190);
-                c.fillStyle = "#FFFFFF";
-                c.fillText(`Accuracy:  ${Math.round(accuracy * 100) / 100}%`, 15, 150);
-                c.fillText(`Playcount:  ${parseInt(playcount).toLocaleString()}`, 15, 170);
-                c.fillText(`Ranked score:  ${as(score)}`, 15, 190);
+                        var uoffset = 0;
+                        if (username.length >= 17) { c.font = "25px B2-Medium"; uoffset = -3; }
+                        else if (username.length >= 13) { c.font = "30px B2-Medium"; uoffset = -2; }
+                        else if (username.lenght >= 11) { c.font = "35px B2-Medium"; uoffset = -1; }
+                        else { c.font = "40px B2-Medium"; }
 
-                var roffset = 0;
-                if (rank.length >= 6) { c.font = "40px B2-Bold"; roffset = -2; }
-                else if (rank.lenght >= 5) { c.font = "45px B2-Bold"; }
-                else { c.font = "50px B2-Bold"; }
+                        c.fillText(username, 140, 45 + uoffset);
 
-                c.textAlign = "right";
-                c.fillText(`#${parseInt(rank).toLocaleString()}`, 590, 50 + roffset);
+                        c.font = "14px B2-Medium";
+                        c.fillStyle = "#000000";
+                        c.strokeText(`${modetext} stats`, 140, 65);
+                        c.strokeText(`Joined ${formatDate(joindate)} (${timeSince(joindate)})`, 140, 85);
+                        c.fillStyle = "#FFFFFF";
+                        c.fillText(`${modetext} stats`, 140, 65);
+                        c.fillText(`Joined ${formatDate(joindate)} (${timeSince(joindate)})`, 140, 85);
 
-                c.font = "30px B2-Bold";
-                c.fillText(`#${parseInt(countryrank).toLocaleString()}`, 532, 86);
+                        c.font = "14px B2-Medium";
+                        c.fillStyle = "#000000";
+                        c.strokeText(`Accuracy:  ${Math.round(accuracy * 100) / 100}%`, 15, 150);
+                        c.strokeText(`Playcount:  ${parseInt(playcount).toLocaleString()}`, 15, 170);
+                        c.strokeText(`Ranked score:  ${as(score)}`, 15, 190);
+                        c.fillStyle = "#FFFFFF";
+                        c.fillText(`Accuracy:  ${Math.round(accuracy * 100) / 100}%`, 15, 150);
+                        c.fillText(`Playcount:  ${parseInt(playcount).toLocaleString()}`, 15, 170);
+                        c.fillText(`Ranked score:  ${as(score)}`, 15, 190);
 
-                c.font = "20px B2-Medium";
-                c.fillStyle = "#000000";
-                c.strokeText(`${Math.round(pp).toLocaleString()} pp`, 590, 116);
-                c.fillStyle = "#FFFFFF";
-                c.fillText(`${Math.round(pp).toLocaleString()} pp`, 590, 116);
+                        var roffset = 0;
+                        if (rank.length >= 6) { c.font = "40px B2-Bold"; roffset = -2; }
+                        else if (rank.lenght >= 5) { c.font = "45px B2-Bold"; }
+                        else { c.font = "50px B2-Bold"; }
 
-                c.fillRect(140, 95, 200, 30);
+                        c.textAlign = "right";
+                        c.fillText(`#${parseInt(rank).toLocaleString()}`, 590, 50 + roffset);
 
-                c.fillStyle = "#2c54b6";
-                c.fillRect(145, 100, 190 * (level % Math.floor(level)), 20);
+                        c.font = "30px B2-Bold";
+                        c.fillText(`#${parseInt(countryrank).toLocaleString()}`, 532, 86);
 
-                c.textAlign = "center";
-                c.shadowBlur = "2";
-                c.fillStyle = "#000000";
-                c.strokeText(`Level ${Math.floor(level)}`, 238, 117);
-                c.fillStyle = "#FFFFFF";
-                c.fillText(`Level ${Math.floor(level)}`, 238, 117);
-                c.shadowBlur = "8";
+                        c.font = "20px B2-Medium";
+                        c.fillStyle = "#000000";
+                        c.strokeText(`${Math.round(pp).toLocaleString()} pp`, 590, 116);
+                        c.fillStyle = "#FFFFFF";
+                        c.fillText(`${Math.round(pp).toLocaleString()} pp`, 590, 116);
 
-                c.textAlign = "left";
+                        c.fillRect(140, 95, 200, 30);
 
-                var pfp = await Canvas.loadImage("https://a.ppy.sh/" + userid);
-                c.drawImage(pfp, 15, 15, 110, 110);
+                        c.fillStyle = "#2c54b6";
+                        c.fillRect(145, 100, 190 * (level % Math.floor(level)), 20);
 
-                var flag = await Canvas.loadImage(`https://osu.ppy.sh/images/flags/${country.toUpperCase()}.png`);
-                c.drawImage(flag, 542, 60, 48, 30);
+                        c.textAlign = "center";
+                        c.shadowBlur = "2";
+                        c.fillStyle = "#000000";
+                        c.strokeText(`Level ${Math.floor(level)}`, 238, 117);
+                        c.fillStyle = "#FFFFFF";
+                        c.fillText(`Level ${Math.floor(level)}`, 238, 117);
+                        c.shadowBlur = "8";
+
+                        c.textAlign = "left";
+
+                        var pfp = await Canvas.loadImage("https://a.ppy.sh/" + userid);
+                        c.drawImage(pfp, 15, 15, 110, 110);
+
+                        var flag = await Canvas.loadImage(`https://osu.ppy.sh/images/flags/${country.toUpperCase()}.png`);
+                        c.drawImage(flag, 542, 60, 48, 30);
+                        break;
+
+                    case 1:
+                        var canvas = Canvas.createCanvas(400, 200);
+                        var c = canvas.getContext('2d');
+
+
+                        break;
+                }
 
                 const attachment = new Discord.Attachment(canvas.toBuffer(), 'statcard.png');
                 message.channel.send(attachment);

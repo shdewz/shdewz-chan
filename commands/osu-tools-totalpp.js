@@ -2,17 +2,15 @@ const config = require("../config.json");
 const fetch = require('node-fetch');
 const Discord = require('discord.js');
 
-module.exports.run = async (message, args, client) => {
+module.exports.run = async (message, args) => {
     try {
-        var stat = client.commands.get("loadstats").run(); // load stats
         var uid;
 
         if (args.length == 0) {
             let found;
-            var stat = client.commands.get("loadstats").run(); // load stats
-            for (var i = 0; i < stat.users.length; i++) {
-                if (stat.users[i].discord == message.author.id) {
-                    uid = stat.users[i].osu_id;
+            for (var i = 0; i < statObj.users.length; i++) {
+                if (statObj.users[i].discord == message.author.id) {
+                    uid = statObj.users[i].osu_id;
                     found = true;
                     break;
                 }

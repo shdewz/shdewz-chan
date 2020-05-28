@@ -4,22 +4,21 @@ const cityTimezones = require('city-timezones');
 const axios = require("axios");
 const config = require("../config.json");
 
-module.exports.run = async (message, args, client) => {
+module.exports.run = async (message, args) => {
     try {
         if (args.length == 0 || args[0].toLowerCase() != "utc") {
 
             let user = "";
             if (args.length > 0) user = args.join("_");
 
-            var stat = client.commands.get("loadstats").run();
             var exists = false;
 
             if (user == "") {
-                for (var i = 0; i < stat.users.length; i++) {
-                    if (stat.users[i].discord == message.author.id) {
-                        if (stat.users[i].osu_id) {
+                for (var i = 0; i < statObj.users.length; i++) {
+                    if (statObj.users[i].discord == message.author.id) {
+                        if (statObj.users[i].osu_id) {
                             exists = true;
-                            return getTime(stat.users[i].osu_id);
+                            return getTime(statObj.users[i].osu_id);
                         }
                         else return message.reply(`you haven't linked your osu! profile yet. Set it with \`${config.prefix}osuset <user>\``);
                     }
@@ -42,12 +41,11 @@ module.exports.run = async (message, args, client) => {
 
                     let userid = response[0].user_id;
                     let found = false;
-                    var stat = client.commands.get("loadstats").run(); // load stats
 
-                    for (var i = 0; i < stat.users.length; i++) {
-                        if (stat.users[i].osu_id == userid) {
-                            if (!stat.users[i].timezone) break;
-                            var timeoffset = stat.users[i].timezone;
+                    for (var i = 0; i < statObj.users.length; i++) {
+                        if (statObj.users[i].osu_id == userid) {
+                            if (!statObj.users[i].timezone) break;
+                            var timeoffset = statObj.users[i].timezone;
                             found = true;
 
                             // do stuff
