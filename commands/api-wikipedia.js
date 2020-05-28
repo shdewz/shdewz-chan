@@ -1,17 +1,15 @@
 const axios = require("axios");
 const moment = require("moment");
 
-const api = axios.create({
-    baseURL: "https://en.wikipedia.org",
-});
+const api = axios.create();
 
-module.exports.run = async (message, args, client) => {
+module.exports.run = async (message, args) => {
     try {
         if (args.length < 1) return message.reply("missing arguments.");
 
         var query;
         query = args.join("_");
-        api.get("/w/api.php", {
+        api.get("https://en.wikipedia.org/w/api.php", {
             params: { action: "opensearch", limit: "5", namespace: "0", format: "json", search: query }
         }).then(response => {
             var data = response.data;
@@ -57,6 +55,7 @@ module.exports.run = async (message, args, client) => {
                         var reaction = collected.first().emoji.name;
                         var position = emotes.indexOf(reaction);
                         getPage(position, results, message);
+                        sentMsg.delete();
                     }
                     else return message.channel.send("**too slow** 😩");
                 });
@@ -71,22 +70,25 @@ module.exports.run = async (message, args, client) => {
 };
 
 function getPage(position, results, message) {
-    api.get(`/api/rest_v1/page/summary/${results[position].replace(" ", "_").replace("/", "")}`).then(response => {
-        var data = response.data;
+    try {
+        api.get(`https://en.wikipedia.org/api/rest_v1/page/summary/${results[position].replace(" ", "_").replace("/", "")}`).then(response => {
+            var data = response.data;
 
-        var time = moment(data.timestamp).format("MMMM Do, YYYY [at] HH:mm")
+            var time = moment(data.timestamp).format("MMMM Do, YYYY [at] HH:mm")
 
-        api.get(data.api_urls.media).then(response => {
-            var mediaData = response.data;
-
-            // find appliccable thumbnail image 
             var thumbnail = "";
-            if (data.originalimage) thumbnail = { url: data.originalimage.source }
-            else {
-                if (mediaData.items.length > 0 && mediaData.items[0].type == "image") {
-                    thumbnail = { url: mediaData.items[0].original.source }
+
+            api.get(data.api_urls.media).then(response => {
+                var mediaData = response.data;
+
+                // find appliccable thumbnail image 
+                if (data.originalimage) thumbnail = { url: data.originalimage.source }
+                else {
+                    if (mediaData.items.length > 0 && mediaData.items[0].type == "image") {
+                        thumbnail = { url: mediaData.items[0].original.source }
+                    }
                 }
-            }
+            }).catch(err => { if (err.response.status != 404) return console.log(err); });
 
             var textString = data.extract;
             if (textString.length > 802) {
@@ -117,7 +119,10 @@ function getPage(position, results, message) {
 
             return message.channel.send({ embed: embed });
         });
-    });
+    }
+    catch (err) {
+        return console.log(err);
+    }
 }
 
 module.exports.help = {
