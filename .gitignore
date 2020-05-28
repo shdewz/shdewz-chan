@@ -6,9 +6,17 @@ sys-p-*.js
 
 # yea
 fun-kyafeet.js
-kya
+img/kya
 fun-menty.js
+awawa.json
+start.bat
 img/ss
+outputs/
+daemon/
+*.bak
+the_brains.json
+.vscode/
+.history/
 
 # Logs
 logs
