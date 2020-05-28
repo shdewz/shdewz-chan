@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-module.exports.run = async (message, args, client) => {
+module.exports.run = async (message, args) => {
     const api = axios.create({
         baseURL: 'https://cat-fact.herokuapp.com',
     });

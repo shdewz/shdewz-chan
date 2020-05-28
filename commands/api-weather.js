@@ -1,7 +1,7 @@
 const config = require("../config.json");
 const fetch = require("node-fetch");
 
-module.exports.run = async (message, args, client) => {
+module.exports.run = async (message, args) => {
     if (args.length == 0) return message.reply(`correct usage: \`${config.prefix}weather [city] [<state>] [<country code>]\``);
     var query = args.join(",");
     const apikey = config.weatherapi;
