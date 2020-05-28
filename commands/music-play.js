@@ -67,64 +67,72 @@ module.exports.run = async (message, args) => {
 };
 
 function play(connection, message) {
-    var server = servers[message.guild.id];
-    server.now = server.queuestats[0];
-
-    // download the audio of the video
-    server.dispatcher = connection.playStream(ytdl(server.queue[0], { filter: "audio", highWaterMark: 1 << 25 }));
-
-    var playingSince = new Date();
-    server.now.playingSince = playingSince;
-    var timeNow = moment.utc(server.now.timeNow).format("HH:mm:ss [UTC]")
-
-    let embed = {
-        color: message.member.displayColor,
-        author: {
-            name: `Started playing:`
-        },
-        description: `**[${server.now.title}](${server.now.url})**`,
-        fields: [
-            {
-                name: `*Length*`,
-                value: `**${server.now.timestamp}**`,
-                inline: true,
+    try {
+        var server = servers[message.guild.id];
+        server.now = server.queuestats[0];
+    
+        // download the audio of the video
+        server.dispatcher = connection.playStream(ytdl(server.queue[0], { filter: "audio", highWaterMark: 1 << 25 }));
+    
+        var playingSince = new Date();
+        server.now.playingSince = playingSince;
+        var timeNow = moment.utc(server.now.timeNow).format("HH:mm:ss [UTC]")
+    
+        let embed = {
+            color: message.member.displayColor,
+            author: {
+                name: `Started playing:`
             },
-            {
-                name: `*Uploaded*`,
-                value: `**${server.now.ago}**`,
-                inline: true,
+            description: `**[${server.now.title}](${server.now.url})**`,
+            fields: [
+                {
+                    name: `*Length*`,
+                    value: `**${server.now.timestamp}**`,
+                    inline: true,
+                },
+                {
+                    name: `*Uploaded*`,
+                    value: `**${server.now.ago}**`,
+                    inline: true,
+                },
+                {
+                    name: `*Views*`,
+                    value: `**${server.now.views.toLocaleString()}**`,
+                    inline: true,
+                }
+            ],
+            thumbnail: {
+                url: server.now.thumbnail,
             },
-            {
-                name: `*Views*`,
-                value: `**${server.now.views.toLocaleString()}**`,
-                inline: true,
+            footer: {
+                text: `Requested by ${server.now.requester} at ${timeNow}`
             }
-        ],
-        thumbnail: {
-            url: server.now.thumbnail,
-        },
-        footer: {
-            text: `Requested by ${server.now.requester} at ${timeNow}`
         }
+    
+        message.channel.send({ embed: embed });
+    
+        // play next after end if in queue
+        server.dispatcher.on("end", () => {
+            if (server.repeat) play(connection, message);
+            else {
+                server.queue.shift();
+                server.now = {};
+                server.queuestats.shift();
+                if (server.queue[0]) play(connection, message);
+                else {
+                    delete server.dispatcher;
+                    server.queue = [];
+                    return connection.disconnect();
+                };
+            }
+        })
     }
 
-    message.channel.send({ embed: embed });
-
-    // play next after end if in queue
-    server.dispatcher.on("end", () => {
-        if (server.repeat) play(connection, message);
-        else {
-            server.queue.shift();
-            server.now = {};
-            server.queuestats.shift();
-            if (server.queue[0]) play(connection, message);
-            else {
-                delete server.dispatcher;
-                server.queue = [];
-                return connection.disconnect();
-            };
-        }
-    })
+    catch (err) {
+        message.channel.send("something happened");
+        return console.log(err);
+    }
+    
 }
 
 module.exports.help = {
