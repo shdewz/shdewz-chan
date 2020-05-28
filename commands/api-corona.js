@@ -1,5 +1,4 @@
 const axios = require("axios");
-const covid = require("novelcovid");
 const moment = require("moment");
 
 const corrections = {
@@ -23,7 +22,7 @@ const queryCorrections = {
 module.exports.run = async (message, args) => {
     try {
         const api = axios.create({
-            baseURL: 'https://corona.lmao.ninja',
+            baseURL: 'https://corona.lmao.ninja/v2',
         });
 
         const apiCountry = axios.create({
@@ -277,7 +276,10 @@ module.exports.run = async (message, args) => {
                                     name: "Recovered", value: `**${data.recovered.toLocaleString()}**
                                     ▸ *${((data.recovered / data.cases) * 100).toFixed(2).toLocaleString()}% of cases*`
                                 }
-                            ]
+                            ],
+                            footer: {
+                                text: `Updated ${moment.utc(data.updated).fromNow()}`
+                            }
                         }
                         return message.channel.send({ embed: embed });
                     }).catch(err => {
@@ -320,7 +322,10 @@ module.exports.run = async (message, args) => {
                                     name: "Recovered", value: `**${data.recovered.toLocaleString()}**
                                     ▸ *${((data.recovered / data.cases) * 100).toFixed(2)}% of cases*`
                                 }
-                            ]
+                            ],
+                            footer: {
+                                text: `Updated ${moment.utc(data.updated).fromNow()}`
+                            }
                         }
                         return message.channel.send({ embed: embed });
                     }).catch(err => {
