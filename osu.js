@@ -6,15 +6,13 @@ const readline = require("readline");
 const request = require('request');
 const osu = require("ojsama");
 
-let api = "";
-let apikey = "";
-let timezone = 2;
+let api, apikey;
 
 const rankemojis = ["<:rankingF:691413465830522912>", "<:rankingD:691413465834717237>", "<:rankingC:691413466036043777>", "<:rankingB:691413466040238170>", "<:rankingA:691413466019397693>", "<:rankingS:691413466048626709>", "<:rankingSH:691413466061209720>", "<:rankingX:691413467634335895>", "<:rankingXH:691413465813745756>"];
 const ranknames = ["F", "D", "C", "B", "A", "S", "SH", "X", "XH"];
 
 const mods_enum = {
-    'No Mods': 0,
+    'NM': 0,
     'NF': 1,
     'EZ': 2,
     'TD': 4,
@@ -44,7 +42,7 @@ const mods_enum = {
     '3K': 134217728,
     '2K': 268435456,
     'V2': 536870912,
-    'MI': 1073741824
+    'MR': 1073741824
 };
 
 module.exports = {
@@ -57,68 +55,42 @@ module.exports = {
         }
     },
 
-    getUser: async function (user, message) {
-        api.get('/get_user', { params: { k: apikey, u: user } }).then(async response => {
-            response = response.data;
+    getUser: async function (user) {
+        return new Promise(async resolve => {
+            api.get('/get_user', { params: { k: apikey, u: user } }).then(async response => {
+                response = response.data;
 
-            if (response.length == 0) {
-                return message.channel.send(`User *${user}* not found.`);
-            }
+                if (response.length == 0) {
+                    resolve({ error: `User **${user}** not found.` });
+                    return;
+                }
+                let data = response[0];
 
-            let data = response[0];
-
-            // assign stat variables
-            let username = data.username;
-            let id = data.user_id;
-            let url = `https://osu.ppy.sh/users/${id}`;
-            let avatar = `https://a.ppy.sh/${id}`;
-
-            let acc = `${Number(data.accuracy).toFixed(2)}`;
-            let playcount = Number(data.playcount);
-            let playtime = Number((data.total_seconds_played) / 60 / 60).toFixed(); // convert to hours
-            let score = Number(data.ranked_score);
-            let pp = Number(data.pp_raw).toFixed(2);
-            let rank = Number(data.pp_rank);
-            let country = data.country;
-            let countryrank = Number(data.pp_country_rank);
-            let level = Number(data.level).toFixed(3);
-            let progress = Number((level - Math.floor(level)) * 100).toFixed(2);
-
-            let joindate = moment(new Date(data.join_date));
-            let timediff = moment.duration(moment(Date.now()).diff(joindate));
-            let sinceJoin = `${timediff.years()} years, ${timediff.months()} months and ${timediff.days()} days ago`;
-
-            let embed = {
-                color: message.member.displayColor,
-                author: {
-                    name: `osu! stats for ${username}`,
-                    icon_url: `https://osu.ppy.sh/images/flags/${country}.png`,
-                    url: url
-                },
-                thumbnail: {
-                    url: avatar,
-                },
-                description: `**Rank** — *#${rank.toLocaleString()} (#${countryrank.toLocaleString()} ${country})*
-                **PP** — *${pp.toLocaleString()}pp*
-                **Accuracy** — *${acc}%*
-                **Playcount** — *${playcount.toLocaleString()}*
-                **Ranked Score** — *${abbreviateNumber(score)}*
-                **Playtime** — *${playtime} hours*
-                **Level** — *${Math.floor(level)} (${progress}%)*`
-            }
-
-            return message.channel.send({ embed: embed });
-        }).catch(err => {
-            if (err.status == 404)
-                message.channel.send("User not found.");
-            else
-                message.channel.send("Something went wrong!");
-            console.log(err);
-            return;
+                return resolve({
+                    username: data.username,
+                    id: data.user_id,
+                    url: `https://osu.ppy.sh/users/${data.user_id}`,
+                    avatar: `https://a.ppy.sh/${data.user_id}`,
+                    acc: Number(data.accuracy),
+                    playcount: Number(data.playcount),
+                    playtime: Number((data.total_seconds_played) / 60 / 60), // convert to hours
+                    score: Number(data.ranked_score),
+                    pp: Number(data.pp_raw),
+                    rank: Number(data.pp_rank),
+                    country: data.country,
+                    countryrank: Number(data.pp_country_rank),
+                    level: Number(data.level),
+                    progress: Number((data.level - Math.floor(data.level)) * 100),
+                });
+            }).catch(err => {
+                console.log(err);
+                resolve({ error: err.name + ": " + err.message });
+                return;
+            });
         });
     },
 
-    setUser: async function (user, message, client) {
+    setUser: async function (user, message) { // add promise later
         api.get('/get_user', { params: { k: apikey, u: user } }).then(async response => {
             response = response.data;
 
@@ -141,12 +113,11 @@ module.exports = {
                 }
             }
 
-            var stat = client.commands.get("loadstats").run(); // load stats
             var exists = false;
 
-            for (var i = 0; i < stat.users.length; i++) {
-                if (stat.users[i].discord == message.author.id) {
-                    stat.users[i].osu_id = id;
+            for (var i = 0; i < statObj.users.length; i++) {
+                if (statObj.users[i].discord == message.author.id) {
+                    statObj.users[i].osu_id = id;
                     exists = true;
                     break;
                 }
@@ -154,13 +125,10 @@ module.exports = {
 
             if (!exists) {
                 var obj = { "discord": message.author.id, "osu_id": id };
-                stat.users.push(obj);
+                statObj.users.push(obj);
             }
 
-            fs.writeFile("stats.json", JSON.stringify(stat), function (err) {
-                if (err) return console.log("error", err);
-                return message.channel.send({ embed: embed });
-            });
+            return message.channel.send({ embed: embed });
         }).catch(err => {
             if (err.status == 404)
                 message.channel.send(`User *${user}* not found.`);
@@ -171,45 +139,39 @@ module.exports = {
         });
     },
 
-    recent: async function (user, message, position, client) {
-        api.get('/get_user', { params: { k: apikey, u: user } }).then(async response => {
-            response = response.data;
-
-            if (response.length == 0) {
-                return message.channel.send(`User *${user}* not found.`);
+    recent: async function (user, message, position) {
+        return new Promise(async resolve => {
+            let userobj = await this.getUser(user, false);
+            if (userobj.error) {
+                resolve({ error: userobj.error });
+                return;
             }
 
-            let data = response[0];
-
-            let username = data.username;
-            let id = data.user_id;
-            let url = `https://osu.ppy.sh/users/${id}`;
-            let avatar = `https://a.ppy.sh/${id}`;
-
-            api.get('/get_user_recent', { params: { k: apikey, u: user } }).then(async response => {
+            api.get('/get_user_recent', { params: { k: apikey, u: userobj.id } }).then(async response => {
                 response = response.data;
 
                 if (response.length == 0) {
-                    return message.channel.send(`No recent plays found for ${username}.`);
+                    resolve({ error: `No recent plays found for ${userobj.username}.` });
+                    return;
                 }
 
                 if (!position) position = 0;
                 let eventdata = response[position];
 
                 let beatmap = eventdata.beatmap_id;
-                let score = eventdata.score;
 
-                let c50 = eventdata.count50;
-                let c100 = eventdata.count100;
-                let c300 = eventdata.count300;
-                let cmiss = eventdata.countmiss;
-                let combo = eventdata.maxcombo;
-                let acc = (getAcc(c300, c100, c50, cmiss) * 100).toFixed(2);
+                let c50 = parseInt(eventdata.count50);
+                let c100 = parseInt(eventdata.count100);
+                let c300 = parseInt(eventdata.count300);
+                let cmiss = parseInt(eventdata.countmiss);
+                let combo = parseInt(eventdata.maxcombo);
+                let score = parseInt(eventdata.score);
+                let acc = getAcc(c300, c100, c50, cmiss) * 100;
 
                 let mods = eventdata.enabled_mods;
                 let modsNames = getMods(mods).join("");
                 let modsText = "";
-                if (mods != 0) modsText = ` **+${modsNames}**`;
+                if (mods != 0) modsText = `${modsNames}`;
 
                 let modsParam = '0';
                 if (modsNames.includes("HR")) modsParam = '16';
@@ -218,65 +180,161 @@ module.exports = {
                 else if (modsNames.includes("EZ")) modsParam = '2';
 
                 let grade = rankemojis[ranknames.indexOf(eventdata.rank)];
-                let sincePlay = moment(new Date(eventdata.date)).add(timezone, 'h').fromNow();
+                let finished = eventdata.rank == "F" ? false : true;
+                let sincePlay = moment.utc(eventdata.date).fromNow();
 
-                api.get('/get_beatmaps', { params: { k: apikey, b: beatmap, mods: modsParam } }).then(async response => {
-                    response = response.data;
+                let map = await getMapData(beatmap, modsParam);
 
-                    if (!response || response.length == 0) {
-                        return message.channel.send(`Beatmap *${beatmap}* not found.`);
-                    }
-                    let mapdata = response[0];
+                let hits = c300 + c100 + c50 + cmiss;
+                let completion = hits / map.objects;
 
-                    let diff = mapdata.version;
-                    let title = mapdata.title;
-                    let artist = mapdata.artist;
-                    let mapper = mapdata.creator;
-                    let maxcombo = mapdata.max_combo;
-                    let bpm = mapdata.bpm;
-                    let stars = Number(mapdata.difficultyrating).toFixed(2);
-                    let beatmapset = mapdata.beatmapset_id;
-                    let banner = `https://assets.ppy.sh/beatmaps/${beatmapset}/covers/list@2x.jpg`
+                let pp = await getPP(beatmap, mods, combo, acc, cmiss);
+                let ppText = `**${pp.toFixed(2)}pp**`;
 
-                    let pp = await getPP(beatmap, mods, combo, acc, cmiss);
-                    let ppText = `**${pp.toFixed(2)}pp**`;
+                if (combo != map.maxcombo) {
+                    let fcpp = await getFCPP(beatmap, mods, acc);
+                    ppText = `**${pp.toFixed(2)}pp** / ${fcpp.toFixed(2)}pp`;
+                }
 
-                    if (combo != maxcombo) {
-                        let fcpp = await getFCPP(beatmap, mods, acc);
-                        ppText = `**${pp.toFixed(2)}pp** / ${fcpp.toFixed(2)}pp`;
-                    }
+                addLastMap(message, beatmap);
 
-                    addLastMap(message, beatmap, client);
-
-                    let embed = {
-                        color: message.member.displayColor,
-                        author: {
-                            name: `Most recent osu! play for ${username}:`,
-                            icon_url: `${avatar}?${+new Date()}`,
-                            url: url
-                        },
-                        thumbnail: {
-                            url: banner,
-                        },
-                        description: `**[${artist} - ${title}](https://osu.ppy.sh/b/${beatmap})**
-                        [${diff}]${modsText} (${stars}★) — ${acc}%
-                        ${grade} — **x${combo.toLocaleString()}/${maxcombo.toLocaleString()}** — [${c300}/${c100}/${c50}/${cmiss}]
-                        ${ppText}`,
-                        footer: {
-                            text: `Play set ${sincePlay}`
-                        }
-                    }
-                    return message.channel.send({ embed: embed });
-                });
+                return resolve({
+                    username: userobj.username,
+                    avatar: userobj.avatar,
+                    url: userobj.url,
+                    banner: map.banner,
+                    artist: map.artist,
+                    title: map.title,
+                    mapid: beatmap,
+                    difficulty: map.diff,
+                    mods: modsText,
+                    stars: map.stars,
+                    score: score,
+                    accuracy: acc,
+                    grade: grade,
+                    combo: combo,
+                    maxcombo: map.maxcombo,
+                    c300: c300,
+                    c100: c100,
+                    c50: c50,
+                    cmiss: cmiss,
+                    pp: ppText,
+                    ago: sincePlay,
+                    finished: finished,
+                    completion: completion
+                })
             });
-
         }).catch(err => {
-            if (err.status == 404)
-                message.channel.send(`User *${user}* not found.`);
-            else
-                message.channel.send("Something went wrong!");
-            console.log(err);
-            return;
+            if (err.status == 404) {
+                resolve({ error: `User **${user}** not found.` });
+                return;
+            }
+            else {
+                console.log(err);
+                resolve({ error: err.name + ": " + err.message });
+                return;
+            }
+        });
+    },
+
+    scores: async function (user, mapID, message) {
+        return new Promise(async resolve => {
+
+            let userobj = await this.getUser(user);
+            if (userobj.error) {
+                resolve({ error: userobj.error });
+                return;
+            }
+
+            api.get('/get_scores', { params: { k: apikey, u: userobj.id, b: mapID } }).then(async response => {
+                response = response.data;
+
+                let mapstats = await getMapData(mapID, 0);
+
+                if (response.length == 0) {
+                    resolve({ error: `No scores found for **${userobj.username}** on **${mapstats.title} [${mapstats.diff}]**.` });
+                    return;
+                }
+
+                let scores = [];
+                let mainobj = {};
+
+                for (var i = 0; i < response.length; i++) {
+                    let score = response[i];
+
+                    let c50 = parseInt(score.count50);
+                    let c100 = parseInt(score.count100);
+                    let c300 = parseInt(score.count300);
+                    let cmiss = parseInt(score.countmiss);
+                    let combo = parseInt(score.maxcombo);
+                    let acc = getAcc(c300, c100, c50, cmiss) * 100;
+
+                    let mods = score.enabled_mods;
+                    let modsNames = getMods(mods).join("");
+                    let modsText = "";
+                    if (mods != 0) modsText = `${modsNames}`;
+
+                    let modsParam = '0';
+                    if (modsNames.includes("HR")) modsParam = '16';
+                    else if (modsNames.includes("DT") || modsText.includes("NC")) modsParam = '64';
+                    else if (modsNames.includes("HT")) modsParam = '256';
+                    else if (modsNames.includes("EZ")) modsParam = '2';
+
+                    let grade = rankemojis[ranknames.indexOf(score.rank)];
+                    let sincePlay = moment.utc(score.date).fromNow();
+
+                    let map = await getMapData(mapID, modsParam);
+                    let fcpp = 0;
+
+                    if (combo != map.maxcombo) {
+                        fcpp = await getFCPP(mapID, mods, acc);
+                    }
+
+                    mainobj = {
+                        username: userobj.username,
+                        avatar: userobj.avatar,
+                        url: userobj.url,
+                        banner: map.banner,
+                        artist: map.artist,
+                        title: map.title,
+                        mapid: mapID,
+                        difficulty: map.diff,
+                        maxcombo: map.maxcombo
+                    }
+
+                    let obj = {
+                        mods: modsText,
+                        stars: Number(map.stars),
+                        accuracy: acc,
+                        score: Number(score.score),
+                        grade: grade,
+                        combo: combo,
+                        c300: c300,
+                        c100: c100,
+                        c50: c50,
+                        cmiss: cmiss,
+                        pp: Number(score.pp),
+                        fcpp: Number(fcpp),
+                        ago: sincePlay
+                    }
+
+                    scores.push(obj);
+                }
+
+                addLastMap(message, mapID);
+
+                resolve({ stats: mainobj, scores: scores });
+            }).catch(err => {
+                if (err.status == 404) {
+                    resolve({ error: `No scores found for ${userobj.username}.` });
+                    return;
+                }
+                else {
+                    console.log(err);
+                    resolve({ error: err.name + ": " + err.message });
+                    return;
+                }
+            });
         });
     }
 }
@@ -337,32 +395,27 @@ function getFCPP(mapID, mods, acc) {
     });
 }
 
-function addLastMap(message, mapID, client) {
-    var stat = client.commands.get("loadstats").run(); // load stats
-
+function addLastMap(message, mapID) {
     var exists = false;
-    for (var i = 0; i < stat.serverstats.length; i++) {
-        if (stat.serverstats[i].id == message.channel.guild.id) {
-            for (var j = 0; j < stat.serverstats[i].channels.length; j++) {
-                if (stat.serverstats[i].channels[j].id == message.channel.id) {
+    for (var i = 0; i < statObj.serverstats.length; i++) {
+        if (statObj.serverstats[i].id == message.channel.guild.id) {
+            for (var j = 0; j < statObj.serverstats[i].channels.length; j++) {
+                if (statObj.serverstats[i].channels[j].id == message.channel.id) {
                     exists = true;
-                    stat.serverstats[i].channels[j].content.lastBeatmap = mapID;
+                    statObj.serverstats[i].channels[j].content.lastBeatmap = mapID;
                 }
             }
             if (!exists) {
                 var obj = { "id": message.channel.id, "content": { "lastBeatmap": mapID } };
-                stat.serverstats[i].channels.push(obj);
+                statObj.serverstats[i].channels.push(obj);
                 exists = true;
             }
         }
     }
     if (!exists) {
         var obj = { "id": message.channel.guild.id, "channels": [{ "id": message.channel.id, "content": { "lastBeatmap": mapID } }] };
-        stat.serverstats.push(obj);
+        statObj.serverstats.push(obj);
     }
-    fs.writeFile("stats.json", JSON.stringify(stat), function (err) {
-        if (err) return console.log("error", err);
-    });
     return;
 }
 
@@ -401,4 +454,43 @@ function cleanMods(mods) {
 
 function getAcc(c300, c100, c50, cmiss) {
     return (c300 * 300 + c100 * 100 + c50 * 50) / (c300 * 300 + c100 * 300 + c50 * 300 + cmiss * 300);
+}
+
+async function getMapData(mapid, mods) {
+    return new Promise(resolve => {
+        api.get('/get_beatmaps', { params: { k: apikey, b: mapid, mods: mods } }).then(async response => {
+            response = response.data;
+
+            if (!response || response.length == 0) {
+                return console.log(`Beatmap *${beatmap}* not found.`);
+            }
+            let mapdata = response[0];
+
+            let diff = mapdata.version;
+            let title = mapdata.title;
+            let artist = mapdata.artist;
+            let mapper = mapdata.creator;
+            let maxcombo = parseInt(mapdata.max_combo);
+            let bpm = parseInt(mapdata.bpm);
+            let stars = Number(mapdata.difficultyrating).toFixed(2);
+            let beatmapset = mapdata.beatmapset_id;
+            let banner = `https://assets.ppy.sh/beatmaps/${beatmapset}/covers/list@2x.jpg`;
+            let objects = parseInt(mapdata.count_normal) + parseInt(mapdata.count_slider) + parseInt(mapdata.count_spinner);
+
+            let map = {
+                diff: diff,
+                title: title,
+                artist: artist,
+                mapper: mapper,
+                maxcombo: maxcombo,
+                bpm: bpm,
+                stars: stars,
+                mapset: beatmapset,
+                banner: banner,
+                objects: objects
+            }
+
+            resolve(map);
+        });
+    });
 }
