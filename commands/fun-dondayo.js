@@ -1,8 +1,12 @@
-const contentarray = require("../awawa.json");
+let contentarray = require("../awawa.json");
 const fs = require("fs");
 
 module.exports.run = async (message, args) => {
-    if (args.length == 0) return;
+    if (args.length == 0) {
+        let list = [];
+        for (var obj of contentarray) list.push(obj.name);
+        return message.channel.send(`Available copypastas:\n\`${list.sort().join("`, `")}\``);
+    }
 
     if (args[0] == "-add") {
         if (args.length < 3) return message.reply("too few arguments");
