@@ -87,3 +87,10 @@ process.on('SIGINT', () => {
     console.log(`\n[${new Date().toLocaleTimeString()}] Stats saved succesfully, exiting.`);
     process.exit();
 });
+
+// autosave every 10 minutes
+setInterval(() => {
+    var stats = statObj;
+    if (stats != {} && ready) fs.writeFileSync("stats.json", JSON.stringify(stats), err => { if (err) return console.log(err); });
+    console.log(`\n[${new Date().toLocaleTimeString()}] Stats autosaved succesfully.`);
+}, 10 * 60 * 1000);
