@@ -102,7 +102,8 @@ module.exports.run = async (message, args) => {
         "old_woman",
         "goblin",
         "ronald_mcdonald",
-        "anal_hook"
+        "anal_hook",
+        "trap"
     ];
 
     if (searchfilters.some(filter => args.includes(filter)))
