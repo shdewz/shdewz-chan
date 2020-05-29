@@ -237,24 +237,18 @@ module.exports = {
         });
     },
 
-    scores: async function (user, mapID, message) {
+    scores: async function (userID, mapID, message) {
         return new Promise(async resolve => {
 
-            let userobj = await this.getUser(user);
-            if (userobj.error) {
-                resolve({ error: userobj.error });
-                return;
-            }
+            let user = await this.getUser(userID);
+            if (user.error) return resolve({ error: user.error });
 
-            api.get('/get_scores', { params: { k: apikey, u: userobj.id, b: mapID } }).then(async response => {
+            api.get('/get_scores', { params: { k: apikey, u: user.id, b: mapID } }).then(async response => {
                 response = response.data;
 
                 let mapstats = await getMapData(mapID, 0);
 
-                if (response.length == 0) {
-                    resolve({ error: `No scores found for **${userobj.username}** on **${mapstats.title} [${mapstats.diff}]**.` });
-                    return;
-                }
+                if (response.length == 0) return resolve({ error: `No scores found for **${user.username}** on **${mapstats.title} [${mapstats.diff}]**.` });
 
                 let scores = [];
                 let mainobj = {};
@@ -271,29 +265,16 @@ module.exports = {
 
                     let mods = score.enabled_mods;
                     let modsNames = getMods(mods).join("");
-                    let modsText = "";
-                    if (mods != 0) modsText = `${modsNames}`;
-
-                    let modsParam = '0';
-                    if (modsNames.includes("HR")) modsParam = '16';
-                    else if (modsNames.includes("DT") || modsText.includes("NC")) modsParam = '64';
-                    else if (modsNames.includes("HT")) modsParam = '256';
-                    else if (modsNames.includes("EZ")) modsParam = '2';
-
-                    let grade = rankemojis[ranknames.indexOf(score.rank)];
-                    let sincePlay = moment.utc(score.date).fromNow();
+                    let modsText = mods != 0 ? modsNames : "";
+                    let modsParam = getModsParam(modsNames);
 
                     let map = await getMapData(mapID, modsParam);
-                    let fcpp = 0;
-
-                    if (combo != map.maxcombo) {
-                        fcpp = await getFCPP(mapID, mods, acc);
-                    }
+                    let fcpp = combo != map.maxcombo ? await getFCPP(mapID, mods, acc) : 0;
 
                     mainobj = {
-                        username: userobj.username,
-                        avatar: userobj.avatar,
-                        url: userobj.url,
+                        username: user.username,
+                        avatar: user.avatar,
+                        url: user.url,
                         banner: map.banner,
                         artist: map.artist,
                         title: map.title,
@@ -307,7 +288,7 @@ module.exports = {
                         stars: Number(map.stars),
                         accuracy: acc,
                         score: Number(score.score),
-                        grade: grade,
+                        grade: rankemojis[ranknames.indexOf(score.rank)],
                         combo: combo,
                         c300: c300,
                         c100: c100,
@@ -315,13 +296,13 @@ module.exports = {
                         cmiss: cmiss,
                         pp: Number(score.pp),
                         fcpp: Number(fcpp),
-                        ago: sincePlay
+                        date: moment.utc(score.date).valueOf()
                     }
 
                     scores.push(obj);
                 }
 
-                addLastMap(message, mapID);
+                if (message) addLastMap(message, mapID);
 
                 resolve({ stats: mainobj, scores: scores });
             }).catch(err => {
@@ -336,7 +317,110 @@ module.exports = {
                 }
             });
         });
+    },
+
+    getTop: async function (userID, limit, length, sortby, reverse) {
+        return new Promise(async resolve => {
+
+            let user = await this.getUser(userID);
+            if (user.error) return resolve({ error: user.error });
+
+            api.get('/get_user_best', { params: { k: apikey, u: user.id, limit: limit } }).then(async response => {
+                response = response.data;
+
+                if (response.length == 0) return resolve({ error: `No plays found for **${user.username}**.` });
+
+                let plays = [];
+                let userobj = {};
+
+                if (typeof sortby == undefined) sortby = "pp";
+
+                for (var i = 0; i < response.length; i++) {
+                    response[i].date = moment.utc(response[i].date).valueOf()
+                    response[i].acc = getAcc(response[i].count300, response[i].count100, response[i].count50, response[i].countmiss) * 100;
+                }
+
+                response.sort(GetSortOrder(sortby));
+                if (!reverse) response.reverse();
+
+                for (var i = 0; i < length; i++) {
+                    let score = response[i];
+
+                    let c50 = parseInt(score.count50);
+                    let c100 = parseInt(score.count100);
+                    let c300 = parseInt(score.count300);
+                    let cmiss = parseInt(score.countmiss);
+                    let combo = parseInt(score.maxcombo);
+                    let acc = getAcc(c300, c100, c50, cmiss) * 100;
+
+                    let mods = score.enabled_mods;
+                    let modsNames = getMods(mods).join("");
+                    let modsText = mods != 0 ? modsNames : "";
+                    let modsParam = getModsParam(modsNames);
+
+                    let map = await getMapData(score.beatmap_id, modsParam);
+                    let fcpp = combo != map.maxcombo ? await getFCPP(score.beatmap_id, mods, acc) : 0;
+
+                    userobj = {
+                        username: user.username,
+                        id: user.id,
+                        avatar: user.avatar,
+                        url: user.url,
+                        flag: `https://osu.ppy.sh/images/flags/${user.country}.png`
+                    }
+
+                    let obj = {
+                        artist: map.artist,
+                        title: map.title,
+                        difficulty: map.diff,
+                        mapid: score.beatmap_id,
+                        mods: modsText,
+                        stars: Number(map.stars),
+                        acc: acc,
+                        score: Number(score.score),
+                        grade: rankemojis[ranknames.indexOf(score.rank)],
+                        combo: combo,
+                        maxcombo: map.maxcombo,
+                        c300: c300,
+                        c100: c100,
+                        c50: c50,
+                        cmiss: cmiss,
+                        pp: Number(score.pp),
+                        fcpp: Number(fcpp),
+                        date: moment.utc(score.date).valueOf()
+                    }
+
+                    plays.push(obj);
+                }
+
+                resolve({ user: userobj, plays: plays });
+            }).catch(err => {
+                if (err.status == 404) return resolve({ error: `No plays found for ${user.username}.` });
+                else {
+                    console.log(err);
+                    return resolve({ error: err.name + ": " + err.message });
+                }
+            });
+        });
     }
+}
+
+function GetSortOrder(prop) {
+    return function (a, b) {
+        if (Number(a[prop]) > Number(b[prop])) return 1;
+        else if (Number(a[prop]) < Number(b[prop])) return -1;
+        return 0;
+    }
+}
+
+function getModsParam(mods) {
+    mods = mods.toUpperCase();
+    let modsParam;
+    if (mods.includes("HR")) modsParam = 16;
+    else if (mods.includes("DT") || mods.includes("NC")) modsParam = 64;
+    else if (mods.includes("HT")) modsParam = 256;
+    else if (mods.includes("EZ")) modsParam = 2;
+    return modsParam;
 }
 
 async function getPP(mapID, mods, combo, acc, cmiss) {
