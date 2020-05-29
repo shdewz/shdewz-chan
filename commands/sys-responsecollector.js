@@ -3,7 +3,7 @@ const fs = require("fs");
 const Fuse = require("fuse.js");
 const responses = require("../the_brains.json").responses;
 
-const fuse = new Fuse(responses, { includeScore: true, threshold: 0.3, keys: ["message"] });
+const fuse = new Fuse(responses, { includeScore: true, location: 0, distance: 6, threshold: 0.4,  minMatchCharLength: 5, keys: ["message"] });
 
 module.exports.run = async (message, args) => {
     this.respond(args.join(" ").replace("\\", "").replace("\"", "'").toLowerCase(), message.channel);
@@ -16,7 +16,7 @@ module.exports.respond = async (query, channel) => {
 
     if (results.length == 0) return;
 
-    if (results[0].score > 0.4) return;
+    if (results[0].score > 0.2) return;
 
     console.log(`'${query}' : '${results[0].item.message}' (${results[0].score.toFixed(2)}) -> '${results[0].item.response}'`);
     var item = results[0].item.response;
