@@ -193,10 +193,8 @@ module.exports = {
 
                 if (combo != map.maxcombo) {
                     let fcpp = await getFCPP(beatmap, mods, acc);
-                    ppText = `**${pp.toFixed(2)}pp** / ${fcpp.toFixed(2)}pp`;
+                    ppText = `**${pp.toFixed(2)}pp**/${fcpp.toFixed(2)}pp`;
                 }
-
-                addLastMap(message, beatmap);
 
                 return resolve({
                     username: userobj.username,
@@ -302,8 +300,6 @@ module.exports = {
                     scores.push(obj);
                 }
 
-                if (message) addLastMap(message, mapID);
-
                 resolve({ stats: mainobj, scores: scores });
             }).catch(err => {
                 if (err.status == 404) {
@@ -336,7 +332,8 @@ module.exports = {
                 if (typeof sortby == undefined) sortby = "pp";
 
                 for (var i = 0; i < response.length; i++) {
-                    response[i].date = moment.utc(response[i].date).valueOf()
+                    response[i].position = i + 1;
+                    response[i].date = moment.utc(response[i].date).valueOf();
                     response[i].acc = getAcc(response[i].count300, response[i].count100, response[i].count50, response[i].countmiss) * 100;
                 }
 
@@ -372,6 +369,7 @@ module.exports = {
                     let obj = {
                         artist: map.artist,
                         title: map.title,
+                        banner: map.banner,
                         difficulty: map.diff,
                         mapid: score.beatmap_id,
                         mods: modsText,
@@ -387,7 +385,9 @@ module.exports = {
                         cmiss: cmiss,
                         pp: Number(score.pp),
                         fcpp: Number(fcpp),
-                        date: moment.utc(score.date).valueOf()
+                        date: moment.utc(score.date).valueOf(),
+                        position: score.position,
+                        submitdate: map.submitted
                     }
 
                     plays.push(obj);
@@ -402,6 +402,30 @@ module.exports = {
                 }
             });
         });
+    },
+
+    addLastMap: function (message, mapID) {
+        var exists = false;
+        for (var i = 0; i < statObj.serverstats.length; i++) {
+            if (statObj.serverstats[i].id == message.channel.guild.id) {
+                for (var j = 0; j < statObj.serverstats[i].channels.length; j++) {
+                    if (statObj.serverstats[i].channels[j].id == message.channel.id) {
+                        statObj.serverstats[i].channels[j].content.lastBeatmap = mapID;
+                        exists = true;
+                    }
+                }
+                if (!exists) {
+                    var obj = { "id": message.channel.id, "content": { "lastBeatmap": mapID } };
+                    statObj.serverstats[i].channels.push(obj);
+                    exists = true;
+                }
+            }
+        }
+        if (!exists) {
+            var obj = { "id": message.channel.guild.id, "channels": [{ "id": message.channel.id, "content": { "lastBeatmap": mapID } }] };
+            statObj.serverstats.push(obj);
+        }
+        return;
     }
 }
 
@@ -415,11 +439,11 @@ function GetSortOrder(prop) {
 
 function getModsParam(mods) {
     mods = mods.toUpperCase();
-    let modsParam;
-    if (mods.includes("HR")) modsParam = 16;
-    else if (mods.includes("DT") || mods.includes("NC")) modsParam = 64;
-    else if (mods.includes("HT")) modsParam = 256;
-    else if (mods.includes("EZ")) modsParam = 2;
+    let modsParam = 0;
+    if (mods.includes("HR")) modsParam += 16;
+    if (mods.includes("DT") || mods.includes("NC")) modsParam += 64;
+    if (mods.includes("HT")) modsParam += 256;
+    if (mods.includes("EZ")) modsParam += 2;
     return modsParam;
 }
 
@@ -479,45 +503,6 @@ function getFCPP(mapID, mods, acc) {
     });
 }
 
-function addLastMap(message, mapID) {
-    var exists = false;
-    for (var i = 0; i < statObj.serverstats.length; i++) {
-        if (statObj.serverstats[i].id == message.channel.guild.id) {
-            for (var j = 0; j < statObj.serverstats[i].channels.length; j++) {
-                if (statObj.serverstats[i].channels[j].id == message.channel.id) {
-                    exists = true;
-                    statObj.serverstats[i].channels[j].content.lastBeatmap = mapID;
-                }
-            }
-            if (!exists) {
-                var obj = { "id": message.channel.id, "content": { "lastBeatmap": mapID } };
-                statObj.serverstats[i].channels.push(obj);
-                exists = true;
-            }
-        }
-    }
-    if (!exists) {
-        var obj = { "id": message.channel.guild.id, "channels": [{ "id": message.channel.id, "content": { "lastBeatmap": mapID } }] };
-        statObj.serverstats.push(obj);
-    }
-    return;
-}
-
-function abbreviateNumber(value) {
-    let newValue = value;
-    const suffixes = ["", " thousand", " million", " billion", " trillion"];
-    let suffixNum = 0;
-    while (newValue >= 1000) {
-        newValue /= 1000;
-        suffixNum++;
-    }
-
-    newValue = newValue.toPrecision(3);
-
-    newValue += suffixes[suffixNum];
-    return newValue;
-}
-
 function getMods(mods) {
     var result = [];
     for (var mod in mods_enum) {
@@ -550,28 +535,20 @@ async function getMapData(mapid, mods) {
             }
             let mapdata = response[0];
 
-            let diff = mapdata.version;
-            let title = mapdata.title;
-            let artist = mapdata.artist;
-            let mapper = mapdata.creator;
-            let maxcombo = parseInt(mapdata.max_combo);
-            let bpm = parseInt(mapdata.bpm);
-            let stars = Number(mapdata.difficultyrating).toFixed(2);
-            let beatmapset = mapdata.beatmapset_id;
-            let banner = `https://assets.ppy.sh/beatmaps/${beatmapset}/covers/list@2x.jpg`;
-            let objects = parseInt(mapdata.count_normal) + parseInt(mapdata.count_slider) + parseInt(mapdata.count_spinner);
-
             let map = {
-                diff: diff,
-                title: title,
-                artist: artist,
-                mapper: mapper,
-                maxcombo: maxcombo,
-                bpm: bpm,
-                stars: stars,
-                mapset: beatmapset,
-                banner: banner,
-                objects: objects
+                diff: mapdata.version,
+                title: mapdata.title,
+                artist: mapdata.artist,
+                mapper: mapdata.creator,
+                maxcombo: parseInt(mapdata.max_combo),
+                bpm: parseInt(mapdata.bpm),
+                stars: Number(mapdata.difficultyrating),
+                mapset: mapdata.beatmapset_id,
+                banner: `https://assets.ppy.sh/beatmaps/${mapdata.beatmapset_id}/covers/list@2x.jpg`,
+                objects: parseInt(mapdata.count_normal) + parseInt(mapdata.count_slider) + parseInt(mapdata.count_spinner),
+                submitted: moment.utc(mapdata.submit_date).valueOf(),
+                ranked: moment.utc(mapdata.approved_date).valueOf(),
+                updated: moment.utc(mapdata.last_update).valueOf()
             }
 
             resolve(map);
