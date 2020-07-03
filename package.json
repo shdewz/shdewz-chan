@@ -23,14 +23,13 @@
     "canvas": "^2.6.1",
     "city-timezones": "^1.2.0",
     "countries-list": "^2.5.4",
-    "discord.js": "^11.6.3",
-    "express-rate-limit": "^5.1.1",
+    "discord.js": "^12.2.0",
     "fs": "0.0.1-security",
-    "fuse.js": "^5.2.3",
-    "mathjs": "^6.6.1",
+    "fuse.js": "^6.0.2",
+    "mathjs": "^7.0.1",
     "minimist": "^1.2.5",
-    "moment": "^2.24.0",
-    "moment-timezone": "^0.5.28",
+    "moment": "^2.26.0",
+    "moment-timezone": "^0.5.31",
     "node-fetch": "^2.6.0",
     "ojsama": "^1.2.5",
     "opusscript": "0.0.7",
@@ -38,6 +37,6 @@
     "request": "^2.88.2",
     "xmlhttprequest": "^1.8.0",
     "yt-search": "^1.1.2",
-    "ytdl-core": "^1.0.9"
+    "ytdl-core": "^3.1.0"
   }
 }
