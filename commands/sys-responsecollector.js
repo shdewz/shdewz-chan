@@ -1,9 +1,10 @@
 const config = require("../config.json");
 const fs = require("fs");
 const Fuse = require("fuse.js");
+const moment = require("moment");
 const responses = require("../the_brains.json").responses;
 
-const fuse = new Fuse(responses, { includeScore: true, location: 0, distance: 6, threshold: 0.4,  minMatchCharLength: 5, keys: ["message"] });
+const fuse = new Fuse(responses, { includeScore: true, location: 0, distance: 6, threshold: 0.4, minMatchCharLength: 5, keys: ["message"] });
 
 module.exports.run = async (message, args) => {
     this.respond(args.join(" ").replace("\\", "").replace("\"", "'").toLowerCase(), message.channel);
@@ -18,7 +19,7 @@ module.exports.respond = async (query, channel) => {
 
     if (results[0].score > 0.2) return;
 
-    console.log(`'${query}' : '${results[0].item.message}' (${results[0].score.toFixed(2)}) -> '${results[0].item.response}'`);
+    console.log(`[${moment().format("HH:mm:ss")}] '${query}' : '${results[0].item.message}' (${results[0].score.toFixed(4)})`);
     var item = results[0].item.response;
     var rng = Math.floor(Math.random() * item.length);
 
@@ -38,8 +39,7 @@ module.exports.collect = async (message) => {
             if (!collected.first() || collected.first().content == "" || collected.first().content.length > 100) return;
             collresponse = collected.first().content.replace("\\", "").replace("\"", "'");
             if (["!", "%", "<", ">", "$", "/"].includes(collresponse.substring(0, 1))) return;
-
-            var responseobj = JSON.parse(fs.readFileSync("the_brains.json", "utf-8"));
+            var responseobj = JSON.parse(JSON.stringify(fs.readFileSync("the_brains.json", "utf-8")));
 
             // check if keyword already exists
             for (var i = 0; i < responseobj.responses.length; i++) {
