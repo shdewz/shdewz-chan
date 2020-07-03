@@ -25,6 +25,39 @@ module.exports.run = async (message, args) => {
                             sourceText = `**[Source](${last.source})**`;
                         else sourceText = "*No source provided*";
 
+                        let artist = "Not provided";
+                        if (args.includes("/artist")) {
+                            const baseurl = "https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1";
+                            const auth = config.gelbooru_auth;
+                            let apiCall = async (tags) => {
+                                try {
+                                    let tags_ = [];
+                                    for (var i = 0; i < tags.length; i++) {
+                                        const response = await fetch(baseurl + auth + "&name_pattern=" + tags[i]);
+                                        const result = await response.json();
+                                        tags_.push({
+                                            name: tags[i],
+                                            type: result[0].type
+                                        });
+                                        if (result[0].type == "artist") break;
+                                    }
+                                    return tags_;
+                                }
+                                catch (err) {
+                                    return console.log(err);
+                                }
+                            }
+
+                            let tags_ = await apiCall(last.tags.split(" "));
+
+                            tags_.forEach(tag => {
+                                if (tag.type == "artist") {
+                                    artist = tag.name;
+                                    return;
+                                }
+                            });
+                        }
+
                         let embed = {
                             color: message.member.displayColor,
                             author: {
@@ -34,9 +67,13 @@ module.exports.run = async (message, args) => {
                                 url: last.file_url,
                             },
                             description: `**Rolled by:** ${last.rolled_by}
+                            **Artist:** ${artist}
                             ${sourceText}
+                            **[Gelbooru post](https://gelbooru.com/index.php?page=post&s=view&id=${last.id})**
                             **Score:** ${last.score}
                             **Rating:** ${ratings[last.rating]}
+                            **Resolution:** ${last.width}x${last.height}
+                            **Uploaded:** ${moment.utc(new Date(last.created_at)).format("MMMM Do, YYYY")} (${moment(new Date(last.created_at)).fromNow()})
                             **Tags:** \`${last.tags.split(" ").join("` `")}\``,
                         };
 
@@ -103,15 +140,15 @@ module.exports.run = async (message, args) => {
         "goblin",
         "ronald_mcdonald",
         "anal_hook",
-        "trap"
+        "trap",
+        "beastiality"
     ];
 
     if (searchfilters.some(filter => args.includes(filter)))
         return message.channel.send("<:WideWeirdChamp3:712801137266524231>");
 
     // Perform a search for popular image posts
-    const baseurl =
-        "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1";
+    const baseurl = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1";
     const auth = config.gelbooru_auth;
     const tags = "&tags=" + args.join("+") + "+score:>4";
 
