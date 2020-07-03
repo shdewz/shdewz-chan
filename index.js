@@ -1,12 +1,14 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
+const moment = require("moment");
 client.commands = new Discord.Collection();
 client.aliases = new Discord.Collection();
 
 const fs = require("fs");
 const config = require("./config.json");
 const osu = require("./osu.js");
-var ready = false;
+
+let ready = false;
 
 global.servers = {};
 global.statObj = {};
@@ -35,7 +37,7 @@ fs.readdir("./commands", (err, files) => {
             });
         }
 
-        console.log(`${f} loaded!`);
+        console.log(`[${i + 1 < 10 ? `0${i + 1}` : i + 1}/${jsfile.length}] ${f} loaded!`);
     })
 });
 
@@ -44,7 +46,7 @@ client.on("message", async message => {
     if (message.author.bot) return; // ignore bot messages
 
     // response learning
-    if (!["!", "%", "<", ">", "$", "/"].includes(message.content.substring(0, 1))) client.commands.get("response").collect(message);
+    // if (!["!", "%", "<", ">", "$", "/"].includes(message.content.substring(0, 1))) client.commands.get("response").collect(message);
 
     // responding
     if (!message.content.startsWith(config.prefix) && Math.random() < 0.08 && message.guild.id == "667863566279507994") client.commands.get("response").respond(message.content, message.channel);
@@ -69,8 +71,7 @@ client.on("message", async message => {
         client.commands.get(client.aliases.get(command)).run(message, args, client);
     } else return;
 
-    console.log(`[${new Date().toLocaleTimeString()}] Command '${command}' issued by ${message.author.username}`)
-
+    console.log(`[${moment().format("HH:mm:ss")}] Command '${command}' issued by ${message.author.username}`)
 })
 
 client.on("guildMemberAdd", async member => {
@@ -81,16 +82,17 @@ client.on("guildMemberAdd", async member => {
 
 client.login(config.token);
 
+// handle exiting
 process.on('SIGINT', () => {
-    var stats = statObj;
+    let stats = statObj;
     if (stats != {} && ready) fs.writeFileSync("stats.json", JSON.stringify(stats), err => { if (err) return console.log(err); });
-    console.log(`\n[${new Date().toLocaleTimeString()}] Stats saved succesfully, exiting.`);
+    console.log(`[${moment().format("HH:mm:ss")}] Stats saved succesfully, exiting.`);
     process.exit();
 });
 
-// autosave every 10 minutes
+// autosave every 20 minutes
 setInterval(() => {
-    var stats = statObj;
+    let stats = statObj;
     if (stats != {} && ready) fs.writeFileSync("stats.json", JSON.stringify(stats), err => { if (err) return console.log(err); });
-    console.log(`\n[${new Date().toLocaleTimeString()}] Stats autosaved succesfully.`);
-}, 10 * 60 * 1000);
+    console.log(`[${moment().format("HH:mm:ss")}] Autosave successful.`);
+}, 20 * 60 * 1000);
