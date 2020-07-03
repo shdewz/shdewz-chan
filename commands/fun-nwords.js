@@ -53,7 +53,7 @@ module.exports.display = (nwords, message, lb, lbobj, length) => {
         for (var i = 0; i < lbobj.length; i++) {
             if (i > length - 1) break;
             rankText += `#${i + 1}\n`
-            nameText += `${message.guild.members.get(lbobj[i].id) ? message.guild.members.get(lbobj[i].id).displayName : "invalid-user"}\n`;
+            nameText += `${message.guild.members.cache.get(lbobj[i].id) ? message.guild.members.cache.get(lbobj[i].id).displayName : "invalid-user"}\n`;
             nwordText += `${lbobj[i].count}\n`
         }
 
