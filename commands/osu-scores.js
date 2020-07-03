@@ -36,16 +36,17 @@ module.exports.score = async (user, mapid, message) => {
 
 async function getScores(user, mapid, message) {
     let s = await osu.scores(user, mapid, message);
-
     if (s.error) return s;
+
+    osu.addLastMap(message, s.stats.mapid);
 
     let fields = [];
     for (var i = 0; i < s.scores.length; i++) {
-        let pptext = s.scores[i].fcpp > 0 ? `**${s.scores[i].pp.toFixed(2)}pp** / ${s.scores[i].fcpp.toFixed(2)}pp` : `**${s.scores[i].pp.toFixed(2)}pp**`;
+        let pptext = s.scores[i].fcpp > 0 ? `**${s.scores[i].pp.toFixed(2)}pp**/${s.scores[i].fcpp.toFixed(2)}pp` : `**${s.scores[i].pp.toFixed(2)}pp**`;
         var obj = {
-            name: `**${s.scores[i].mods == "" ? "NM" : s.scores[i].mods}** (${s.scores[i].stars}★) — ${moment.utc(s.scores[i].date).fromNow()}`,
-            value: `${s.scores[i].grade} \xa0 — \xa0 ${pptext} \xa0 — \xa0 **${s.scores[i].accuracy.toFixed(2)}%**
-                ${s.scores[i].score.toLocaleString()} \xa0 — \xa0 **x${s.scores[i].combo.toLocaleString()}** / ${s.stats.maxcombo.toLocaleString()} \xa0 — \xa0 [${s.scores[i].c300.toLocaleString()}/${s.scores[i].c100.toLocaleString()}/${s.scores[i].c50.toLocaleString()}/${s.scores[i].cmiss.toLocaleString()}]\n`
+            name: `**${s.scores[i].mods == "" ? "NM" : s.scores[i].mods}** (${s.scores[i].stars.toFixed(2)}★) — ${moment.utc(s.scores[i].date).fromNow()}`,
+            value: `${s.scores[i].grade} — ${pptext} — **${s.scores[i].accuracy.toFixed(2)}%**
+                ${s.scores[i].score.toLocaleString()} — **x${s.scores[i].combo.toLocaleString()}**/${s.stats.maxcombo.toLocaleString()} — [${s.scores[i].c300.toLocaleString()}/${s.scores[i].c100.toLocaleString()}/${s.scores[i].c50.toLocaleString()}/${s.scores[i].cmiss.toLocaleString()}]\n`
         }
         fields.push(obj);
     }
