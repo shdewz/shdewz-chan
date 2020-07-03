@@ -5,7 +5,7 @@ module.exports.init = async (client) => {
     for (var i = 0; i < statObj.reminders.length; i++) {
         startTimer(statObj.reminders[i].user, statObj.reminders[i].subject, statObj.reminders[i].start, statObj.reminders[i].end, client);
     }
-    console.log(statObj.reminders.length + " reminders running.")
+    console.log(statObj.reminders.length + " reminder(s) running.");
     return;
 }
 
@@ -36,7 +36,7 @@ module.exports.run = async (message, args, client) => {
         var remindersText = `**All reminders:**\n`;
         var amount = 1;
         for (var i = 0; i < reminders.length; i++) {
-            remindersText += `**${amount}.** ${client.users.get(reminders[i].user).username}: *${reminders[i].subject}* on ${moment.utc(reminders[i].end).format("**dddd, MMMM Do YYYY** [at] **HH:mm:ss UTC**")} (${moment.utc(reminders[i].end).fromNow()})\n`;
+            remindersText += `**${amount}.** ${client.users.cache.get(reminders[i].user).username}: *${reminders[i].subject}* on ${moment.utc(reminders[i].end).format("**dddd, MMMM Do YYYY** [at] **HH:mm:ss UTC**")} (${moment.utc(reminders[i].end).fromNow()})\n`;
             amount++;
         }
         return message.channel.send(remindersText);
@@ -115,7 +115,7 @@ module.exports.run = async (message, args, client) => {
 
 function startTimer(userid, subject, start, end, client) {
     var time = end > moment.utc().valueOf() ? moment.utc(end).diff(moment.utc().valueOf()) : 1000;
-    var user = client.users.get(userid);
+    var user = client.users.cache.get(userid);
     var late = end + 20000 < moment.utc().valueOf() ? `\n\nLooks like i was late by about **${moment.utc().to(moment.utc(end), true)}**. oops! >w<` : "";
 
     reminder = setTimeout(async () => {
