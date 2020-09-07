@@ -1,8 +1,8 @@
 const fs = require("fs");
 
-module.exports.run = function () {
+module.exports.run = filename => {
     try {
-        if (fs.existsSync("stats.json")) return JSON.parse(fs.readFileSync("stats.json", "utf-8"));
+        if (fs.existsSync(filename)) return JSON.parse(fs.readFileSync(filename, "utf-8"));
         else return;
     }
     catch (error) { return console.log(error); }
