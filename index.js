@@ -31,7 +31,7 @@ client.on("message", async message => {
     if (message.author.id == "250693235091963904" && message.content == `${config.prefix}reloadcommands`) return reloadCommands();
 
     // response learning
-    if (!["!", "%", "<", ">", "$", "/"].includes(message.content.substring(0, 1))) client.commands.get("response").collect(message);
+    client.commands.get("response").collect(message);
 
     // responding
     if (((!message.content.startsWith(config.prefix) && Math.random() < 0.08) || message.mentions.has(client.user)) && message.guild.id == "667863566279507994") client.commands.get("response").respond(message.content, message.channel);

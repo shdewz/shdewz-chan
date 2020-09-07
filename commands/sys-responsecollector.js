@@ -28,13 +28,13 @@ module.exports.collect = async (message) => {
     keyword.replace("\\", "").replace("\"", "'");
     if (keyword.length > 100) return;
 
-    const filter = response => { return response.author != message.author && !response.author.bot; };
+    const filter = response => { return !response.author.bot; };
 
     message.channel.awaitMessages(filter, { max: 1 })
         .then(collected => {
-            if (!collected.first() || collected.first().content == "" || collected.first().content.length > 100) return;
+            if (collected.first().author === message.author) return;
+            if (!collected.first() || collected.first().content === "" || collected.first().content.length > 120) return;
             collresponse = collected.first().content.replace("\\", "").replace("\"", "'");
-            if (["!", "%", "<", ">", "$", "/"].includes(collresponse.substring(0, 1)) && collresponse.length > 1) return;
 
             if (keyword.includes("@everyone") || keyword.includes("@here")) return;
 
