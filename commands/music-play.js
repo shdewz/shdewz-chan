@@ -5,14 +5,14 @@ const moment = require("moment");
 module.exports.run = async (message, args) => {
 
     try {
-        if (!message.member.voiceChannel) return message.reply("you must be in a voice channel!"); // check if user is in a voice channel
+        if (!message.member.voice.channel) return message.reply("you must be in a voice channel!"); // check if user is in a voice channel
         if (!args[0]) return message.reply("no link!"); // check if a link exists
 
         // check if argument is a valid link
         var link = "";
-        if (args[0].match(/(https?:\/\/)?(www.)?youtu\.?be(.com)?\/(watch\?v=)?.{11}/)) {
+        if (args[0].match(/(https?:\/\/)?(www.)?youtu\.?be(.com)?\/(watch\?v=)?.{2,11}/)) {
             link = args[0];
-            var videoid = link.match(/[a-zA-Z0-9_-]{11}/)[0];
+            var videoid = link.match(/[a-zA-Z0-9_-]{2,11}/)[0];
             const r = await search({ videoId: videoid }); // search for video
             var video = r;
         }
@@ -39,7 +39,7 @@ module.exports.run = async (message, args) => {
         server.queue.push(link);
         server.queuestats.push(video);
 
-        if (!message.guild.voiceConnection) message.member.voiceChannel.join().then(connection => {
+        message.member.voice.channel.join().then(connection => {
             play(connection, message);
         });
 
@@ -63,21 +63,21 @@ module.exports.run = async (message, args) => {
         message.channel.send("error");
         return console.error(err);
     }
-
 };
 
 function play(connection, message) {
     try {
         var server = servers[message.guild.id];
         server.now = server.queuestats[0];
-    
+
         // download the audio of the video
-        server.dispatcher = connection.playStream(ytdl(server.queue[0], { filter: "audio", highWaterMark: 1 << 25 }));
-    
+        console.log(server.queue);
+        server.dispatcher = connection.play(ytdl(server.queue[0], { filter: "audio", highWaterMark: 1 << 25 }));
+
         var playingSince = new Date();
         server.now.playingSince = playingSince;
         var timeNow = moment.utc(server.now.timeNow).format("HH:mm:ss [UTC]")
-    
+
         let embed = {
             color: message.member.displayColor,
             author: {
@@ -108,9 +108,9 @@ function play(connection, message) {
                 text: `Requested by ${server.now.requester} at ${timeNow}`
             }
         }
-    
+
         message.channel.send({ embed: embed });
-    
+
         // play next after end if in queue
         server.dispatcher.on("end", () => {
             if (server.repeat) play(connection, message);
@@ -132,7 +132,7 @@ function play(connection, message) {
         message.channel.send("something happened");
         return console.log(err);
     }
-    
+
 }
 
 module.exports.help = {
