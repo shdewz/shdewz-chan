@@ -1,34 +1,30 @@
-const config = require("../config.json");
-const fs = require("fs");
-const Fuse = require("fuse.js");
+const fuzzysort = require("fuzzysort");
 const moment = require("moment");
-const responses = require("../the_brains.json").responses;
-
-const fuse = new Fuse(responses, { includeScore: true, location: 0, distance: 6, threshold: 0.4, minMatchCharLength: 5, keys: ["message"] });
 
 module.exports.run = async (message, args) => {
     this.respond(args.join(" ").replace("\\", "").replace("\"", "'").toLowerCase(), message.channel);
 };
 
-module.exports.respond = async (query, channel) => {
-    query = query.replace("\\", "").replace("\"", "'");
-    if (query.length > 100 || query.length < 1) return;
-    var results = fuse.search(query.toLowerCase());
+module.exports.respond = async (content, channel) => {
+    let query_arr = content.split(" ").filter(a => !a.match(/<@!?(\d+)>/));
+    if (query_arr.length == 0) var query = "hi";
+    else var query = query_arr.join(" ");
 
+    const results = fuzzysort.go(query, responseObj.responses, { key: "message", allowTypo: true, limit: 3, threshold: -70000 });
     if (results.length == 0) return;
+    if (Math.abs(results[0].obj.message.length - query.length) > 3 * query.length) return;
+    let result = results[Math.floor(Math.random() * results.length)];
+    let message = result.obj.response[Math.floor(Math.random() * result.obj.response.length)];
 
-    if (results[0].score > 0.2) return;
+    if (message.includes("@everyone") || message.includes("@here")) return;
 
-    console.log(`[${moment().format("HH:mm:ss")}] '${query}' : '${results[0].item.message}' (${results[0].score.toFixed(4)})`);
-    var item = results[0].item.response;
-    var rng = Math.floor(Math.random() * item.length);
-
-    return channel.send(item[rng]);
+    console.log(`[${moment().format("HH:mm:ss")}] '${query}' -> '${result.obj.message}' (${result.score})`);
+    return channel.send(message);
 };
 
 module.exports.collect = async (message) => {
     if (message.content == "") return;
-    var keyword = message.content.toLowerCase();
+    var keyword = message.content;
     keyword.replace("\\", "").replace("\"", "'");
     if (keyword.length > 100) return;
 
@@ -38,35 +34,25 @@ module.exports.collect = async (message) => {
         .then(collected => {
             if (!collected.first() || collected.first().content == "" || collected.first().content.length > 100) return;
             collresponse = collected.first().content.replace("\\", "").replace("\"", "'");
-            if (["!", "%", "<", ">", "$", "/"].includes(collresponse.substring(0, 1))) return;
-            var responseobj = JSON.parse(JSON.stringify(fs.readFileSync("the_brains.json", "utf-8")));
+            if (["!", "%", "<", ">", "$", "/"].includes(collresponse.substring(0, 1)) && collresponse.length > 1) return;
+
+            if (keyword.includes("@everyone") || keyword.includes("@here")) return;
 
             // check if keyword already exists
-            for (var i = 0; i < responseobj.responses.length; i++) {
-                if (responseobj.responses[i].message.toLowerCase() == keyword) {
-                    if (responseobj.responses.includes(keyword)) return; // ignore duplicates
-
-                    responseobj.responses[i].response.push(collresponse.toLowerCase());
-
-                    fs.writeFile("the_brains.json", JSON.stringify(responseobj), err => {
-                        if (err) return console.log("error", err);
-                    });
-
+            for (var i = 0; i < responseObj.responses.length; i++) {
+                if (responseObj.responses[i].message.toLowerCase() == keyword.toLowerCase()) {
+                    if (responseObj.responses.includes(keyword)) return; // ignore duplicates
+                    responseObj.responses[i].response.push(collresponse);
                     return;
                 }
             }
 
             var obj = {
                 "message": keyword,
-                "response": [collresponse.toLowerCase()]
+                "response": [collresponse]
             }
 
-            responseobj.responses.push(obj);
-
-            fs.writeFile("the_brains.json", JSON.stringify(responseobj), err => {
-                if (err) return console.log("error", err);
-            });
-
+            responseObj.responses.push(obj);
             return;
         })
 };
