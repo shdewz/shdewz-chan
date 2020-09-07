@@ -6,33 +6,45 @@ const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 module.exports.run = async (message, args) => {
     try {
         var mode = 0
+        var derank = false;
+        var derankpos = 0;
+        var modes = {
+            "osu": 0,
+            "taiko": 1,
+            "ctb": 2,
+            "mania": 3
+        }
 
-        if (!args || args.length < 1) return message.channel.send(`Correct usage: \`${config.prefix}netpp [<username>] <raw pp> [<taiko/ctb/mania>]\``);
-        else if (args.length <= 1) {
-            var ppraw = args[0];
-
-            let found;
-            for (var i = 0; i < statObj.users.length; i++) {
-                if (statObj.users[i].discord == message.author.id) {
-                    uid = statObj.users[i].osu_id;
-                    found = true;
-                    break;
-                }
+        if (args.length == 0) return message.channel.send(`Correct usage: \`${config.prefix}netpp [<username>] <raw pp> [<taiko/ctb/mania>]\``);
+        else {
+            if (args.includes("-m")) {
+                mode = modes[args[args.indexOf("-m") + 1].toLowerCase()];
+                args.splice(args.indexOf("-m"), 2);
             }
-            if (!found) return message.channel.send(`Looks like you haven't linked your account yet.\nLink it with the command \`${config.prefix}osuset <user>\`.`)
+
+            if (args.includes("-o")) {
+                derank = true;
+                derankpos = args[args.indexOf("-o") + 1]
+                args.splice(args.indexOf("-o"), 2);
+            }
+
+            var ppraw = !isNaN(args[0]) ? args[0] : args[args.length - 1];
+
+            if (args.length == 1) {
+                let found = false;
+                for (var i = 0; i < statObj.users.length; i++) {
+                    if (statObj.users[i].discord == message.author.id) {
+                        uid = statObj.users[i].osu_id;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) return message.channel.send(`Looks like you haven't linked your account yet.\nLink it with the command \`${config.prefix}osuset <user>\`.`)
+            }
+            else {
+                var uid = args.splice(args.indexOf(ppraw), 1).join("_");
+            }
         }
-        else if (args.length <= 2) {
-            var uid = args[0];
-            var ppraw = args[1];
-        }
-        else if (args.length <= 3) {
-            var uid = args[0];
-            var ppraw = args[1];
-            if (args[2] == "taiko") mode = 1;
-            else if (args[2] == "ctb") mode = 2;
-            else if (args[2] == "mania") mode = 3;
-        }
-        else return;
 
         var apikey = config.apikey;
 
@@ -56,12 +68,11 @@ module.exports.run = async (message, args) => {
         // get the top 100 plays from the api
         fetch(`https://osu.ppy.sh/api/get_user_best?k=${apikey}&m=${mode}&limit=100&u=${uid}`).then(function (response) {
             return response.json();
-        }).then(function (rawjson) {
+        }).then(plays => {
 
             // add the pp values of the plays to an array
-            var json_array = rawjson;
-            for (var j in json_array) {
-                scores[scores.length] = parseFloat(json_array[j].pp);
+            for (var play in plays) {
+                scores.push(parseFloat(plays[play].pp));
             }
 
             // get the lowest score on the list
@@ -72,15 +83,11 @@ module.exports.run = async (message, args) => {
                 return response.json();
             }).then(function (rawjsonuser) {
 
-                // take the total pp
-                var json_array_user = rawjsonuser;
-                for (var ju in json_array_user) {
-                    var ppfull = json_array_user[ju].pp_raw;
-                    var username = json_array_user[ju].username;
-                    uid = json_array_user[ju].user_id;
-                    var country = json_array_user[ju].country;
-                    var oldrank = json_array_user[ju].pp_rank;
-                }
+                var ppfull = rawjsonuser[0].pp_raw;
+                var username = rawjsonuser[0].username;
+                var uid = rawjsonuser[0].user_id;
+                var country = rawjsonuser[0].country;
+                var oldrank = rawjsonuser[0].pp_rank;
 
                 // see if the inputted pp is below the lowest score
                 if (scores.length >= 100 && ppraw < scores[scores.length - 1]) {
@@ -93,10 +100,11 @@ module.exports.run = async (message, args) => {
                         scoresoldw[scoresoldw.length] = scores[i - 1] * Math.pow(0.95, i - 1);
                         i++;
                     }
-                    scores.pop();
+                    if (derank) scores.splice(derankpos - 1, 1);
+                    else scores.pop();
 
                     // add the hypothetical play to the list and sort it
-                    scores[scores.length] = ppraw;
+                    scores.push(ppraw);
                     scores.sort((a, b) => b - a);
 
                     // apply weighting again with the new score in place
@@ -131,15 +139,20 @@ module.exports.run = async (message, args) => {
                             newrank = this.responseText
                             clearTimeout(dead);
 
-                            const statEmbed = new Discord.RichEmbed()
-                                .setAuthor(username, flagurl, url = `https://osu.ppy.sh/u/${uid}`)
-                                .setColor('#ff007a')
-                                .setThumbnail(`https://a.ppy.sh/${uid}?${+new Date()}`)
-                                .setDescription(`**${(Math.round(ppfull * 100) / 100).toLocaleString()}pp** *currently*
-                        **${(Math.round(newpp * 100) / 100).toLocaleString()}pp** *after ${(Math.round(ppraw * 100) / 100).toLocaleString()}pp play*
-                        **${diffsymbol}${differencerounded}pp** *difference*
-                        **#${Math.round(oldrank).toLocaleString()} → #${Math.round(newrank).toLocaleString()}** *rank change*`)
-                            return message.channel.send(statEmbed);
+                            let embed = {
+                                color: message.member.displayColor,
+                                author: {
+                                    name: username,
+                                    icon_url: flagurl,
+                                    url: `https://osu.ppy.sh/u/${uid}`
+                                },
+                                description: `**${(Math.round(ppfull * 100) / 100).toLocaleString()}pp** *currently*
+                                **${(Math.round(newpp * 100) / 100).toLocaleString()}pp** *after ${(Math.round(ppraw * 100) / 100).toLocaleString()}pp play*
+                                **${diffsymbol}${differencerounded}pp** *difference*
+                                **#${Math.round(oldrank).toLocaleString()} → #${Math.round(newrank).toLocaleString()}** *rank change*`
+                            }
+
+                            return message.channel.send({ embed: embed });
                         };
                     };
 
@@ -150,25 +163,31 @@ module.exports.run = async (message, args) => {
                     var done = false;
 
                     dead = setTimeout(function () {
-                        const statEmbed = new Discord.RichEmbed()
-                            .setAuthor(username, flagurl, url = `https://osu.ppy.sh/u/${uid}`)
-                            .setColor('#ff007a')
-                            .setThumbnail(`https://a.ppy.sh/${uid}?${+new Date()}`)
-                            .setDescription(`**${(Math.round(ppfull * 100) / 100).toLocaleString()}pp** *currently*
-                        **${(Math.round(newpp * 100) / 100).toLocaleString()}pp** *after ${(Math.round(ppraw * 100) / 100).toLocaleString()}pp play*
-                        **${diffsymbol}${differencerounded}pp** *difference*`)
+                        let embed = {
+                            color: message.member.displayColor,
+                            author: {
+                                name: username,
+                                icon_url: flagurl,
+                                url: `https://osu.ppy.sh/u/${uid}`
+                            },
+                            description: `**${(Math.round(ppfull * 100) / 100).toLocaleString()}pp** *currently*
+                            **${(Math.round(newpp * 100) / 100).toLocaleString()}pp** *after ${(Math.round(ppraw * 100) / 100).toLocaleString()}pp play*
+                            **${diffsymbol}${differencerounded}pp** *difference*`
+                        }
+
                         done = true;
-                        return message.channel.send(statEmbed);
+                        return message.channel.send({ embed: embed });
+
                     }, 5000);
                 }
 
-            }).catch(function (error) {
+            }).catch(error => {
                 return console.log(error);
-            })
+            });
 
-        }).catch(function (error) {
+        }).catch(error => {
             return console.log(error);
-        })
+        });
     }
     catch (error) {
         return console.log(error);
@@ -177,8 +196,8 @@ module.exports.run = async (message, args) => {
 
 module.exports.help = {
     name: "netpp",
-    description: "Calculate how much a new play would affect your total pp",
-    usage: "netpp [<user>] <raw pp> [<taiko/ctb/mania>]",
+    description: "Calculate how much a new play would affect your total pp and rank.\n\nParameters:\n\`-m <taiko/ctb/mania>\` change the gamemode\n\`-o <position>\` overwrite a play (1-100) on your top plays.",
+    usage: "netpp [<user>] <raw pp> [<parameters>]",
     example: "netpp shdewz 500",
     category: "osu!"
 }
