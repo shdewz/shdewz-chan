@@ -77,27 +77,40 @@ module.exports.run = async (message, args, client) => {
     var final;
 
     if (args.join(" ").toLowerCase().includes(" in ")) {
-        var time = args.join(" ").toLowerCase().split(" in ")[1].split(" ");
-        subject = args.join(" ").split(" in ")[0];
+        try {
+            var timestring = args.join(" ").toLowerCase().split(" in ")[1]
+            var time = timestring.split(" ");
+            subject = args.join(" ").split(" in ")[0];
 
-        var duration = moment.duration({
-            seconds: time.includes("seconds") ? time[time.indexOf("seconds") - 1] : 0,
-            minutes: time.includes("minutes") ? time[time.indexOf("minutes") - 1] : 0,
-            hours: time.includes("hours") ? time[time.indexOf("hours") - 1] : 0,
-            days: time.includes("days") ? time[time.indexOf("days") - 1] : 0,
-            weeks: time.includes("weeks") ? time[time.indexOf("weeks") - 1] : 0,
-            months: time.includes("months") ? time[time.indexOf("months") - 1] : 0,
-            years: time.includes("years") ? time[time.indexOf("years") - 1] : 0
-        });
+            var duration = moment.duration({
+                seconds: timestring.match(/seconds?/) ? time[time.indexOf(timestring.match(/seconds?/)[0]) - 1] : 0,
+                minutes: timestring.match(/minutes?/) ? time[time.indexOf(timestring.match(/minutes?/)[0]) - 1] : 0,
+                hours: timestring.match(/hours?/) ? time[time.indexOf(timestring.match(/hours?/)[0]) - 1] : 0,
+                days: timestring.match(/days?/) ? time[time.indexOf(timestring.match(/days?/)[0]) - 1] : 0,
+                weeks: timestring.match(/weeks?/) ? time[time.indexOf(timestring.match(/weeks?/)[0]) - 1] : 0,
+                months: timestring.match(/months?/) ? time[time.indexOf(timestring.match(/months?/)[0]) - 1] : 0,
+                years: timestring.match(/years?/) ? time[time.indexOf(timestring.match(/years?/)[0]) - 1] : 0
+            });
 
-        final = current.add(duration);
+            final = current.add(duration);
+        }
+        catch (error) {
+            message.reply("error processing date/time.");
+            return console.log(error);
+        }
     }
     else if (args.join(" ").toLowerCase().includes(" at ")) {
-        subject = args.join(" ").split(" at ")[0];
-        var datestring = args.join(" ").toLowerCase().replace("/", "-").split(" at ")[1];
-        if (!datestring.match(/\d+\-\d+\-\d+/)) datestring = moment.utc().format("YYYY-MM-DD") + " " + datestring;
-        else if (!datestring.match(/\d+\:\d+/)) datestring = datestring + " " + moment.utc().format("HH:mm");
-        final = moment.utc(datestring);
+        try {
+            subject = args.join(" ").split(" at ")[0];
+            var datestring = args.join(" ").split(" at ")[1].replace(/\//g, "-");
+            if (!datestring.match(/\d+\-\d+\-\d+/)) datestring = moment.utc().format("YYYY-MM-DD") + " " + datestring;
+            else if (!datestring.match(/\d+\:\d+/)) datestring = datestring + " " + moment.utc().format("HH:mm");
+            final = moment.utc(datestring);
+        }
+        catch (error) {
+            message.reply("error processing date/time.");
+            return console.log(error);
+        }
     }
 
     var obj = {
@@ -119,12 +132,15 @@ function startTimer(userid, subject, start, end, client) {
     var late = end + 20000 < moment.utc().valueOf() ? `\n\nLooks like i was late by about **${moment.utc().to(moment.utc(end), true)}**. oops! >w<` : "";
 
     reminder = setTimeout(async () => {
+        let found = false;
         for (i = 0; i < statObj.reminders.length; i++) {
-            if (statObj.reminders[i].user == userid && statObj.reminders[i].end == end) {
+            if (statObj.reminders[i].user == userid && statObj.reminders[i].end == end && statObj.reminders[i].subject == subject) {
+                found = true;
                 if (statObj.reminders.length == 1) statObj.reminders = [];
                 else statObj.reminders.splice(i, 1);
             }
         }
+        if (!found) return;
 
         var response = await fetch("https://official-joke-api.appspot.com/random_joke");
         var jokejson = await response.json();
