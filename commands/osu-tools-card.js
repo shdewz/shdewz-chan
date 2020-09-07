@@ -1,6 +1,6 @@
 const config = require("../config.json");
 const fetch = require('node-fetch');
-const Discord = require('discord.js');
+const { MessageAttachment } = require('discord.js');
 const Canvas = require('canvas');
 const registerFont = require('canvas');
 
@@ -158,7 +158,7 @@ module.exports.run = async (message, args) => {
                         break;
                 }
 
-                const attachment = new Discord.Attachment(canvas.toBuffer(), 'statcard.png');
+                const attachment = new MessageAttachment(canvas.toBuffer(), 'statcard.png');
                 message.channel.send(attachment);
             }
             catch (error) {
