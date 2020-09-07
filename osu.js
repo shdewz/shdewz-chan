@@ -173,11 +173,7 @@ module.exports = {
                 let modsText = "";
                 if (mods != 0) modsText = `${modsNames}`;
 
-                let modsParam = '0';
-                if (modsNames.includes("HR")) modsParam = '16';
-                else if (modsNames.includes("DT") || modsText.includes("NC")) modsParam = '64';
-                else if (modsNames.includes("HT")) modsParam = '256';
-                else if (modsNames.includes("EZ")) modsParam = '2';
+                let modsParam = getModsParam(modsNames);
 
                 let grade = rankemojis[ranknames.indexOf(eventdata.rank)];
                 let finished = eventdata.rank == "F" ? false : true;
@@ -473,6 +469,9 @@ async function getPP(mapID, mods, combo, acc, cmiss) {
 
                 resolve(pp.total);
             });
+    }).catch(err => {
+        console.error(err);
+        return 0.00;
     });
 }
 
@@ -500,6 +499,9 @@ function getFCPP(mapID, mods, acc) {
 
                 resolve(pp.total);
             });
+    }).catch(err => {
+        console.error(err);
+        return 0.00;
     });
 }
 
