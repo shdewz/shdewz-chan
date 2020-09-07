@@ -95,7 +95,7 @@ module.exports.run = async (message, args) => {
         if (message.channel.nsfw) {
             args.splice(args.indexOf("/nsfw"));
             args.push("-rating:safe");
-        } else return message.channel.send("NOT HERE " + message.author);
+        } else return message.reply("NOT HERE");
     } else args.push("rating:safe");
 
     if (args.includes("/familyfriendly")) {
