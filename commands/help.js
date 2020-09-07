@@ -15,12 +15,17 @@ module.exports.run = async (message, args, client) => {
             if (!command.help.usage) var usage = command.help.name;
             else var usage = command.help.usage;
 
+            let aliastext = "";
+            if (command.help.aliases) {
+                aliastext = `\n\n**Aliases:**\n\`${command.help.aliases.join("\`, \`")}\``;
+            }
+
             let embed = {
                 color: message.member.displayColor,
                 author: {
                     name: `${config.prefix}${command.help.name}`
                 },
-                description: `*${command.help.description}*\n\n**Usage:** \`${config.prefix}${usage}\`${exampletext}`,
+                description: `*${command.help.description}*\n\n**Usage:** \`${config.prefix}${usage}\`${exampletext}${aliastext}`,
                 footer: {
                     text: `Use ${config.prefix}help for a list of all commands`
                 }
@@ -62,8 +67,8 @@ module.exports.run = async (message, args, client) => {
         let embed = {
             color: message.member.displayColor,
             author: {
-                name: `shdewz-chan command list`,
-                icon_url: `https://i.imgur.com/VUeXUCY.jpg`
+                name: `${client.user.username} command list:`,
+                icon_url: client.user.avatarURL()
             },
             fields: fields,
             footer: {
@@ -71,8 +76,6 @@ module.exports.run = async (message, args, client) => {
             }
         }
         return message.channel.send({ embed: embed });
-
-        return console.log(commands); // list all commands
     }
 };
 
