@@ -12,47 +12,31 @@ let ready = false;
 
 global.servers = {};
 global.statObj = {};
+global.responseObj = {};
 
 client.once("ready", async () => {
     osu.init(config.apikey);
     console.log("\nReady!\n");
     client.user.setActivity("nothing");
-    statObj = client.commands.get("loadstats").run();
+    statObj = client.commands.get("loadstats").run("stats.json");
+    responseObj = client.commands.get("loadstats").run("the_brains.json");
     client.commands.get("remindme").init(client);
     ready = true;
-});
-
-fs.readdir("./commands", (err, files) => {
-    if (err) console.log(err);
-
-    let jsfile = files.filter(f => f.split(".").pop() === "js");
-    if (jsfile.length <= 0) return console.log("Couldn't find commands.");
-
-    jsfile.forEach((f, i) => {
-        let props = require(`./commands/${f}`);
-        client.commands.set(props.help.name, props);
-        if (props.help.aliases) {
-            props.help.aliases.forEach(alias => {
-                client.aliases.set(alias, props.help.name);
-            });
-        }
-
-        console.log(`[${i + 1 < 10 ? `0${i + 1}` : i + 1}/${jsfile.length}] ${f} loaded!`);
-    })
 });
 
 client.on("message", async message => {
     if (message.channel.type !== "text") return; // ignore non-text-channels
     if (message.author.bot) return; // ignore bot messages
 
+    if (message.author.id == "250693235091963904" && message.content == `${config.prefix}reloadcommands`) return reloadCommands();
+
     // response learning
-    // if (!["!", "%", "<", ">", "$", "/"].includes(message.content.substring(0, 1))) client.commands.get("response").collect(message);
+    if (!["!", "%", "<", ">", "$", "/"].includes(message.content.substring(0, 1))) client.commands.get("response").collect(message);
 
     // responding
-    if (!message.content.startsWith(config.prefix) && Math.random() < 0.08 && message.guild.id == "667863566279507994") client.commands.get("response").respond(message.content, message.channel);
+    if (((!message.content.startsWith(config.prefix) && Math.random() < 0.08) || message.mentions.has(client.user)) && message.guild.id == "667863566279507994") client.commands.get("response").respond(message.content, message.channel);
 
     // special messages
-    if (message.content.split(" ").join("").toLowerCase().includes("nigger")) client.commands.get("nwords").newNword(message);
     if (message.content == ")/") return message.channel.send(")/");
 
     // ignore non-commands
@@ -74,25 +58,48 @@ client.on("message", async message => {
     console.log(`[${moment().format("HH:mm:ss")}] Command '${command}' issued by ${message.author.username}`)
 })
 
-client.on("guildMemberAdd", async member => {
-    const channel = member.guild.channels.find(ch => ch.name === "general");
-    if (!channel) return;
-    client.commands.get("serverjoin").run(member, channel, member.guild);
-})
+// command reload
+function reloadCommands() {
+    client.commands.clear();
+    client.aliases.clear();
 
+    fs.readdir("./commands", (err, files) => {
+        if (err) console.log(err);
+
+        let jsfile = files.filter(f => f.split(".").pop() === "js");
+        if (jsfile.length <= 0) return console.log("Couldn't find commands.");
+
+        jsfile.forEach((f, i) => {
+            let props = require(`./commands/${f}`);
+            client.commands.set(props.help.name, props);
+            if (props.help.aliases) {
+                props.help.aliases.forEach(alias => {
+                    client.aliases.set(alias, props.help.name);
+                });
+            }
+        })
+        console.log(`[${moment().format("HH:mm:ss")}] ${jsfile.length} commands loaded succesfully.`);
+    });
+}
+
+reloadCommands();
 client.login(config.token);
 
 // handle exiting
 process.on('SIGINT', () => {
     let stats = statObj;
+    let responses = responseObj;
     if (stats != {} && ready) fs.writeFileSync("stats.json", JSON.stringify(stats), err => { if (err) return console.log(err); });
+    if (responses != {} && ready) fs.writeFileSync("the_brains.json", JSON.stringify(responses), err => { if (err) return console.log(err); });
     console.log(`[${moment().format("HH:mm:ss")}] Stats saved succesfully, exiting.`);
     process.exit();
 });
 
-// autosave every 20 minutes
+// autosave every 30 minutes
 setInterval(() => {
     let stats = statObj;
+    let responses = responseObj;
     if (stats != {} && ready) fs.writeFileSync("stats.json", JSON.stringify(stats), err => { if (err) return console.log(err); });
+    if (responses != {} && ready) fs.writeFileSync("the_brains.json", JSON.stringify(responses), err => { if (err) return console.log(err); });
     console.log(`[${moment().format("HH:mm:ss")}] Autosave successful.`);
-}, 20 * 60 * 1000);
+}, 30 * 60 * 1000);
