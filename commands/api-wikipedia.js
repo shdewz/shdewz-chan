@@ -71,24 +71,12 @@ module.exports.run = async (message, args) => {
 
 function getPage(position, results, message) {
     try {
-        api.get(`https://en.wikipedia.org/api/rest_v1/page/summary/${results[position].replace(" ", "_").replace("/", "")}`).then(response => {
+        api.get(`https://en.wikipedia.org/api/rest_v1/page/summary/${results[position].replace(/ /g, "_").replace(/\//g, "")}`).then(response => {
             var data = response.data;
 
             var time = moment(data.timestamp).format("MMMM Do, YYYY [at] HH:mm")
 
-            var thumbnail = "";
-
-            api.get(data.api_urls.media).then(response => {
-                var mediaData = response.data;
-
-                // find appliccable thumbnail image 
-                if (data.originalimage) thumbnail = { url: data.originalimage.source }
-                else {
-                    if (mediaData.items.length > 0 && mediaData.items[0].type == "image") {
-                        thumbnail = { url: mediaData.items[0].original.source }
-                    }
-                }
-            }).catch(err => { if (err.response.status != 404) return console.log(err); });
+            var thumbnail = (typeof data.thumbnail.source === "undefined" || data.thumbnail.source == "") ? "" : data.thumbnail.source;
 
             var textString = data.extract;
             if (textString.length > 802) {
@@ -105,7 +93,7 @@ function getPage(position, results, message) {
                     name: data.titles.normalized,
                     url: data.content_urls.desktop.page
                 },
-                thumbnail: thumbnail,
+                thumbnail: { url: thumbnail },
                 fields: [
                     {
                         name: desc,
