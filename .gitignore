@@ -9,6 +9,7 @@ fun-kyafeet.js
 img/kya
 fun-menty.js
 awawa.json
+apiv2test.js
 start.bat
 img/ss
 outputs/
@@ -17,6 +18,7 @@ daemon/
 the_brains.json
 .vscode/
 .history/
+roles.json
 
 # Logs
 logs
