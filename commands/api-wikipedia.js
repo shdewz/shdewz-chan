@@ -76,7 +76,8 @@ function getPage(position, results, message) {
 
             var time = moment(data.timestamp).format("MMMM Do, YYYY [at] HH:mm")
 
-            var thumbnail = (typeof data.thumbnail.source === "undefined" || data.thumbnail.source == "") ? "" : data.thumbnail.source;
+            var thumbnail =  "";
+            if (typeof data.thumbnail !== "undefined") thumbnail = data.thumbnail.source;
 
             var textString = data.extract;
             if (textString.length > 802) {
