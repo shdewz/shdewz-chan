@@ -1,8 +1,8 @@
 const config = require("../config.json");
 const osu = require("../osu.js");
 const moment = require("moment");
-const sortable = ["pp", "date", "combo", "acc", "score", "mapid"];
-const sortable_ = ["pp", "date", "maxcombo", "acc", "score", "beatmap_id"];
+const sortable = ["pp", "date", "combo", "acc", "score", "mapid", "300s", "100s", "50s", "misses"];
+const sortable_ = ["pp", "date", "maxcombo", "acc", "score", "beatmap_id", "count300", "count100", "count50", "countmiss"];
 
 module.exports.run = async (message, args) => {
     try {
@@ -47,10 +47,9 @@ module.exports.run = async (message, args) => {
 
         let fields = [];
         for (var i = 0; i < length; i++) {
-            let pptext = s.plays[i].fcpp > s.plays[i].pp + 1 ? `**${s.plays[i].pp.toFixed(2)}pp**/${s.plays[i].fcpp.toFixed(2)}pp` : `**${s.plays[i].pp.toFixed(2)}pp**`;
             var obj = {
                 name: `**${s.plays[i].position}. ${s.plays[i].title} [${s.plays[i].difficulty}] ${s.plays[i].mods == "" ? "" : "+" + s.plays[i].mods}** (${s.plays[i].stars.toFixed(2)}★)`,
-                value: `${s.plays[i].grade} — ${pptext} — **${s.plays[i].acc.toFixed(2)}%** — [Map Link](https://osu.ppy.sh/b/${s.plays[i].mapid})
+                value: `${s.plays[i].grade} — ${s.plays[i].pp} — **${s.plays[i].acc.toFixed(2)}%** — [Map Link](https://osu.ppy.sh/b/${s.plays[i].mapid})
                 ${s.plays[i].score.toLocaleString()} — **x${s.plays[i].combo.toLocaleString()}**/${s.plays[i].maxcombo.toLocaleString()} — [${s.plays[i].c300.toLocaleString()}/${s.plays[i].c100.toLocaleString()}/${s.plays[i].c50.toLocaleString()}/${s.plays[i].cmiss.toLocaleString()}]
                 **${moment.utc(s.plays[i].date).fromNow()}** (${moment.utc(s.plays[i].date).format("MMMM Do, YYYY")})\n${sortby == "beatmap_id" ? `Map submitted **${moment.utc(s.plays[i].submitdate).fromNow()}** (${moment.utc(s.plays[i].submitdate).format("MMMM Do, YYYY")})\n` : ""}`
             }
