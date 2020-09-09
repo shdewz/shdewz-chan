@@ -84,7 +84,7 @@ module.exports = {
                 });
             }).catch(err => {
                 console.log(err);
-                resolve({ error: err.name + ": " + err.message });
+                resolve({ error: `**${err.name}**` + ": " + err.message });
                 return;
             });
         });
@@ -160,13 +160,16 @@ module.exports = {
 
                 let beatmap = eventdata.beatmap_id;
 
-                let c50 = parseInt(eventdata.count50);
-                let c100 = parseInt(eventdata.count100);
-                let c300 = parseInt(eventdata.count300);
-                let cmiss = parseInt(eventdata.countmiss);
+                let hits = {
+                    c50: parseInt(eventdata.count50),
+                    c100: parseInt(eventdata.count100),
+                    c300: parseInt(eventdata.count300),
+                    cmiss: parseInt(eventdata.countmiss)
+                }
+
                 let combo = parseInt(eventdata.maxcombo);
                 let score = parseInt(eventdata.score);
-                let acc = getAcc(c300, c100, c50, cmiss) * 100;
+                let acc = getAcc(hits.c300, hits.c100, hits.c50, hits.cmiss) * 100;
 
                 let mods = eventdata.enabled_mods;
                 let modsNames = getMods(mods).join("");
@@ -181,16 +184,10 @@ module.exports = {
 
                 let map = await getMapData(beatmap, modsParam);
 
-                let hits = c300 + c100 + c50 + cmiss;
-                let completion = hits / map.objects;
+                let totalhits = Object.values(hits).reduce((a, b) => a + b);
+                let completion = totalhits / map.objects;
 
-                let pp = await getPP(beatmap, mods, combo, acc, cmiss);
-                let ppText = `**${pp.toFixed(2)}pp**`;
-
-                if (combo != map.maxcombo) {
-                    let fcpp = await getFCPP(beatmap, mods, acc);
-                    ppText = `**${pp.toFixed(2)}pp**/${fcpp.toFixed(2)}pp`;
-                }
+                let ppText = await getPPText(map, mods, combo, hits, -1);
 
                 return resolve({
                     username: userobj.username,
@@ -208,10 +205,10 @@ module.exports = {
                     grade: grade,
                     combo: combo,
                     maxcombo: map.maxcombo,
-                    c300: c300,
-                    c100: c100,
-                    c50: c50,
-                    cmiss: cmiss,
+                    c300: hits.c300,
+                    c100: hits.c100,
+                    c50: hits.c50,
+                    cmiss: hits.cmiss,
                     pp: ppText,
                     ago: sincePlay,
                     finished: finished,
@@ -225,7 +222,7 @@ module.exports = {
             }
             else {
                 console.log(err);
-                resolve({ error: err.name + ": " + err.message });
+                resolve({ error: `**${err.name}**` + ": " + err.message });
                 return;
             }
         });
@@ -250,12 +247,15 @@ module.exports = {
                 for (var i = 0; i < response.length; i++) {
                     let score = response[i];
 
-                    let c50 = parseInt(score.count50);
-                    let c100 = parseInt(score.count100);
-                    let c300 = parseInt(score.count300);
-                    let cmiss = parseInt(score.countmiss);
+                    let hits = {
+                        c50: parseInt(score.count50),
+                        c100: parseInt(score.count100),
+                        c300: parseInt(score.count300),
+                        cmiss: parseInt(score.countmiss)
+                    }
+
                     let combo = parseInt(score.maxcombo);
-                    let acc = getAcc(c300, c100, c50, cmiss) * 100;
+                    let acc = getAcc(hits.c300, hits.c100, hits.c50, hits.cmiss) * 100;
 
                     let mods = score.enabled_mods;
                     let modsNames = getMods(mods).join("");
@@ -263,7 +263,8 @@ module.exports = {
                     let modsParam = getModsParam(modsNames);
 
                     let map = await getMapData(mapID, modsParam);
-                    let fcpp = combo != map.maxcombo ? await getFCPP(mapID, mods, acc) : 0;
+
+                    let ppText = await getPPText(map, mods, combo, hits, score.pp);
 
                     mainobj = {
                         username: user.username,
@@ -284,19 +285,18 @@ module.exports = {
                         score: Number(score.score),
                         grade: rankemojis[ranknames.indexOf(score.rank)],
                         combo: combo,
-                        c300: c300,
-                        c100: c100,
-                        c50: c50,
-                        cmiss: cmiss,
-                        pp: Number(score.pp),
-                        fcpp: Number(fcpp),
+                        c300: hits.c300,
+                        c100: hits.c100,
+                        c50: hits.c50,
+                        cmiss: hits.cmiss,
+                        ppText: ppText,
                         date: moment.utc(score.date).valueOf()
                     }
 
                     scores.push(obj);
                 }
 
-                resolve({ stats: mainobj, scores: scores });
+                resolve({ stats: mainobj, scores: scores.slice(0, Math.min(8, scores.length)) });
             }).catch(err => {
                 if (err.status == 404) {
                     resolve({ error: `No scores found for ${userobj.username}.` });
@@ -304,7 +304,7 @@ module.exports = {
                 }
                 else {
                     console.log(err);
-                    resolve({ error: err.name + ": " + err.message });
+                    resolve({ error: `**${err.name}**` + ": " + err.message });
                     return;
                 }
             });
@@ -333,18 +333,22 @@ module.exports = {
                     response[i].acc = getAcc(response[i].count300, response[i].count100, response[i].count50, response[i].countmiss) * 100;
                 }
 
+                response.sort(GetSortOrder("pp"));
                 response.sort(GetSortOrder(sortby));
                 if (!reverse) response.reverse();
 
                 for (var i = 0; i < length; i++) {
                     let score = response[i];
 
-                    let c50 = parseInt(score.count50);
-                    let c100 = parseInt(score.count100);
-                    let c300 = parseInt(score.count300);
-                    let cmiss = parseInt(score.countmiss);
+                    let hits = {
+                        c50: parseInt(score.count50),
+                        c100: parseInt(score.count100),
+                        c300: parseInt(score.count300),
+                        cmiss: parseInt(score.countmiss)
+                    }
+
                     let combo = parseInt(score.maxcombo);
-                    let acc = getAcc(c300, c100, c50, cmiss) * 100;
+                    let acc = getAcc(hits.c300, hits.c100, hits.c50, hits.cmiss) * 100;
 
                     let mods = score.enabled_mods;
                     let modsNames = getMods(mods).join("");
@@ -352,7 +356,8 @@ module.exports = {
                     let modsParam = getModsParam(modsNames);
 
                     let map = await getMapData(score.beatmap_id, modsParam);
-                    let fcpp = combo != map.maxcombo ? await getFCPP(score.beatmap_id, mods, acc) : 0;
+
+                    let ppText = await getPPText(map, mods, combo, hits, score.pp);
 
                     userobj = {
                         username: user.username,
@@ -375,12 +380,11 @@ module.exports = {
                         grade: rankemojis[ranknames.indexOf(score.rank)],
                         combo: combo,
                         maxcombo: map.maxcombo,
-                        c300: c300,
-                        c100: c100,
-                        c50: c50,
-                        cmiss: cmiss,
-                        pp: Number(score.pp),
-                        fcpp: Number(fcpp),
+                        c300: hits.c300,
+                        c100: hits.c100,
+                        c50: hits.c50,
+                        cmiss: hits.cmiss,
+                        pp: ppText,
                         date: moment.utc(score.date).valueOf(),
                         position: score.position,
                         submitdate: map.submitted
@@ -394,7 +398,7 @@ module.exports = {
                 if (err.status == 404) return resolve({ error: `No plays found for ${user.username}.` });
                 else {
                     console.log(err);
-                    return resolve({ error: err.name + ": " + err.message });
+                    return resolve({ error: `**${err.name}**` + ": " + err.message });
                 }
             });
         });
@@ -443,6 +447,17 @@ function getModsParam(mods) {
     return modsParam;
 }
 
+async function getPPText(map, mods, combo, hits, pp_) {
+    let pp = pp_ != -1 ? Number(pp_) : await getPP(map.id, mods, combo, getAcc(hits.c300, hits.c100, hits.c50, hits.cmiss), hits.cmiss);
+    let ppText = `**${pp.toFixed(2)}pp**`;
+
+    if (combo != map.maxcombo) {
+        let fcpp = await getFCPP(map.id, mods, getAcc(hits.c300 + hits.cmiss, hits.c100, hits.c50, 0) * 100);
+        ppText = `**${pp.toFixed(2)}pp**/${fcpp.toFixed(2)}pp`;
+    }
+    return ppText;
+}
+
 async function getPP(mapID, mods, combo, acc, cmiss) {
     return new Promise(resolve => {
         cmiss = parseInt(cmiss);
@@ -455,10 +470,8 @@ async function getPP(mapID, mods, combo, acc, cmiss) {
         })
             .on("line", parser.feed_line.bind(parser))
             .on("close", function () {
-
                 var map = parser.map;
                 var stars = new osu.diff().calc({ map: map, mods: mods });
-                var max_combo = map.max_combo();
 
                 var pp = osu.ppv2({
                     stars: stars,
@@ -477,8 +490,6 @@ async function getPP(mapID, mods, combo, acc, cmiss) {
 
 function getFCPP(mapID, mods, acc) {
     return new Promise(resolve => {
-        var cmiss = 0;
-
         var parser = new osu.parser();
         readline.createInterface({
             input: request.get("https://osu.ppy.sh/osu/" + mapID), terminal: false
@@ -493,7 +504,7 @@ function getFCPP(mapID, mods, acc) {
                 var pp = osu.ppv2({
                     stars: stars,
                     combo: max_combo,
-                    nmiss: cmiss,
+                    nmiss: 0,
                     acc_percent: acc,
                 });
 
@@ -538,6 +549,7 @@ async function getMapData(mapid, mods) {
             let mapdata = response[0];
 
             let map = {
+                id: mapdata.beatmap_id,
                 diff: mapdata.version,
                 title: mapdata.title,
                 artist: mapdata.artist,
