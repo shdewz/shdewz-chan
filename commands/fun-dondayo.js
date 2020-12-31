@@ -1,4 +1,4 @@
-let contentarray = require("../awawa.json");
+let contentarray = require("../settings/awawa.json");
 const fs = require("fs");
 
 module.exports.run = async (message, args) => {
@@ -27,7 +27,7 @@ module.exports.run = async (message, args) => {
         }
 
         contentarray.push(obj);
-        fs.writeFileSync("awawa.json", JSON.stringify(contentarray), err => { if (err) return console.log(err); });
+        fs.writeFileSync("settings/awawa.json", JSON.stringify(contentarray), err => { if (err) return console.log(err); });
         return message.reply("content added succesfully.");
     }
     else if (args[0] == "-alias") {
@@ -38,7 +38,7 @@ module.exports.run = async (message, args) => {
             if (contentarray[i].name == name || contentarray[i].aliases.includes(name)) {
                 if (contentarray[i].aliases.includes(alias)) return message.reply(`${name} already has the alias ${alias}.`)
                 contentarray[i].aliases.push(alias);
-                fs.writeFileSync("awawa.json", JSON.stringify(contentarray), err => { if (err) return console.log(err); });
+                fs.writeFileSync("settings/awawa.json", JSON.stringify(contentarray), err => { if (err) return console.log(err); });
                 return message.reply("alias added succesfully.");
             }
         }
