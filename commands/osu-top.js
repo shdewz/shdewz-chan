@@ -44,16 +44,14 @@ module.exports.run = async (message, args) => {
 
         let s = await osu.getTop(username, limit, length, sortby, reverse);
         if (s.error) return message.channel.send(s.error);
+        osu.addLastMap(message, s.plays[0].mapid);
 
         let fields = [];
         for (var i = 0; i < length; i++) {
-            var obj = {
-                name: `**${s.plays[i].position}. ${s.plays[i].title} [${s.plays[i].difficulty}] ${s.plays[i].mods == "" ? "" : "+" + s.plays[i].mods}** (${s.plays[i].stars.toFixed(2)}★)`,
-                value: `${s.plays[i].grade} — ${s.plays[i].pp} — **${s.plays[i].acc.toFixed(2)}%** — [Map Link](https://osu.ppy.sh/b/${s.plays[i].mapid})
-                ${s.plays[i].score.toLocaleString()} — **x${s.plays[i].combo.toLocaleString()}**/${s.plays[i].maxcombo.toLocaleString()} — [${s.plays[i].c300.toLocaleString()}/${s.plays[i].c100.toLocaleString()}/${s.plays[i].c50.toLocaleString()}/${s.plays[i].cmiss.toLocaleString()}]
-                **${moment.utc(s.plays[i].date).fromNow()}** (${moment.utc(s.plays[i].date).format("MMMM Do, YYYY")})\n${sortby == "beatmap_id" ? `Map submitted **${moment.utc(s.plays[i].submitdate).fromNow()}** (${moment.utc(s.plays[i].submitdate).format("MMMM Do, YYYY")})\n` : ""}`
-            }
-            fields.push(obj);
+            fields.push(`**${s.plays[i].position}. [${s.plays[i].title} [${s.plays[i].difficulty}]](https://osu.ppy.sh/b/${s.plays[i].mapid}) ${s.plays[i].mods == "" ? "" : "+" + s.plays[i].mods}** (${s.plays[i].stars.toFixed(2)}★)
+            ${s.plays[i].grade} — ${s.plays[i].pp} — **${s.plays[i].acc.toFixed(2)}%**
+            ${s.plays[i].score.toLocaleString()} — **x${s.plays[i].combo.toLocaleString()}**/${s.plays[i].maxcombo.toLocaleString()} — \`[ ${s.plays[i].c300.toLocaleString()} / ${s.plays[i].c100.toLocaleString()} / ${s.plays[i].c50.toLocaleString()} / ${s.plays[i].cmiss.toLocaleString()} ]\`
+            **${moment.utc(s.plays[i].date).fromNow()}** (${moment.utc(s.plays[i].date).format("MMMM Do, YYYY")})\n${sortby == "beatmap_id" ? `Map submitted **${moment.utc(s.plays[i].submitdate).fromNow()}** (${moment.utc(s.plays[i].submitdate).format("MMMM Do, YYYY")})\n` : ""}`);
         }
 
         let embed = {
@@ -66,8 +64,8 @@ module.exports.run = async (message, args) => {
             thumbnail: {
                 url: s.user.avatar,
             },
-            description: `${sortby == "pp" && !reverse ? "" : "Sorted by " + sortable[sortable_.indexOf(sortby)] + (reverse == true ? " (reversed)" : "")}`,
-            fields: fields
+            title: `${sortby == "pp" && !reverse ? "" : "Sorted by " + sortable[sortable_.indexOf(sortby)] + (reverse == true ? " (reversed)" : "")}`,
+            description: fields.join("\n"),
         }
 
         return message.channel.send({ embed: embed });

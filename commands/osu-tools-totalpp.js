@@ -22,7 +22,7 @@ module.exports.run = async (message, args) => {
 
         // get osu stats
         const osuStatRequest = async () => {
-            const response = await fetch(`https://osu.ppy.sh/api/get_user?k=${config.apikey}&m=0&u=${uid}`);
+            const response = await fetch(`https://osu.ppy.sh/api/get_user?k=${config.keys.osu.apikey_old}&m=0&u=${uid}`);
             const osujson = await response.json();
 
             var osupp = osujson[0].pp_raw;
@@ -32,21 +32,21 @@ module.exports.run = async (message, args) => {
 
             // get taiko stats
             const taikoStatRequest = async () => {
-                const response = await fetch(`https://osu.ppy.sh/api/get_user?k=${config.apikey}&m=1&u=${uid}`);
+                const response = await fetch(`https://osu.ppy.sh/api/get_user?k=${config.keys.osu.apikey_old}&m=1&u=${uid}`);
                 const taikojson = await response.json();
 
                 var taikopp = taikojson[0].pp_raw;
 
                 // get ctb stats
                 const ctbStatRequest = async () => {
-                    const response = await fetch(`https://osu.ppy.sh/api/get_user?k=${config.apikey}&m=2&u=${uid}`);
+                    const response = await fetch(`https://osu.ppy.sh/api/get_user?k=${config.keys.osu.apikey_old}&m=2&u=${uid}`);
                     const ctbjson = await response.json();
 
                     var ctbpp = ctbjson[0].pp_raw;
 
                     // get mania stats
                     const maniaStatRequest = async () => {
-                        const response = await fetch(`https://osu.ppy.sh/api/get_user?k=${config.apikey}&m=3&u=${uid}`);
+                        const response = await fetch(`https://osu.ppy.sh/api/get_user?k=${config.keys.osu.apikey_old}&m=3&u=${uid}`);
                         const maniajson = await response.json();
 
                         var maniapp = maniajson[0].pp_raw;

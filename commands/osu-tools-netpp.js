@@ -8,6 +8,7 @@ module.exports.run = async (message, args) => {
         var mode = 0
         var derank = false;
         var derankpos = 0;
+        var uid = "";
         var modes = {
             "osu": 0,
             "taiko": 1,
@@ -15,7 +16,7 @@ module.exports.run = async (message, args) => {
             "mania": 3
         }
 
-        if (args.length == 0) return message.channel.send(`Correct usage: \`${config.prefix}netpp [<username>] <raw pp> [<taiko/ctb/mania>]\``);
+        if (args.length == 0) return message.channel.send(`Correct usage: \`${config.prefix}netpp [<-u username>] <raw pp> [-o <position>] [<-m taiko/ctb/mania>]\``);
         else {
             if (args.includes("-m")) {
                 mode = modes[args[args.indexOf("-m") + 1].toLowerCase()];
@@ -28,9 +29,14 @@ module.exports.run = async (message, args) => {
                 args.splice(args.indexOf("-o"), 2);
             }
 
-            var ppraw = !isNaN(args[0]) ? args[0] : args[args.length - 1];
+            if (args.includes("-u")) {
+                uid = args[args.indexOf("-u") + 1]
+                args.splice(args.indexOf("-u"), 2);
+            }
 
-            if (args.length == 1) {
+            var ppraw = args.filter(a => !isNaN(a))[0];
+
+            if (uid == "") {
                 let found = false;
                 for (var i = 0; i < statObj.users.length; i++) {
                     if (statObj.users[i].discord == message.author.id) {
@@ -41,12 +47,9 @@ module.exports.run = async (message, args) => {
                 }
                 if (!found) return message.channel.send(`Looks like you haven't linked your account yet.\nLink it with the command \`${config.prefix}osuset <user>\`.`)
             }
-            else {
-                var uid = args.splice(args.indexOf(ppraw), 1).join("_");
-            }
         }
 
-        var apikey = config.apikey;
+        var apikey = config.keys.osu.apikey_old;
 
         // declare the variables
         var scores = [];

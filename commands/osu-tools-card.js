@@ -37,7 +37,7 @@ module.exports.run = async (message, args) => {
 
         var modetext = ["osu!", "osu!taiko", "osu!catch", "osu!mania"][mode];
 
-        var apikey = config.apikey;
+        var apikey = config.keys.osu.apikey_old;
 
         // get stats
         const userStatRequest = async () => {
@@ -61,13 +61,6 @@ module.exports.run = async (message, args) => {
                 }
 
                 // draw everything
-
-                /*
-                var grd = c.createLinearGradient(0, 0, 600, 0);
-                grd.addColorStop(0, "#c31432");
-                grd.addColorStop(1, "#240b36");
-                c.fillStyle = grd;
-                c.fillRect(0, 0, 600, 200);*/
 
                 let design = args.includes("-d") ? args[args.indexOf("-d") + 1] : 0;
 

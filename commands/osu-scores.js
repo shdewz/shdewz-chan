@@ -44,8 +44,8 @@ async function getScores(user, mapid, message) {
     for (var i = 0; i < s.scores.length; i++) {
         var obj = {
             name: `**${s.scores[i].mods == "" ? "NM" : s.scores[i].mods}** (${s.scores[i].stars.toFixed(2)}★) — ${moment.utc(s.scores[i].date).fromNow()}`,
-            value: `${s.scores[i].grade} — ${s.ppText} — **${s.scores[i].accuracy.toFixed(2)}%**
-                ${s.scores[i].score.toLocaleString()} — **x${s.scores[i].combo.toLocaleString()}**/${s.stats.maxcombo.toLocaleString()} — [${s.scores[i].c300.toLocaleString()}/${s.scores[i].c100.toLocaleString()}/${s.scores[i].c50.toLocaleString()}/${s.scores[i].cmiss.toLocaleString()}]\n`
+            value: `${s.scores[i].grade} — ${s.scores[i].ppText} — **${s.scores[i].accuracy.toFixed(2)}%**
+                ${s.scores[i].score.toLocaleString()} — **x${s.scores[i].combo.toLocaleString()}**/${s.stats.maxcombo.toLocaleString()} — \`[ ${s.scores[i].c300.toLocaleString()} / ${s.scores[i].c100.toLocaleString()} / ${s.scores[i].c50.toLocaleString()} / ${s.scores[i].cmiss.toLocaleString()} ]\`\n`
         }
         fields.push(obj);
     }
