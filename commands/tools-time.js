@@ -1,8 +1,8 @@
 const moment = require('moment-timezone');
-const countrylist = require("countries-list");
-const cityTimezones = require('city-timezones');
+const tools = require("../tools.js");
 const axios = require("axios");
 const config = require("../config.json");
+const countries = require("countries-list").countries;
 
 module.exports.run = async (message, args) => {
     try {
@@ -29,12 +29,12 @@ module.exports.run = async (message, args) => {
 
             function getTime(username) {
                 // use timezone based on osu country
-                let apikey = config.apikey;
+                let apikey = config.keys.osu.apikey_old;
                 let api = axios.create({
                     baseURL: 'https://osu.ppy.sh/api',
                 });
 
-                api.get('/get_user', { params: { k: apikey, u: username } }).then(response => {
+                api.get('/get_user', { params: { k: apikey, u: username } }).then(async response => {
                     response = response.data;
 
                     if (response.length == 0) return;
@@ -45,15 +45,10 @@ module.exports.run = async (message, args) => {
                     for (var i = 0; i < statObj.users.length; i++) {
                         if (statObj.users[i].osu_id == userid) {
                             if (!statObj.users[i].timezone) break;
-                            var timeoffset = statObj.users[i].timezone;
+
                             found = true;
 
-                            // do stuff
-                            let now = moment.utc();
-                            if (timeoffset < 0) now.subtract(timeoffset.match(/[0-9]{1,2}/)[0], "hours");
-                            else if (timeoffset > 0) now.add(timeoffset.match(/[0-9]{1,2}/)[0], "hours");
-
-                            var time = now.format("HH:mm");
+                            let time = moment.utc().add(Number(statObj.users[i].timezone), "hours").format("HH:mm");
 
                             let embed = {
                                 color: message.member.displayColor,
@@ -61,6 +56,9 @@ module.exports.run = async (message, args) => {
                                     name: `It is currently ${time} for ${response[0].username}`,
                                     icon_url: `https://a.ppy.sh/${response[0].user_id}?${+new Date()}`,
                                     url: `https://osu.ppy.sh/u/${response[0].user_id}`
+                                },
+                                footer: {
+                                    text: `Timezone: UTC${statObj.users[i].timezone}`
                                 }
                             }
                             return message.channel.send({ embed: embed });
@@ -68,22 +66,12 @@ module.exports.run = async (message, args) => {
                     }
 
                     if (!found) {
-                        let country_obj = countrylist.countries[response[0].country.toUpperCase()];
-                        let country = country_obj.name;
-                        let capital = country_obj.capital;
+                        let capital = countries[response[0].country].capital;
+                        let location_array = await tools.getLocation({ city: capital, country: response[0].country });
+                        let location = location_array[0];
+                        let timezone = await tools.getTimezone(location.latitude, location.longitude);
 
-                        // fix broken capitals
-                        if (capital == "Washington D.C.") capital = "New York";
-                        if (capital == "City of Victoria") capital = "Hong Kong";
-
-                        if (!cityTimezones.lookupViaCity(capital)) return;
-                        let city_obj = cityTimezones.lookupViaCity(capital)
-                        let timezone = city_obj[0].timezone;
-                        if (capital == "London") timezone = "Europe/London";
-                        let now = moment().tz(timezone);
-
-                        var time = now.format("HH:mm");
-                        //var date = now.format("dddd, MMMM Do, YYYY");
+                        let time = moment.utc().add(timezone.gmtOffset, "s").format("HH:mm");
 
                         let embed = {
                             color: message.member.displayColor,
@@ -91,6 +79,9 @@ module.exports.run = async (message, args) => {
                                 name: `It is currently ${time} for ${response[0].username}`,
                                 icon_url: `https://a.ppy.sh/${response[0].user_id}?${+new Date()}`,
                                 url: `https://osu.ppy.sh/u/${response[0].user_id}`
+                            },
+                            footer: {
+                                text: `Timezone: ${timezone.abbreviation} - ${timezone.zoneName}`
                             }
                         }
                         return message.channel.send({ embed: embed });

@@ -10,13 +10,16 @@ module.exports.run = async (message, args) => {
         for (var i = 0; i < statObj.users.length; i++) {
             if (statObj.users[i].discord == message.author.id) {
                 statObj.users[i].timezone = zone;
+                message.reply(`your timezone has been set to ${zone}`);
                 exists = true;
-                break;
+                return;
             }
         }
         if (!exists) {
             var obj = { "discord": message.author.id, "timezone": zone };
             statObj.users.push(obj);
+            message.reply(`your timezone has been set to ${zone}`);
+            return;
         }
     }
 };
