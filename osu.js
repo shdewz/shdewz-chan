@@ -1,49 +1,17 @@
 const axios = require("axios");
-const fs = require("fs");
+const fetch = require("node-fetch");
 const moment = require("moment");
+const config = require("./config.json");
 
 const readline = require("readline");
 const request = require('request');
 const osu = require("ojsama");
+const tools = require("./tools.js");
 
 let api, apikey;
 
 const rankemojis = ["<:rankingF:691413465830522912>", "<:rankingD:691413465834717237>", "<:rankingC:691413466036043777>", "<:rankingB:691413466040238170>", "<:rankingA:691413466019397693>", "<:rankingS:691413466048626709>", "<:rankingSH:691413466061209720>", "<:rankingX:691413467634335895>", "<:rankingXH:691413465813745756>"];
 const ranknames = ["F", "D", "C", "B", "A", "S", "SH", "X", "XH"];
-
-const mods_enum = {
-    'NM': 0,
-    'NF': 1,
-    'EZ': 2,
-    'TD': 4,
-    'HD': 8,
-    'HR': 16,
-    'SD': 32,
-    'DT': 64,
-    'RX': 128,
-    'HT': 256,
-    'NC': 512,
-    'FL': 1024,
-    'AT': 2048,
-    'SO': 4096,
-    'AP': 8192,
-    'PF': 16384,
-    '4K': 32768,
-    '5K': 65536,
-    '6K': 131072,
-    '7K': 262144,
-    '8K': 524288,
-    'FI': 1048576,
-    'RD': 2097152,
-    'LM': 4194304,
-    '9K': 16777216,
-    '10K': 33554432,
-    '1K': 67108864,
-    '3K': 134217728,
-    '2K': 268435456,
-    'V2': 536870912,
-    'MR': 1073741824
-};
 
 module.exports = {
     init: function (api_key) {
@@ -84,8 +52,27 @@ module.exports = {
                 });
             }).catch(err => {
                 console.log(err);
-                resolve({ error: `**${err.name}**` + ": " + err.message });
+                resolve({ error: `**${err.name}:** ${err.message}` });
                 return;
+            });
+        });
+    },
+
+    getUser_v2: async function (user) {
+        return new Promise(async resolve => {
+            let auth = await getAuth(config.keys.osu.client_id, config.keys.osu.client_secret);
+
+            fetch(`https://osu.ppy.sh/api/v2/users/${user}`, {
+                headers: {
+                    Authorization: `Bearer ${auth.access_token}`
+                }
+            }).then(async response => {
+                let data = await response.json();
+                if (data.length == 0) resolve({ error: `User **${user}** not found.` });
+                resolve(data);
+            }).catch(err => {
+                console.log(err);
+                resolve({ error: `**${err.name}:** ${err.message}` });
             });
         });
     },
@@ -169,14 +156,13 @@ module.exports = {
 
                 let combo = parseInt(eventdata.maxcombo);
                 let score = parseInt(eventdata.score);
-                let acc = getAcc(hits.c300, hits.c100, hits.c50, hits.cmiss) * 100;
+                let acc = tools.osu.getAcc(hits.c300, hits.c100, hits.c50, hits.cmiss) * 100;
 
                 let mods = eventdata.enabled_mods;
-                let modsNames = getMods(mods).join("");
-                let modsText = "";
-                if (mods != 0) modsText = `${modsNames}`;
+                let modsNames = tools.osu.getMods(mods).join("");
+                let modsText = mods != 0 ? modsNames : "";
 
-                let modsParam = getModsParam(modsNames);
+                let modsParam = mods == 0 ? 0 : tools.osu.modsToParam(modsNames);
 
                 let grade = rankemojis[ranknames.indexOf(eventdata.rank)];
                 let finished = eventdata.rank == "F" ? false : true;
@@ -222,7 +208,7 @@ module.exports = {
             }
             else {
                 console.log(err);
-                resolve({ error: `**${err.name}**` + ": " + err.message });
+                resolve({ error: `**${err.name}:** ${err.message}` });
                 return;
             }
         });
@@ -255,12 +241,12 @@ module.exports = {
                     }
 
                     let combo = parseInt(score.maxcombo);
-                    let acc = getAcc(hits.c300, hits.c100, hits.c50, hits.cmiss) * 100;
+                    let acc = tools.osu.getAcc(hits.c300, hits.c100, hits.c50, hits.cmiss) * 100;
 
                     let mods = score.enabled_mods;
-                    let modsNames = getMods(mods).join("");
+                    let modsNames = tools.osu.getMods(mods).join("");
                     let modsText = mods != 0 ? modsNames : "";
-                    let modsParam = getModsParam(modsNames);
+                    let modsParam = mods == 0 ? 0 : tools.osu.modsToParam(modsNames);
 
                     let map = await getMapData(mapID, modsParam);
 
@@ -304,7 +290,7 @@ module.exports = {
                 }
                 else {
                     console.log(err);
-                    resolve({ error: `**${err.name}**` + ": " + err.message });
+                    resolve({ error: `**${err.name}:** ${err.message}` });
                     return;
                 }
             });
@@ -330,7 +316,7 @@ module.exports = {
                 for (var i = 0; i < response.length; i++) {
                     response[i].position = i + 1;
                     response[i].date = moment.utc(response[i].date).valueOf();
-                    response[i].acc = getAcc(response[i].count300, response[i].count100, response[i].count50, response[i].countmiss) * 100;
+                    response[i].acc = tools.osu.getAcc(response[i].count300, response[i].count100, response[i].count50, response[i].countmiss) * 100;
                 }
 
                 response.sort(GetSortOrder("pp"));
@@ -348,12 +334,12 @@ module.exports = {
                     }
 
                     let combo = parseInt(score.maxcombo);
-                    let acc = getAcc(hits.c300, hits.c100, hits.c50, hits.cmiss) * 100;
+                    let acc = tools.osu.getAcc(hits.c300, hits.c100, hits.c50, hits.cmiss) * 100;
 
                     let mods = score.enabled_mods;
-                    let modsNames = getMods(mods).join("");
+                    let modsNames = tools.osu.getMods(mods).join("");
                     let modsText = mods != 0 ? modsNames : "";
-                    let modsParam = getModsParam(modsNames);
+                    let modsParam = mods == 0 ? 0 : tools.osu.modsToParam(modsNames);
 
                     let map = await getMapData(score.beatmap_id, modsParam);
 
@@ -398,32 +384,52 @@ module.exports = {
                 if (err.status == 404) return resolve({ error: `No plays found for ${user.username}.` });
                 else {
                     console.log(err);
-                    return resolve({ error: `**${err.name}**` + ": " + err.message });
+                    return resolve({ error: `**${err.name}:** ${err.message}` });
                 }
             });
         });
     },
 
-    addLastMap: function (message, mapID) {
-        var exists = false;
-        for (var i = 0; i < statObj.serverstats.length; i++) {
-            if (statObj.serverstats[i].id == message.channel.guild.id) {
-                for (var j = 0; j < statObj.serverstats[i].channels.length; j++) {
-                    if (statObj.serverstats[i].channels[j].id == message.channel.id) {
-                        statObj.serverstats[i].channels[j].content.lastBeatmap = mapID;
-                        exists = true;
-                    }
-                }
-                if (!exists) {
-                    var obj = { "id": message.channel.id, "content": { "lastBeatmap": mapID } };
-                    statObj.serverstats[i].channels.push(obj);
-                    exists = true;
-                }
+    getMap: async function (mapID, mods) {
+        return new Promise(async resolve => {
+            let map = await getMapData(mapID, mods == "" ? 0 : tools.osu.modsToParam(mods), mods);
+            let lb = await getMapLeaderboard(mapID, tools.osu.modsToParamFull(mods));
+
+            let obj = {
+                map: map,
+                lb: lb
             }
-        }
-        if (!exists) {
-            var obj = { "id": message.channel.guild.id, "channels": [{ "id": message.channel.id, "content": { "lastBeatmap": mapID } }] };
+
+            resolve(obj);
+        });
+    },
+
+    getMatch: async function (match_id) {
+        return new Promise(async resolve => {
+            api.get('/get_match', { params: { k: apikey, mp: match_id } }).then(async response => {
+                response = response.data;
+                if (response.games.length == 0) resolve({ error: `Match **${match_id}** not found.` });
+                resolve(response);
+            }).catch(err => {
+                console.log(err);
+                resolve({ error: `**${err.name}:** ${err.message}` });
+            });
+        });
+    },
+
+    addLastMap: function (message, mapID) {
+        let server_index = statObj.serverstats.findIndex(s => s.id == message.channel.guild.id);
+        if (server_index == -1) {
+            let obj = { "id": message.channel.guild.id, "channels": [{ "id": message.channel.id, "content": { "lastBeatmap": mapID } }] };
             statObj.serverstats.push(obj);
+        }
+        else {
+            let channel_index = statObj.serverstats[server_index].channels.findIndex(c => c.id == message.channel.id);
+            if (channel_index == -1) {
+                let obj = { "id": message.channel.id, "content": { "lastBeatmap": mapID } };
+                statObj.serverstats[server_index].channels.push(obj);
+            }
+            else statObj.serverstats[server_index].channels[channel_index].content.lastBeatmap = mapID;
         }
         return;
     }
@@ -437,22 +443,13 @@ function GetSortOrder(prop) {
     }
 }
 
-function getModsParam(mods) {
-    mods = mods.toUpperCase();
-    let modsParam = 0;
-    if (mods.includes("HR")) modsParam += 16;
-    if (mods.includes("DT") || mods.includes("NC")) modsParam += 64;
-    if (mods.includes("HT")) modsParam += 256;
-    if (mods.includes("EZ")) modsParam += 2;
-    return modsParam;
-}
-
+// pp to string form
 async function getPPText(map, mods, combo, hits, pp_) {
-    let pp = pp_ != -1 ? Number(pp_) : await getPP(map.id, mods, combo, getAcc(hits.c300, hits.c100, hits.c50, hits.cmiss), hits.cmiss);
+    let pp = pp_ != -1 ? Number(pp_) : await getPP(map.id, mods, combo, tools.osu.getAcc(hits.c300, hits.c100, hits.c50, hits.cmiss) * 100, hits.cmiss);
     let ppText = `**${pp.toFixed(2)}pp**`;
 
     if (combo != map.maxcombo) {
-        let fcpp = await getFCPP(map.id, mods, getAcc(hits.c300 + hits.cmiss, hits.c100, hits.c50, 0) * 100);
+        let fcpp = await getFCPP(map.id, mods, tools.osu.getAcc(hits.c300 + hits.cmiss, hits.c100, hits.c50, 0) * 100);
         ppText = `**${pp.toFixed(2)}pp**/${fcpp.toFixed(2)}pp`;
     }
     return ppText;
@@ -477,6 +474,7 @@ async function getPP(mapID, mods, combo, acc, cmiss) {
                     stars: stars,
                     combo: combo,
                     nmiss: cmiss,
+                    mods: mods,
                     acc_percent: acc,
                 });
 
@@ -488,57 +486,43 @@ async function getPP(mapID, mods, combo, acc, cmiss) {
     });
 }
 
-function getFCPP(mapID, mods, acc) {
-    return new Promise(resolve => {
-        var parser = new osu.parser();
-        readline.createInterface({
-            input: request.get("https://osu.ppy.sh/osu/" + mapID), terminal: false
-        })
-            .on("line", parser.feed_line.bind(parser))
-            .on("close", function () {
+async function getFCPP(mapID, mods, acc) {
+    try {
+        return new Promise(resolve => {
+            var parser = new osu.parser();
+            readline.createInterface({
+                input: request.get("https://osu.ppy.sh/osu/" + mapID), terminal: false
+            })
+                .on("line", parser.feed_line.bind(parser))
+                .on("close", function () {
+                    try {
+                        var map = parser.map;
+                        var stars = new osu.diff().calc({ map: map, mods: mods });
+                        var max_combo = map.max_combo();
 
-                var map = parser.map;
-                var stars = new osu.diff().calc({ map: map, mods: mods });
-                var max_combo = map.max_combo();
+                        var pp = osu.ppv2({
+                            stars: stars,
+                            combo: max_combo,
+                            nmiss: 0,
+                            mods: mods,
+                            acc_percent: acc,
+                        });
 
-                var pp = osu.ppv2({
-                    stars: stars,
-                    combo: max_combo,
-                    nmiss: 0,
-                    acc_percent: acc,
+                        resolve(pp.total);
+                    }
+                    catch (error) {
+                        console.log(error);
+                        resolve(0);
+                    }
                 });
-
-                resolve(pp.total);
-            });
-    }).catch(err => {
+        });
+    } catch (err) {
         console.error(err);
-        return 0.00;
-    });
-}
-
-function getMods(mods) {
-    var result = [];
-    for (var mod in mods_enum) {
-        if ((mods_enum[mod] & mods) != 0)
-            result.push(mod);
+        return 0;
     }
-    return cleanMods(result);
 }
 
-function cleanMods(mods) {
-    let result = mods;
-    if (mods.includes("NC") && mods.includes("DT"))
-        result.splice(mods.indexOf("DT"), 1);
-    if (mods.includes("PF") && mods.includes("SD"))
-        result.splice(mods.indexOf("SD"), 1);
-    return result;
-}
-
-function getAcc(c300, c100, c50, cmiss) {
-    return (c300 * 300 + c100 * 100 + c50 * 50) / (c300 * 300 + c100 * 300 + c50 * 300 + cmiss * 300);
-}
-
-async function getMapData(mapid, mods) {
+async function getMapData(mapid, mods, modsfull) {
     return new Promise(resolve => {
         api.get('/get_beatmaps', { params: { k: apikey, b: mapid, mods: mods } }).then(async response => {
             response = response.data;
@@ -546,26 +530,108 @@ async function getMapData(mapid, mods) {
             if (!response || response.length == 0) {
                 return console.log(`Beatmap *${beatmap}* not found.`);
             }
-            let mapdata = response[0];
+            let data = response[0];
+
+            let pps = !modsfull ? [] : [
+                {
+                    acc: 95,
+                    pp: await getFCPP(mapid, tools.osu.modsToParamFull(modsfull), 95)
+                },
+                {
+                    acc: 98,
+                    pp: await getFCPP(mapid, tools.osu.modsToParamFull(modsfull), 98)
+                },
+                {
+                    acc: 99,
+                    pp: await getFCPP(mapid, tools.osu.modsToParamFull(modsfull), 99)
+                },
+                {
+                    acc: 100,
+                    pp: await getFCPP(mapid, tools.osu.modsToParamFull(modsfull), 100)
+                }
+            ];
+
+            let modmultiplier = !modsfull ? 1 : ["DT", "NC"].some(m => modsfull.includes(m)) ? 1.5 : modsfull.includes("HT") ? 0.75 : 1;
+
+            let stats = !modsfull ? {} : tools.osu.getModStats(data.diff_size, data.diff_approach, data.diff_overall, data.diff_drain, modsfull);
 
             let map = {
-                id: mapdata.beatmap_id,
-                diff: mapdata.version,
-                title: mapdata.title,
-                artist: mapdata.artist,
-                mapper: mapdata.creator,
-                maxcombo: parseInt(mapdata.max_combo),
-                bpm: parseInt(mapdata.bpm),
-                stars: Number(mapdata.difficultyrating),
-                mapset: mapdata.beatmapset_id,
-                banner: `https://assets.ppy.sh/beatmaps/${mapdata.beatmapset_id}/covers/list@2x.jpg`,
-                objects: parseInt(mapdata.count_normal) + parseInt(mapdata.count_slider) + parseInt(mapdata.count_spinner),
-                submitted: moment.utc(mapdata.submit_date).valueOf(),
-                ranked: moment.utc(mapdata.approved_date).valueOf(),
-                updated: moment.utc(mapdata.last_update).valueOf()
+                id: data.beatmap_id,
+                diff: data.version,
+                title: data.title,
+                artist: data.artist,
+                mapper: data.creator,
+                total_length: Math.round(data.total_length / modmultiplier),
+                hit_length: Math.round(data.hit_length / modmultiplier),
+                maxcombo: Number(data.max_combo),
+                bpm: Number(data.bpm) * modmultiplier,
+                stars: Number(data.difficultyrating),
+                mapset: data.beatmapset_id,
+                pps: pps,
+                stats: stats,
+                banner: `https://assets.ppy.sh/beatmaps/${data.beatmapset_id}/covers/list@2x.jpg`,
+                objects: Number(data.count_normal) + Number(data.count_slider) + Number(data.count_spinner),
+                submitted: moment.utc(data.submit_date).valueOf(),
+                ranked: moment.utc(data.approved_date).valueOf(),
+                updated: moment.utc(data.last_update).valueOf()
             }
 
             resolve(map);
+        });
+    });
+}
+
+async function getMapLeaderboard(mapid, mods) {
+    return new Promise(resolve => {
+        let limit = 5;
+        api.get('/get_scores', { params: { k: apikey, b: mapid, mods: mods, limit: limit } }).then(async response => {
+            let data = response.data;
+            let scores = [];
+
+            data.forEach(score => {
+                let obj = {
+                    username: score.username,
+                    user_id: score.user_id,
+                    score: Number(score.score),
+                    combo: Number(score.maxcombo),
+                    cmiss: Number(score.countmiss),
+                    c50: Number(score.count50),
+                    c100: Number(score.count100),
+                    c300: Number(score.count300),
+                    acc: tools.osu.getAcc(score.count300, score.count100, score.count50, score.countmiss),
+                    pp: Number(score.pp),
+                    replay: score.replay_available == 1 ? `https://osu.ppy.sh/scores/osu/${score.score_id}/download` : false,
+                    date: moment.utc(score.date).valueOf(),
+                    grade: rankemojis[ranknames.indexOf(score.rank)],
+                    mods: tools.osu.getMods(score.enabled_mods)
+                }
+                scores.push(obj);
+            });
+
+            resolve(scores);
+        });
+    });
+}
+
+// api v2 stuff
+
+async function getAuth(client_id, client_secret) {
+    return new Promise(resolve => {
+        fetch("https://osu.ppy.sh/oauth/token", {
+            method: 'post',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "grant_type": "client_credentials",
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "scope": "public"
+            })
+        }).then(async response => {
+            let data = await response.json();
+            resolve(data);
         });
     });
 }
