@@ -28,7 +28,7 @@ module.exports.run = async (message, args) => {
                         let artist = "Not provided";
                         if (args.includes("/artist")) {
                             const baseurl = "https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1";
-                            const auth = config.gelbooru_auth;
+                            const auth = config.keys.gelbooru_auth;
                             let apiCall = async (tags) => {
                                 try {
                                     let tags_ = [];
@@ -93,14 +93,14 @@ module.exports.run = async (message, args) => {
     });
     if (args.includes("/nsfw")) {
         if (message.channel.nsfw) {
-            args.splice(args.indexOf("/nsfw"));
+            args.splice(args.indexOf("/nsfw"), 1);
             args.push("-rating:safe");
         } else return message.reply("NOT HERE");
     } else args.push("rating:safe");
 
     if (args.includes("/familyfriendly")) {
         args.splice(args.indexOf("/familyfriendly"), 1);
-        args = `${args.join(" ")} -ass -bikini -cleavage`.split(" ");
+        args = `${args.join(" ")} -ass -bikini -cleavage -underwear`.split(" ");
     }
 
     var searchfilters = [
@@ -149,59 +149,36 @@ module.exports.run = async (message, args) => {
 
     // Perform a search for popular image posts
     const baseurl = "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1";
-    const auth = config.gelbooru_auth;
+    const auth = config.keys.gelbooru_auth;
     const tags = "&tags=" + args.join("+") + "+score:>4";
 
     const apiCall = async () => {
         try {
             const response = await fetch(baseurl + auth + tags);
-            const result = await response.json();
+            const results = await response.json();
+            filteredResults = results.filter(r => !searchfilters.some(filter => r.tags.split(" ").includes(filter)));
+            if (filteredResults.length == 0) return message.channel.send("No images found.");
 
-            var maxtries = 10;
-            var found = false;
-            var tries = 0;
+            let post = filteredResults[Math.floor(Math.random() * filteredResults.length)];
 
-            while (!found) {
-                if (tries >= maxtries)
-                    return message.channel.send("No images found.");
-
-                var rng = Math.floor(Math.random() * result.length);
-                if (
-                    !searchfilters.some(filter =>
-                        result[rng].tags.includes(filter),
-                    )
-                )
-                    break;
-
-                tries++;
-            }
-
-            var url = result[rng].file_url;
-            result[rng].rolled_by = message.member.displayName;
+            let url = post.file_url;
+            post.rolled_by = message.member.displayName;
             message.channel.send(url);
 
-            var exists = false;
+            let exists = false;
             for (var i = 0; i < statObj.serverstats.length; i++) {
                 if (statObj.serverstats[i].id == message.channel.guild.id) {
-                    for (
-                        var j = 0;
-                        j < statObj.serverstats[i].channels.length;
-                        j++
-                    ) {
-                        if (
-                            statObj.serverstats[i].channels[j].id ==
-                            message.channel.id
-                        ) {
+                    for (var j = 0; j < statObj.serverstats[i].channels.length; j++) {
+                        if (statObj.serverstats[i].channels[j].id == message.channel.id) {
                             exists = true;
-                            statObj.serverstats[i].channels[j].content.lastAnime =
-                                result[rng];
+                            statObj.serverstats[i].channels[j].content.lastAnime = post;
                         }
                     }
                     if (!exists) {
-                        var obj = {
+                        let obj = {
                             id: message.channel.id,
                             content: {
-                                lastAnime: result[rng],
+                                lastAnime: post,
                             },
                         };
                         statObj.serverstats[i].channels.push(obj);
@@ -216,7 +193,7 @@ module.exports.run = async (message, args) => {
                         {
                             id: message.channel.id,
                             content: {
-                                lastAnime: result[rng],
+                                lastAnime: post,
                             },
                         },
                     ],
@@ -224,24 +201,28 @@ module.exports.run = async (message, args) => {
                 statObj.serverstats.push(obj);
             }
 
+            let post_tags = post.tags.split(" ");
+
             // it's pinging time
             if (message.guild.id == "667863566279507994") {
                 // LwL
-                if (result[rng].tags.includes("loli"))
+                if (post_tags.includes("loli"))
                     message.channel.send("hey <@110538906637721600> got some loli content for you here");
                 // bart
-                if (result[rng].tags.includes("feet"))
+                if (post_tags.includes("feet"))
                     message.channel.send("hey <@184753701519360001> have feet");
+                if (post_tags.includes("yumemi_riamu"))
+                    message.channel.send("<@184753701519360001> dumb bitch in sight");
                 // shdewz
-                if (result[rng].tags.includes("ke-ta"))
+                if (post_tags.includes("ke-ta"))
                     message.channel.send("ke-ta ow o you fucking nonce <@250693235091963904>");
                 // lokser
-                if (result[rng].tags.includes("love_live!"))
+                if (post_tags.includes("love_live!"))
                     message.channel.send("idols spotted <@250998032856776704> <@117555792894361602>");
                 // menty
-                if (result[rng].tags.includes("konpaku_youmu") && result[rng].rating == "s")
+                if (post_tags.includes("konpaku_youmu") && post.rating == "s")
                     message.channel.send("<@117555792894361602> caring wife");
-                if (result[rng].tags.includes("armpits") && !result[rng].tags.includes("hairy_armpits"))
+                if (post_tags.includes("armpits") && !post_tags.includes("hairy_armpits"))
                     message.channel.send("pits of the arms <@117555792894361602>");
             }
             return;
