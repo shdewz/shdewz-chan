@@ -1,24 +1,17 @@
 # settings files
 config.json
-stats.json
-settings.json
 sys-p-*.js
 
 # yea
-fun-kyafeet.js
-img/kya
-fun-menty.js
-awawa.json
-apiv2test.js
+settings/
 start.bat
+loadlolis.js
 img/ss
 outputs/
-daemon/
+avatars/
 *.bak
-the_brains.json
 .vscode/
 .history/
-roles.json
 
 # Logs
 logs
