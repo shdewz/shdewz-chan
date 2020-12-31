@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const client = new Discord.Client();
+const client = new Discord.Client({ ws: { intents: Discord.Intents.ALL } });
 const moment = require("moment");
 client.commands = new Discord.Collection();
 client.aliases = new Discord.Collection();
@@ -12,35 +12,33 @@ let ready = false;
 
 global.servers = {};
 global.statObj = {};
-global.responseObj = {};
 
 client.once("ready", async () => {
-    osu.init(config.apikey);
-    console.log("\nReady!\n");
-    client.user.setActivity("nothing");
-    statObj = client.commands.get("loadstats").run("stats.json");
-    responseObj = client.commands.get("loadstats").run("the_brains.json");
+    osu.init(config.keys.osu.apikey_old);
+    client.commands.get("response").init();
+    client.commands.get("gachamanager").init();
+
+    client.user.setActivity("Halozy", { type: "LISTENING" });
+    statObj = client.commands.get("loadstats").run("settings/stats.json");
     client.commands.get("remindme").init(client);
+
     ready = true;
+    console.log("\nReady!\n");
 });
 
 client.on("message", async message => {
     if (message.channel.type !== "text") return; // ignore non-text-channels
     if (message.author.bot) return; // ignore bot messages
 
-    if (message.author.id == "250693235091963904" && message.content == `${config.prefix}reloadcommands`) return reloadCommands();
+    let prefix = config.prefix;
 
     // response learning
-    client.commands.get("response").collect(message);
+    if (config.responses.collect.includes(message.guild.id) && !message.content.startsWith(prefix) && !message.mentions.has(client.user)) client.commands.get("response").collect(message, client);
 
     // responding
-    if (((!message.content.startsWith(config.prefix) && Math.random() < 0.08) || message.mentions.has(client.user)) && message.guild.id == "667863566279507994") client.commands.get("response").respond(message.content, message.channel);
-
-    // special messages
-    if (message.content == ")/") return message.channel.send(")/");
+    if (((!message.content.startsWith(prefix) && Math.random() < 0.08) || message.mentions.has(client.user)) && config.responses.respond.includes(message.guild.id)) client.commands.get("response").respond(message.content, message);
 
     // ignore non-commands
-    let prefix = config.prefix;
     if (!message.content.startsWith(prefix)) return;
 
     //split and format message for use in commands
@@ -49,17 +47,14 @@ client.on("message", async message => {
     let args = messageArray.slice(1);
 
     // run the command
-    if (client.commands.has(command)) {
-        client.commands.get(command).run(message, args, client);
-    } else if (client.aliases.has(command)) {
-        client.commands.get(client.aliases.get(command)).run(message, args, client);
-    } else return;
+    if (client.commands.has(command)) client.commands.get(command).run(message, args, client);
+    else if (client.aliases.has(command)) client.commands.get(client.aliases.get(command)).run(message, args, client);
+    else return;
 
     console.log(`[${moment().format("HH:mm:ss")}] Command '${command}' issued by ${message.author.username}`)
-})
+});
 
-// command reload
-function reloadCommands() {
+function loadCommands() {
     client.commands.clear();
     client.aliases.clear();
 
@@ -82,15 +77,15 @@ function reloadCommands() {
     });
 }
 
-reloadCommands();
+loadCommands();
 client.login(config.token);
 
 // handle exiting
 process.on('SIGINT', () => {
     let stats = statObj;
-    let responses = responseObj;
-    if (stats != {} && ready) fs.writeFileSync("stats.json", JSON.stringify(stats), err => { if (err) return console.log(err); });
-    if (responses != {} && ready) fs.writeFileSync("the_brains.json", JSON.stringify(responses), err => { if (err) return console.log(err); });
+    if (stats != {} && ready) fs.writeFileSync("settings/stats.json", JSON.stringify(stats), err => { if (err) return console.log(err); });
+    client.commands.get("response").save();
+    client.commands.get("gachamanager").save();
     console.log(`[${moment().format("HH:mm:ss")}] Stats saved succesfully, exiting.`);
     process.exit();
 });
@@ -98,8 +93,6 @@ process.on('SIGINT', () => {
 // autosave every 30 minutes
 setInterval(() => {
     let stats = statObj;
-    let responses = responseObj;
-    if (stats != {} && ready) fs.writeFileSync("stats.json", JSON.stringify(stats), err => { if (err) return console.log(err); });
-    if (responses != {} && ready) fs.writeFileSync("the_brains.json", JSON.stringify(responses), err => { if (err) return console.log(err); });
+    if (stats != {} && ready) fs.writeFileSync("settings/stats.json", JSON.stringify(stats), err => { if (err) return console.log(err); });
     console.log(`[${moment().format("HH:mm:ss")}] Autosave successful.`);
 }, 30 * 60 * 1000);
