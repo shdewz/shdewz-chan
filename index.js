@@ -43,15 +43,19 @@ client.on("message", async message => {
 
     //split and format message for use in commands
     let messageArray = message.content.split(" ");
-    let command = messageArray[0].slice(prefix.length).toLowerCase();
+    let commandname = messageArray[0].slice(prefix.length).toLowerCase();
     let args = messageArray.slice(1);
 
     // run the command
-    if (client.commands.has(command)) client.commands.get(command).run(message, args, client);
-    else if (client.aliases.has(command)) client.commands.get(client.aliases.get(command)).run(message, args, client);
+    let command;
+    if (client.commands.has(commandname)) command = client.commands.get(commandname);
+    else if (client.aliases.has(commandname)) command = client.commands.get(client.aliases.get(commandname));
     else return;
 
-    console.log(`[${moment().format("HH:mm:ss")}] Command '${command}' issued by ${message.author.username}`)
+    if (command.help.servers && !command.help.servers.includes(message.guild.id) && message.guild.id != config.testserver) return;
+    command.run(message, args, client);
+
+    console.log(`[${moment().format("HH:mm:ss")}] Command '${commandname}' issued by ${message.author.username}`)
 });
 
 function loadCommands() {
