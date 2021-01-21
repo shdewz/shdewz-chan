@@ -10,13 +10,24 @@ module.exports.run = async (message, args) => {
         let found;
         let limit = 5;
         let length = 5;
+        let customlength = false;
+        let position = 0;
         let reverse = false;
         let sortby = "pp";
 
         if (args.includes("-l")) {
             limit = Math.max(Math.min(args[args.indexOf("-l") + 1], 8), 1);
             length = limit;
+            customlength = true;
             args.splice(args.indexOf("-l"), 2);
+        }
+
+        if (args.includes("-p")) {
+            position = args[args.indexOf("-p") + 1] - 1;
+            if (!customlength) length = 1;
+            length = Math.min(length, 100 - position);
+            limit = Math.min(Math.max(limit, position + length), 100);
+            args.splice(args.indexOf("-p"), 2);
         }
 
         if (args.includes("-s")) {
@@ -42,22 +53,19 @@ module.exports.run = async (message, args) => {
 
 
 
-        let s = await osu.getTop(username, limit, length, sortby, reverse);
+        let s = await osu.getTop(username, limit, length, sortby, reverse, position);
         if (s.error) return message.channel.send(s.error);
         osu.addLastMap(message, s.plays[0].mapid);
 
         let fields = [];
         for (var i = 0; i < length; i++) {
-            fields.push(`**${s.plays[i].position}. [${s.plays[i].title} [${s.plays[i].difficulty}]](https://osu.ppy.sh/b/${s.plays[i].mapid}) ${s.plays[i].mods == "" ? "" : "+" + s.plays[i].mods}** (${s.plays[i].stars.toFixed(2)}★)
-            ${s.plays[i].grade} — ${s.plays[i].pp} — **${s.plays[i].acc.toFixed(2)}%**
-            ${s.plays[i].score.toLocaleString()} — **x${s.plays[i].combo.toLocaleString()}**/${s.plays[i].maxcombo.toLocaleString()} — \`[ ${s.plays[i].c300.toLocaleString()} / ${s.plays[i].c100.toLocaleString()} / ${s.plays[i].c50.toLocaleString()} / ${s.plays[i].cmiss.toLocaleString()} ]\`
-            **${moment.utc(s.plays[i].date).fromNow()}** (${moment.utc(s.plays[i].date).format("MMMM Do, YYYY")})\n${sortby == "beatmap_id" ? `Map submitted **${moment.utc(s.plays[i].submitdate).fromNow()}** (${moment.utc(s.plays[i].submitdate).format("MMMM Do, YYYY")})\n` : ""}`);
+            fields.push(`**${s.plays[i].position}. [${s.plays[i].title} [${s.plays[i].difficulty}]](https://osu.ppy.sh/b/${s.plays[i].mapid}) ${s.plays[i].mods == "" ? "" : "+" + s.plays[i].mods}** (${s.plays[i].stars.toFixed(2)}★)\n${s.plays[i].grade} — ${s.plays[i].pp} — **${s.plays[i].acc.toFixed(2)}%**\n${s.plays[i].score.toLocaleString()} — **x${s.plays[i].combo.toLocaleString()}**/${s.plays[i].maxcombo.toLocaleString()} — \`[ ${s.plays[i].c300.toLocaleString()} / ${s.plays[i].c100.toLocaleString()} / ${s.plays[i].c50.toLocaleString()} / ${s.plays[i].cmiss.toLocaleString()} ]\`\n**${moment.utc(s.plays[i].date).fromNow()}** (${moment.utc(s.plays[i].date).format("MMMM Do, YYYY")})\n${sortby == "beatmap_id" ? `Map submitted **${moment.utc(s.plays[i].submitdate).fromNow()}** (${moment.utc(s.plays[i].submitdate).format("MMMM Do, YYYY")})\n` : ""}`);
         }
 
         let embed = {
             color: message.member.displayColor,
             author: {
-                name: `Top ${length} osu! plays for ${s.user.username}`,
+                name: `Top ${length} osu! plays for ${s.user.username}${position == 0 ? "" : ` starting at #${position + 1}`}`,
                 icon_url: `${s.user.flag}?${+new Date()}`,
                 url: s.user.url
             },
