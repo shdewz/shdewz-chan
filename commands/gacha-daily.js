@@ -21,8 +21,6 @@ module.exports.run = async (message) => {
         }
         else gacha.users[user].daily.streak = 1;
 
-        console.log({ today, last_day });
-
         let daily_amount = base_amount + Math.pow((gacha.users[user].daily.streak - 1) / 2, 2);
 
         gacha.users[user].balance += daily_amount;
@@ -59,5 +57,6 @@ module.exports.run = async (message) => {
 module.exports.help = {
     name: "daily",
     description: "Collect your daily reward.",
-    category: "Gacha"
+    category: "Gacha",
+    servers: ["465232270832304128"]
 }
