@@ -10,7 +10,7 @@ const tools = require("./tools.js");
 
 let api, apikey;
 
-const rankemojis = ["<:rankingF:691413465830522912>", "<:rankingD:691413465834717237>", "<:rankingC:691413466036043777>", "<:rankingB:691413466040238170>", "<:rankingA:691413466019397693>", "<:rankingS:691413466048626709>", "<:rankingSH:691413466061209720>", "<:rankingX:691413467634335895>", "<:rankingXH:691413465813745756>"];
+const rankemojis = ["<:rankingF:799961417498230824>", "<:rankingD:799961417197420546>", "<:rankingC:799961417474113536>", "<:rankingB:799961417552887870>", "<:rankingA:799961417431777290>", "<:rankingS:799961417490366464>", "<:rankingSH:799961417481715722>", "<:rankingX:799961417637822495>", "<:rankingXH:799961496062132225>"];
 const ranknames = ["F", "D", "C", "B", "A", "S", "SH", "X", "XH"];
 
 module.exports = {
@@ -166,7 +166,7 @@ module.exports = {
 
                 let grade = rankemojis[ranknames.indexOf(eventdata.rank)];
                 let finished = eventdata.rank == "F" ? false : true;
-                let sincePlay = moment.utc(eventdata.date).fromNow();
+                let date = moment.utc(eventdata.date).valueOf();
 
                 let map = await getMapData(beatmap, modsParam);
 
@@ -196,7 +196,7 @@ module.exports = {
                     c50: hits.c50,
                     cmiss: hits.cmiss,
                     pp: ppText,
-                    ago: sincePlay,
+                    date: date,
                     finished: finished,
                     completion: completion
                 })
@@ -297,7 +297,7 @@ module.exports = {
         });
     },
 
-    getTop: async function (userID, limit, length, sortby, reverse) {
+    getTop: async function (userID, limit, length, sortby, reverse, position) {
         return new Promise(async resolve => {
 
             let user = await this.getUser(userID);
@@ -322,6 +322,8 @@ module.exports = {
                 response.sort(GetSortOrder("pp"));
                 response.sort(GetSortOrder(sortby));
                 if (!reverse) response.reverse();
+
+                if (position > 0) response.splice(0, position);
 
                 for (var i = 0; i < length; i++) {
                     let score = response[i];
@@ -392,7 +394,7 @@ module.exports = {
 
     getMap: async function (mapID, mods) {
         return new Promise(async resolve => {
-            let map = await getMapData(mapID, mods == "" ? 0 : tools.osu.modsToParam(mods), mods);
+            let map = await getMapData(mapID, mods == "" ? 0 : tools.osu.modsToParam(mods), mods, true);
             let lb = await getMapLeaderboard(mapID, tools.osu.modsToParamFull(mods));
 
             let obj = {
@@ -468,7 +470,10 @@ async function getPP(mapID, mods, combo, acc, cmiss) {
             .on("line", parser.feed_line.bind(parser))
             .on("close", function () {
                 var map = parser.map;
-                var stars = new osu.diff().calc({ map: map, mods: mods });
+                var stars = 0;
+
+                try { stars = new osu.diff().calc({ map: map, mods: mods }); }
+                catch (err) { console.error(err); return 0.00; }
 
                 var pp = osu.ppv2({
                     stars: stars,
@@ -522,7 +527,7 @@ async function getFCPP(mapID, mods, acc) {
     }
 }
 
-async function getMapData(mapid, mods, modsfull) {
+async function getMapData(mapid, mods, modsfull, getpps) {
     return new Promise(resolve => {
         api.get('/get_beatmaps', { params: { k: apikey, b: mapid, mods: mods } }).then(async response => {
             response = response.data;
@@ -532,7 +537,7 @@ async function getMapData(mapid, mods, modsfull) {
             }
             let data = response[0];
 
-            let pps = !modsfull ? [] : [
+            let pps = !getpps ? [] : [
                 {
                     acc: 95,
                     pp: await getFCPP(mapid, tools.osu.modsToParamFull(modsfull), 95)
@@ -553,7 +558,12 @@ async function getMapData(mapid, mods, modsfull) {
 
             let modmultiplier = !modsfull ? 1 : ["DT", "NC"].some(m => modsfull.includes(m)) ? 1.5 : modsfull.includes("HT") ? 0.75 : 1;
 
-            let stats = !modsfull ? {} : tools.osu.getModStats(data.diff_size, data.diff_approach, data.diff_overall, data.diff_drain, modsfull);
+            let stats = !modsfull ? {
+                cs: data.diff_size,
+                ar: data.diff_approach,
+                od: data.diff_overall,
+                hp: data.diff_drain
+            } : tools.osu.getModStats(data.diff_size, data.diff_approach, data.diff_overall, data.diff_drain, modsfull);
 
             let map = {
                 id: data.beatmap_id,
