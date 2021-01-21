@@ -1,6 +1,7 @@
 # settings files
 config.json
 sys-p-*.js
+gacha-admin.js
 
 # yea
 settings/
