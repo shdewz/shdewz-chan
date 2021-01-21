@@ -11,8 +11,9 @@ module.exports.run = async (message, args, client) => {
     let s = await osu.getMatch(match_id);
     if (s.error) return message.channel.send(s.error);
 
-    if (args.includes("-w")) s.games.splice(0, args[args.indexOf("-w") + 1]);
-    if (args.includes("-e")) s.games.splice(-args[args.indexOf("-e") + 1], args[args.indexOf("-e") + 1]);
+
+    if (args[1] && !isNaN(args[1])) s.games.splice(0, args[1]);
+    if (args[2] && !isNaN(args[2])) s.games.splice(-args[2], args[2]);
 
     let mode = s.games[0].team_type;
     let valid = s.match.name.match(/.*: \(.*\) vs \(.*\)$/i) ? true : false;
@@ -24,7 +25,8 @@ module.exports.run = async (message, args, client) => {
         team1points: 0,
         team2points: 0,
         players: [],
-        medians: []
+        medians: [],
+        medianmaps: 0
     };
 
     let unique_players = s.games.map(g => g.scores.filter(s => s.score > 0).map(s => s.user_id)).reduce((a, b) => a.concat(b), []).filter((p, i, a) => a.indexOf(p) == i);
@@ -52,7 +54,7 @@ module.exports.run = async (message, args, client) => {
             }
         }
 
-        s.games.forEach(map => {
+        s.games.filter(game => game.scores.length > 0).forEach(map => {
             match.medians.push(median(map.scores.map(sc => Number(sc.score))));
 
             if (mode == 2) {
@@ -78,7 +80,11 @@ module.exports.run = async (message, args, client) => {
             });
         });
 
-        match.players.forEach(player => { player.rating = getCost(player.scores, match.medians) });
+        let arr = [];
+        match.players.forEach(player => arr.push(player.scores.filter(score => score > 0).length));
+        match.medianmaps = median(arr);
+
+        match.players.forEach(player => { player.rating = getCost(player.scores, match.medians, match.medianmaps) });
         match.players.sort((a, b) => a.rating - b.rating).reverse();
         for (var i = 0; i < Math.min(match.players.length, 3); i++) { match.players[i].medal = medals[i]; }
 
@@ -94,35 +100,15 @@ module.exports.run = async (message, args, client) => {
                 description: `**Final score:** ${match.team2points > match.team1points ? `🔴 **${match.team2points}** - ${match.team1points} 🔵` : `🔴 ${match.team2points} - **${match.team1points}** 🔵`}`,
                 fields: [
                     {
-                        name: `🔴`,
-                        value: match.players.filter(p => p.team == 2).map((p, i) => `**#${i + 1}**`),
-                        inline: true,
+                        name: `🔴 **Red Team**`,
+                        value: match.players.filter(p => p.team == 2).map((p, i) => `#${i + 1} \u200b **${p.rating.toFixed(2)}** \u200b [${p.username}](https://osu.ppy.sh/u/${p.user_id}) ${p.medal}`),
+                        inline: false,
                     },
                     {
-                        name: `**Red Team**`,
-                        value: match.players.filter(p => p.team == 2).map(p => `[${p.username}](https://osu.ppy.sh/u/${p.user_id}) ${p.medal}`),
-                        inline: true,
-                    },
-                    {
-                        name: "\u200b",
-                        value: match.players.filter(p => p.team == 2).map(p => `**${p.rating.toFixed(2)}**`),
-                        inline: true,
-                    },
-                    {
-                        name: `🔵`,
-                        value: match.players.filter(p => p.team == 1).map((p, i) => `**#${i + 1}**`),
-                        inline: true,
-                    },
-                    {
-                        name: `**Blue Team**`,
-                        value: match.players.filter(p => p.team == 1).map(p => `[${p.username}](https://osu.ppy.sh/u/${p.user_id}) ${p.medal}`),
-                        inline: true,
-                    },
-                    {
-                        name: "\u200b",
-                        value: match.players.filter(p => p.team == 1).map(p => `**${p.rating.toFixed(2)}**`),
-                        inline: true,
-                    },
+                        name: `🔵 **Blue Team**`,
+                        value: match.players.filter(p => p.team == 1).map((p, i) => `#${i + 1} \u200b **${p.rating.toFixed(2)}** \u200b [${p.username}](https://osu.ppy.sh/u/${p.user_id}) ${p.medal}`),
+                        inline: false,
+                    }
                 ]
             }
         }
@@ -130,26 +116,16 @@ module.exports.run = async (message, args, client) => {
             embed = {
                 color: message.member.displayColor,
                 author: {
-                    name: `${match.acronym}: ${match.team1} vs ${match.team2}`,
+                    name: `${valid ? `${match.acronym}: ${match.team1} vs ${match.team2}` : s.match.name}`,
                     url: `https://osu.ppy.sh/mp/${match_id}`
                 },
                 description: match.players.length == 2 ? `**Final score:** ${match.team1points > match.team2points ? `**${match.players[0].username} ${match.team1points}** - ${match.team2points} ${match.players[1].username}` : `${match.players[0].username} ${match.team1points} - **${match.team2points} ${match.players[1].username}**`}` : "",
                 fields: [
                     {
                         name: "\u200b",
-                        value: match.players.map((p, i) => `**#${i + 1}**`),
-                        inline: true,
-                    },
-                    {
-                        name: "\u200b",
-                        value: match.players.map(p => `[${p.username}](https://osu.ppy.sh/u/${p.user_id}) ${p.medal}`),
-                        inline: true,
-                    },
-                    {
-                        name: "\u200b",
-                        value: match.players.map(p => `**${p.rating.toFixed(2)}**`),
-                        inline: true,
-                    },
+                        value: match.players.map((p, i) => `#${i + 1} \u200b **${p.rating.toFixed(2)}** \u200b [${p.username}](https://osu.ppy.sh/u/${p.user_id}) ${p.medal}`),
+                        inline: false,
+                    }
                 ]
             }
         }
@@ -161,7 +137,7 @@ module.exports.run = async (message, args, client) => {
     });
 };
 
-const getCost = (p, m) => { let sum = 0; p.forEach((s, i) => { if (s > 0) sum += s / m[i] }); return (sum / p.filter(s => s > 0).length) * Math.sqrt(p.filter(s => s > 0).length / m.length); };
+const getCost = (p, m, mm) => { let sum = 0; p.forEach((s, i) => { if (s > 0) sum += s / m[i] }); return (sum / p.filter(s => s > 0).length) * Math.cbrt(p.filter(s => s > 0).length / mm); };
 
 const getCostAlt = (p, m) => { let sum = 0; p.forEach((s, i) => { if (s > 0) sum += s / m[i] }); return sum; };
 
@@ -174,8 +150,8 @@ const median = arr => {
 module.exports.help = {
     name: "match_costs",
     aliases: ["matchcosts", "mc", "costs"],
-    description: "Compare the individual performance of players in an osu! tournament match.\n\n**Parameters:**\n`-w <number>` amount of warmups - or maps to ignore from the start\n`-e <number>` same as above but from the end",
-    usage: "match_costs <mplink/id> [parameters]",
-    example: "match_costs 62088294 -w 2 -e 1",
+    description: "Compare the individual performance of players in an osu! tournament match.",
+    usage: "match_costs <mplink/id> [<ignore_from_start>] [<ignore_from_end>]",
+    example: "match_costs 62088294 2 0",
     category: "osu!"
 }
