@@ -47,15 +47,11 @@ module.exports.run = async (message, args) => {
                 thumbnail: {
                     url: s.plays[0].banner,
                 },
-                description: `**[${s.plays[0].artist} - ${s.plays[0].title} \[${s.plays[0].difficulty}\]](https://osu.ppy.sh/b/${s.plays[0].mapid})**`,
-                fields: [
-                    {
-                        name: `**${s.plays[0].position}. ${s.plays[0].title} [${s.plays[0].difficulty}] ${s.plays[0].mods == "" ? "" : "+" + s.plays[0].mods}** (${s.plays[0].stars.toFixed(2)}★)`,
-                        value: `${s.plays[0].grade} — ${s.plays[0].pp} — **${s.plays[0].acc.toFixed(2)}%**
-                        ${s.plays[0].score.toLocaleString()} — **x${s.plays[0].combo.toLocaleString()}**/${s.plays[0].maxcombo.toLocaleString()} — \`[ ${s.plays[0].c300.toLocaleString()} / ${s.plays[0].c100.toLocaleString()} / ${s.plays[0].c50.toLocaleString()} / ${s.plays[0].cmiss.toLocaleString()} ]\`
-                        **${moment.utc(s.plays[0].date).fromNow()}** (${moment.utc(s.plays[0].date).format("MMMM Do, YYYY")})\n`
-                    }
-                ]
+                description: `**${s.plays[0].position}. [${s.plays[0].title} [${s.plays[0].difficulty}]](https://osu.ppy.sh/b/${s.plays[0].mapid}) ${s.plays[0].mods == "" ? "" : "+" + s.plays[0].mods}** (${s.plays[0].stars.toFixed(2)}★)\n${s.plays[0].grade} — ${s.plays[0].pp} — **${s.plays[0].acc.toFixed(2)}%**\n${s.plays[0].score.toLocaleString()} — **x${s.plays[0].combo.toLocaleString()}**/${s.plays[0].maxcombo.toLocaleString()} — \`[ ${s.plays[0].c300.toLocaleString()} / ${s.plays[0].c100.toLocaleString()} / ${s.plays[0].c50.toLocaleString()} / ${s.plays[0].cmiss.toLocaleString()} ]\``,
+                footer: {
+                    text: `${moment.utc(s.plays[0].date).fromNow()}`
+                },
+                timestamp: new Date(s.plays[0].date),
             }
 
             return message.channel.send({ embed: embed });
@@ -75,14 +71,11 @@ module.exports.run = async (message, args) => {
                 thumbnail: {
                     url: s.banner,
                 },
-                description: `**[${s.artist} - ${s.title} \[${s.difficulty}\]](https://osu.ppy.sh/b/${s.mapid})**`,
-                fields: [
-                    {
-                        name: `**${s.mods == "" ? "NM" : s.mods}** (${s.stars.toFixed(2)}★) — ${s.ago}`,
-                        value: `${s.grade} — ${s.pp} — **${s.accuracy.toFixed(2)}%**
-                        ${s.score.toLocaleString()} — **x${s.combo.toLocaleString()}**/${s.maxcombo.toLocaleString()} — \`[ ${s.c300.toLocaleString()} / ${s.c100.toLocaleString()} / ${s.c50.toLocaleString()} / ${s.cmiss.toLocaleString()} ]\`${s.finished == true ? "" : "\n" + (s.completion * 100).toFixed(2) + "% completion"}`
-                    }
-                ]
+                description: `**[${s.title} \[${s.difficulty}\]](https://osu.ppy.sh/b/${s.mapid})** ${s.mods == "" ? "" : `**+${s.mods}**`} (${s.stars.toFixed(2)}★)\n${s.grade} — ${s.pp} — **${s.accuracy.toFixed(2)}%**\n${s.score.toLocaleString()} — **x${s.combo.toLocaleString()}**/${s.maxcombo.toLocaleString()} — \`[ ${s.c300.toLocaleString()} / ${s.c100.toLocaleString()} / ${s.c50.toLocaleString()} / ${s.cmiss.toLocaleString()} ]\`${s.finished == true ? "" : "\n" + (s.completion * 100).toFixed(2) + "% completion"}`,
+                footer: {
+                    text: `${moment.utc(s.date).fromNow()}`
+                },
+                timestamp: new Date(s.date),
             }
 
             return message.channel.send({ embed: embed });
