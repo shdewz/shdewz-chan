@@ -54,11 +54,11 @@ module.exports.run = async (message, args, client) => {
         thumbnail: {
             url: m.map.banner,
         },
-        description: `Mapped by **${m.map.mapper}**\n**Length:** ${String(moment.duration(m.map.total_length * 1000).minutes()).padStart(2, '0')}:${String(moment.duration(m.map.total_length * 1000).seconds()).padStart(2, '0')} (${String(moment.duration(m.map.hit_length * 1000).minutes()).padStart(2, '0')}:${String(moment.duration(m.map.hit_length * 1000).seconds()).padStart(2, '0')}) \u200b **BPM:** ${m.map.bpm.toLocaleString()} \u200b **Mods:** +${mods == "" ? "NM" : mods.replace(/[^a-zA-Z]/g, "")}\n**CS:** ${Math.round(m.map.stats.cs * 10) / 10} \u200b **AR:** ${Math.round(m.map.stats.ar * 10) / 10} \u200b **OD:** ${Math.round(m.map.stats.od * 10) / 10} \u200b **HP:** ${Math.round(m.map.stats.hp * 10) / 10} \u200b `,
+        description: `Mapped by **${m.map.mapper}**\n**Length:** ${String(moment.duration(m.map.total_length * 1000).minutes()).padStart(2, '0')}:${String(moment.duration(m.map.total_length * 1000).seconds()).padStart(2, '0')} (${String(moment.duration(m.map.hit_length * 1000).minutes()).padStart(2, '0')}:${String(moment.duration(m.map.hit_length * 1000).seconds()).padStart(2, '0')}) \u200b **BPM:** ${m.map.bpm.toLocaleString()} \u200b **Mods:** +${mods == "" ? "NM" : mods.replace(/[^a-zA-Z]/g, "")}`,
         fields: [
             {
                 name: `**[${m.map.diff}]**`,
-                value: `**Difficulty:** ${m.map.stars.toFixed(2)}★ \u200b **Max combo:** x${m.map.maxcombo.toLocaleString()}\n**PP:** | ${m.map.pps.map(p => `**${p.acc.toFixed(0)}%** \`${p.pp.toFixed(0)}pp\``).join(" | ")}`,
+                value: `**CS:** ${Math.round(m.map.stats.cs * 10) / 10} \u200b **AR:** ${Math.round(m.map.stats.ar * 10) / 10} \u200b **OD:** ${Math.round(m.map.stats.od * 10) / 10} \u200b **HP:** ${Math.round(m.map.stats.hp * 10) / 10}\n**Difficulty:** ${m.map.stars.toFixed(2)}★ \u200b **Max combo:** x${m.map.maxcombo.toLocaleString()}\n**PP:** | ${m.map.pps.map(p => `**${p.acc.toFixed(0)}%** \`${p.pp.toFixed(0)}pp\``).join(" | ")}`,
                 inline: false,
             },
             lb.length > 0 ? lbfields : { name: `Leaderboard`, value: "No leaderboard scores." }
