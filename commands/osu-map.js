@@ -16,7 +16,7 @@ module.exports.run = async (message, args, client) => {
 
     let mods = args.filter(a => a.startsWith("+")).length > 0 ? args.filter(a => a.startsWith("+"))[0].toUpperCase().substring(1) : "";
 
-    let m = await osu.getMap(mapid, mods);
+    let m = await osu.getMap(mapid, mods, true);
     osu.addLastMap(message, m.map.id);
 
     let lb = [];

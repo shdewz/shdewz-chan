@@ -392,9 +392,9 @@ module.exports = {
         });
     },
 
-    getMap: async function (mapID, mods) {
+    getMap: async function (mapID, mods, getpps) {
         return new Promise(async resolve => {
-            let map = await getMapData(mapID, mods == "" ? 0 : tools.osu.modsToParam(mods), mods, true);
+            let map = await getMapData(mapID, mods == "" ? 0 : tools.osu.modsToParam(mods), mods, getpps);
             let lb = await getMapLeaderboard(mapID, tools.osu.modsToParamFull(mods));
 
             let obj = {
