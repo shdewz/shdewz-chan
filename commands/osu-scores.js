@@ -51,7 +51,7 @@ async function getScores(user, mapid, message) {
     }
 
     let embed = {
-        color: message.member.displayColor,
+        color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
         author: {
             name: `${s.stats.artist} - ${s.stats.title} [${s.stats.difficulty}]`,
             icon_url: `${s.stats.avatar}?${+new Date()}`,

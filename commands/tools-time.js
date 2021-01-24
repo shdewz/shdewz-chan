@@ -51,7 +51,7 @@ module.exports.run = async (message, args) => {
                             let time = moment.utc().add(Number(statObj.users[i].timezone), "hours").format("HH:mm");
 
                             let embed = {
-                                color: message.member.displayColor,
+                                color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                                 author: {
                                     name: `It is currently ${time} for ${response[0].username}`,
                                     icon_url: `https://a.ppy.sh/${response[0].user_id}?${+new Date()}`,
@@ -74,7 +74,7 @@ module.exports.run = async (message, args) => {
                         let time = moment.utc().add(timezone.gmtOffset, "s").format("HH:mm");
 
                         let embed = {
-                            color: message.member.displayColor,
+                            color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                             author: {
                                 name: `It is currently ${time} for ${response[0].username}`,
                                 icon_url: `https://a.ppy.sh/${response[0].user_id}?${+new Date()}`,
@@ -100,7 +100,7 @@ module.exports.run = async (message, args) => {
             var detailed = now.format("DDDo [day of the year / Week] w");
 
             let embed = {
-                color: message.member.displayColor,
+                color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                 description: `**${time} UTC**
                     ${date}
                     ${detailed}`

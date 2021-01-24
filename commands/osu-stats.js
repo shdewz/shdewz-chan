@@ -78,7 +78,7 @@ module.exports.run = async (message, args) => {
                 if (s.error) return message.channel.send(s.error);
 
                 let embed = {
-                    color: message.member.displayColor,
+                    color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                     author: {
                         name: `osu! stats for ${s.username}`,
                         icon_url: `https://osu.ppy.sh/images/flags/${s.country}.png`,

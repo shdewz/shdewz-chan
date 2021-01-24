@@ -38,7 +38,7 @@ module.exports.run = async (message, args) => {
             osu.addLastMap(message, s.plays[0].mapid);
 
             let embed = {
-                color: message.member.displayColor,
+                color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                 author: {
                     name: `Most recent osu! top play for ${s.user.username}:`,
                     icon_url: `${s.user.avatar}?${+new Date()}`,
@@ -62,7 +62,7 @@ module.exports.run = async (message, args) => {
             osu.addLastMap(message, s.mapid);
 
             let embed = {
-                color: message.member.displayColor,
+                color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                 author: {
                     name: `Most recent osu! play for ${s.username}:`,
                     icon_url: `${s.avatar}?${+new Date()}`,

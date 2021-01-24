@@ -12,7 +12,7 @@ module.exports.run = async (message, args) => {
     let post = posts[rng].data;
 
     let embed = {
-        color: message.member.displayColor,
+        color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
         author: {
             name: post.title,
             url: "https://reddit.com" + post.permalink

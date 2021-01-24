@@ -42,7 +42,7 @@ module.exports.run = async (message, args, client) => {
                 apiv2.get("/summary").then(response => {
                     data = response.data.Global;
                     let embed = {
-                        color: message.member.displayColor,
+                        color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                         author: {
                             name: `Coronavirus overall statistics:`
                         },
@@ -81,7 +81,7 @@ module.exports.run = async (message, args, client) => {
                     const chartimage = new MessageAttachment(chart, `covid19-${info.Country.replace(/ /g, "_").toLowerCase()}-chart.png`);
 
                     let embed = {
-                        color: message.member.displayColor,
+                        color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                         author: {
                             name: `Coronavirus in ${info.Country}`,
                             icon_url: `https://osu.ppy.sh/images/flags/${info.CountryCode}.png`
@@ -114,7 +114,7 @@ module.exports.run = async (message, args, client) => {
                 api.get("/all").then(response => {
                     data = response.data;
                     let embed = {
-                        color: message.member.displayColor,
+                        color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                         author: {
                             name: `Coronavirus overall statistics:`
                         },
@@ -155,7 +155,7 @@ module.exports.run = async (message, args, client) => {
                     countries.sort();
 
                     let embed = {
-                        color: message.member.displayColor,
+                        color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                         author: {
                             name: `All supported countries:`
                         },
@@ -183,7 +183,7 @@ module.exports.run = async (message, args, client) => {
                     });
 
                     let embed = {
-                        color: message.member.displayColor,
+                        color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                         author: {
                             name: `Top 10 by cases${args.includes("-today") ? " (today)" : ""}:`
                         },
@@ -219,7 +219,7 @@ module.exports.run = async (message, args, client) => {
                     });
 
                     let embed = {
-                        color: message.member.displayColor,
+                        color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                         author: {
                             name: `Top 10 by deaths:`
                         },
@@ -272,7 +272,7 @@ module.exports.run = async (message, args, client) => {
                         });
 
                         let embed = {
-                            color: message.member.displayColor,
+                            color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                             author: {
                                 name: `Top 10 by % infected:`
                             },
@@ -320,7 +320,7 @@ module.exports.run = async (message, args, client) => {
                     }
 
                     let embed = {
-                        color: message.member.displayColor,
+                        color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                         author: {
                             name: `Top 10 by death %:`
                         },
@@ -355,7 +355,7 @@ module.exports.run = async (message, args, client) => {
                             data = response.data;
 
                             let embed = {
-                                color: message.member.displayColor,
+                                color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                                 author: {
                                     name: `Coronavirus in ${data.country}:`,
                                     icon_url: `https://osu.ppy.sh/images/flags/${code}.png`
@@ -410,7 +410,7 @@ module.exports.run = async (message, args, client) => {
                             data = response.data;
 
                             let embed = {
-                                color: message.member.displayColor,
+                                color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                                 author: {
                                     name: `Coronavirus in ${data.country}:`,
                                     icon_url: `https://osu.ppy.sh/images/flags/${code}.png`

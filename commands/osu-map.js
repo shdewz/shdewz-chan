@@ -46,7 +46,7 @@ module.exports.run = async (message, args, client) => {
     }];
 
     let embed = {
-        color: message.member.displayColor,
+        color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
         author: {
             name: `${m.map.artist} - ${m.map.title}`,
             url: `https://osu.ppy.sh/b/${m.map.id}`

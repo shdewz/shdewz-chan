@@ -4,7 +4,7 @@ module.exports.run = async (message, args, client) => {
     let userobj = client.users.cache.get(id);
 
     let embed = {
-        color: message.member.displayColor,
+        color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
         author: {
             name: userobj.username,
             icon_url: userobj.avatarURL()

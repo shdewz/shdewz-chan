@@ -63,7 +63,7 @@ module.exports.run = async (message, args) => {
         }
 
         let embed = {
-            color: message.member.displayColor,
+            color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
             author: {
                 name: `Top ${length} osu! plays for ${s.user.username}${position == 0 ? "" : ` starting at #${position + 1}`}`,
                 icon_url: `${s.user.flag}?${+new Date()}`,

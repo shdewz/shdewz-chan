@@ -143,7 +143,7 @@ module.exports.run = async (message, args) => {
                             clearTimeout(dead);
 
                             let embed = {
-                                color: message.member.displayColor,
+                                color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                                 author: {
                                     name: username,
                                     icon_url: flagurl,
@@ -167,7 +167,7 @@ module.exports.run = async (message, args) => {
 
                     dead = setTimeout(function () {
                         let embed = {
-                            color: message.member.displayColor,
+                            color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                             author: {
                                 name: username,
                                 icon_url: flagurl,

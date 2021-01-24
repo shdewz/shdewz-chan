@@ -92,7 +92,7 @@ module.exports.run = async (message, args, client) => {
 
         if (mode == 2) { // teamvs
             embed = {
-                color: message.member.displayColor,
+                color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                 author: {
                     name: `${valid ? `${match.acronym}: ${match.team1} vs ${match.team2}` : s.match.name}`,
                     url: `https://osu.ppy.sh/mp/${match_id}`
@@ -114,7 +114,7 @@ module.exports.run = async (message, args, client) => {
         }
         else { // head to head
             embed = {
-                color: message.member.displayColor,
+                color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                 author: {
                     name: `${valid ? `${match.acronym}: ${match.team1} vs ${match.team2}` : s.match.name}`,
                     url: `https://osu.ppy.sh/mp/${match_id}`

@@ -15,7 +15,7 @@ module.exports.run = async (message, args, client) => {
 
     if (args.includes("-text") && !all) {
         let embed = {
-            color: message.member.displayColor,
+            color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
             author: {
                 name: userobj.username,
                 icon_url: userobj.avatarURL()
@@ -70,7 +70,7 @@ module.exports.run = async (message, args, client) => {
             const image = new MessageAttachment(buffer, `shdewzchan-gacha-${userobj.username.replace(/ /g, "_").toLowerCase()}-inventory.png`);
 
             let embed = {
-                color: message.member.displayColor,
+                color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                 author: all ? {} : {
                     name: userobj.username,
                     icon_url: userobj.avatarURL()

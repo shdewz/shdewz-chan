@@ -59,7 +59,7 @@ module.exports.run = async (message, args) => {
                         }
 
                         let embed = {
-                            color: message.member.displayColor,
+                            color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                             author: {
                                 name: `Latest anime post in #${message.channel.name}`,
                             },

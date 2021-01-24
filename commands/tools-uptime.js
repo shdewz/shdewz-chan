@@ -21,7 +21,7 @@ module.exports.run = async (message, args, client) => {
     let minutestext = minutes > 0 ? `**${minutes}** minute${minutes_s}, ` : "";
 
     let embed = {
-        color: message.member.displayColor,
+        color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
         author: {
             name: `shdewz-chan uptime:`,
             icon_url: client.user.displayAvatarURL()

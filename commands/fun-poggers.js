@@ -88,7 +88,7 @@ module.exports.run = async (message, args) => {
         else poggers.users.sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
 
         let embed = {
-            color: message.member.displayColor,
+            color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
             title: `**poggers list:**`,
             fields: [
                 {
@@ -115,7 +115,7 @@ module.exports.run = async (message, args) => {
 
     if (args.includes("-list")) {
         let embed = {
-            color: message.member.displayColor,
+            color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
             title: `**content list for ${user.name}:**`,
             fields: [
                 {

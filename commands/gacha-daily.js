@@ -31,7 +31,7 @@ module.exports.run = async (message) => {
         let streaktext = `**${gacha.users[user].daily.streak}** / ${max_streak}`;
 
         let embed = {
-            color: message.member.displayColor,
+            color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
             author: {
                 name: message.author.username,
                 icon_url: message.author.avatarURL()

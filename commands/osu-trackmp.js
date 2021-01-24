@@ -9,27 +9,31 @@ let last_map = 0;
 let last_message = 0;
 let delete_msg = false;
 
-let timer;
-
 module.exports.run = async (message, args, client) => {
     if (args.length == 0) return;
     args = args.map(a => a.toLowerCase());
     let match_id = args[0].match(/\d+/)[0];
     if (args.includes("-d")) delete_msg = true;
 
-    checkMatch(match_id, message);
-    timer = setInterval(async () => { checkMatch(match_id, message); }, 30 * 1000); // check every 30 seconds
+    async function update() {
+        let type = await checkMatch(match_id, message);
+        if (type == "same") {
+            try_count++;
+            if (try_count >= max_tries) return;
+        }
+        setTimeout(update, 30 * 1000);
+    }
+    update();
 };
 
 let checkMatch = async (matchid, message) => {
     let s = await osu.getMatch(matchid); // load match data
 
+    // return if no maps
+    if (!s.games || s.games.slice(-1)[0].scores.length == 0) return "same";
+
     // return if there are no new finished maps
-    if (s.games.length == 0 || last_map == s.games.slice(-1)[0].game_id) {
-        try_count++;
-        if (try_count >= max_tries) clearInterval(timer);
-        return;
-    }
+    if (last_map == s.games.slice(-1)[0].game_id) return "same";
 
     try_count = 0;
     let map = s.games.slice(-1)[0]; // get last map of match
@@ -62,7 +66,7 @@ let checkMatch = async (matchid, message) => {
         scores.sort((a, b) => b.score - a.score);
 
         let embed = {
-            color: message.member.displayColor,
+            color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
             author: {
                 name: `${s.match.name}`,
                 url: `https://osu.ppy.sh/mp/${matchid}`,
@@ -87,7 +91,9 @@ let checkMatch = async (matchid, message) => {
         if (last_message != 0 && delete_msg) {
             message.channel.messages.fetch(last_message).then(msg => msg.delete());
         }
-        return message.channel.send({ embed: embed }).then(msg => last_message = msg.id);
+        message.channel.send({ embed: embed }).then(msg => last_message = msg.id);
+
+        return "new";
     });
 }
 

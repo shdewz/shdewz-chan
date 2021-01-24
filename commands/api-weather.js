@@ -146,7 +146,7 @@ module.exports.run = async (message, args) => {
         ]
 
         let embed = {
-            color: message.member.displayColor,
+            color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
             author: {
                 name: `Weather for ${typeof location.city === "undefined" ? "" : `${location.city}, `}${location.country}`,
                 icon_url: `https://osu.ppy.sh/images/flags/${location.countryCode}.png`,

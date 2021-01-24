@@ -16,7 +16,7 @@ module.exports.run = async (message, args, client) => {
     const image = new MessageAttachment(card, `shdewzchan-gacha-${loli.name.replace(/ /g, "_").toLowerCase()}.png`);
 
     let embed = {
-        color: message.member.displayColor,
+        color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
         author: {
             name: loli.name,
         },

@@ -92,7 +92,7 @@ module.exports = {
             let avatar = `https://a.ppy.sh/${id}`;
 
             let embed = {
-                color: message.member.displayColor,
+                color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                 author: {
                     name: `Succesfully linked to osu! account ${username}!`,
                     icon_url: `${avatar}?${+new Date()}`,
