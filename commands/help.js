@@ -8,6 +8,8 @@ module.exports.run = async (message, args, client) => {
             if (client.commands.has(command)) command = client.commands.get(command);
             else command = client.commands.get(client.aliases.get(command));
 
+            if (command.help.servers && !command.help.servers.includes(message.guild.id) && message.guild.id != config.testserver) return;
+
             var exampletext = "";
             if (command.help.example) exampletext = `\n**Example:** \`${config.prefix}${command.help.example}\``;
             if (command.help.example2) exampletext += `\n**Example:** \`${config.prefix}${command.help.example2}\``;
@@ -35,34 +37,19 @@ module.exports.run = async (message, args, client) => {
         else return message.reply(`command ${command} not found.`);
     }
     else {
-        var commands = [];
-        for (var i = 0; i < Array.from(client.commands).length; i++) {
-            var command = Array.from(client.commands)[i][1];
-            if (!command.help) continue;
-            if (command.help && command.help.category == "sys") continue;
+        let commands = Array.from(client.commands).map(c => ({ name: c[1].help.name, category: c[1].help.category, servers: c[1].help.servers ? c[1].help.servers : [] })).filter(c => c.category.toLowerCase() != "sys");
+        let categories = [...new Set(commands.map(c => c.category))];
+        let fields = [];
 
-            var found = false;
-            for (var n = 0; n < commands.length; n++) {
-                if (commands[n].category && commands[n].category == command.help.category) {
-                    if (commands[n].names) {
-                        commands[n].names += `\`${command.help.name}\` `;
-                    }
-                    else commands[n].names = `\`${command.help.name}\` `;
-                    found = true;
-                }
-            }
+        categories.forEach(category => {
+            let cmds = commands.filter(c => c.category == category && (c.servers.length == 0 || c.servers.includes(message.guild.id) || message.guild.id == config.testserver)).map(c => c.name);
+            if (cmds.length == 0) return;
 
-            if (!found) {
-                var obj = { category: command.help.category, names: `\`${command.help.name}\` ` };
-                commands.push(obj);
-            }
-        }
-
-        var fields = [];
-        for (var i = 0; i < commands.length; i++) {
-            var obj = { name: commands[i].category, value: commands[i].names };
-            fields.push(obj);
-        }
+            fields.push({
+                name: category,
+                value: `\`${cmds.join("` `")}\``
+            })
+        });
 
         let embed = {
             color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
