@@ -24,6 +24,12 @@ module.exports.run = async (message) => {
         let daily_amount = base_amount + Math.pow((gacha.users[user].daily.streak - 1) / 2, 2);
 
         gacha.users[user].balance += daily_amount;
+
+        // fuck you nik
+        if (id == "214404841689186304" && gacha.users[user].balance % 1 != 0) {
+            gacha.users[user].balance = Math.floor(gacha.users[user].balance);
+        }
+
         gacha.users[user].daily.last_timestamp = moment.utc().valueOf();
         gacha.users[user].daily.counter += 1;
 
