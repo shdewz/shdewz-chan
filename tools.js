@@ -3,13 +3,18 @@ const axios = require("axios");
 const fs = require("fs");
 const moment = require("moment");
 
-const Geocoder = require('node-geocoder');
-
 module.exports = {
-    getLocation: query => {
+    getLocation: (query, reverse) => {
         return new Promise(async resolve => {
-            const res = await Geocoder({ provider: "openstreetmap", language: "en" }).geocode(query);
-            resolve(res);
+            axios.create({ baseURL: "http://api.positionstack.com/v1" })
+                .get(!reverse ? "/forward" : "/reverse", { params: { access_key: config.keys.positionstack, limit: 1, timezone_module: 1, country_module: 1, query: query } })
+                .then(async response => {
+                    response = response.data.data;
+                    if (response.length == 0) resolve({ error: "Error fetching location data." });
+                    resolve(response);
+                }).catch(err => {
+                    resolve({ error: err });
+                });
         });
     },
     getTimezone: (lat, long) => {
@@ -23,6 +28,7 @@ module.exports = {
                 });
         });
     },
+    ts: () => { return `[${moment().format("HH:mm:ss")}]`; },
     osu: {
         getModStats: (cs_raw, ar_raw, od_raw, hp_raw, mods) => {
             mods = mods.replace("NC", "DT");
