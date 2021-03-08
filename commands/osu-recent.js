@@ -77,7 +77,6 @@ module.exports.run = async (message, args) => {
                 },
                 timestamp: new Date(s.date),
             }
-
             return message.channel.send({ embed: embed });
         }
     }
