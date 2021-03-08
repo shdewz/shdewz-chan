@@ -6,54 +6,91 @@ module.exports.run = async (message, args, client) => {
     else tourney = statObj.tournaments.find(t => t.server_id == args[0] || t.acronym.toLowerCase() == args[0].toLowerCase());
     if (!tourney || !tourney.admins.includes(message.author.id)) return;
 
-    let data = await sheet.loadUsers(tourney.sheet_id, tourney.sheet_page, tourney.sheet_filter, tourney.outside, false);
-    if (data.error) return message.reply(data.error);
-    let users = data.result;
+    let teams = await sheet.loadUsers(tourney.sheet_id, tourney.sheet_page, tourney.sheet_filter, tourney.teamsize, tourney.outside, false);
+    if (teams.error) return message.reply(teams.error);
 
     let guild = client.guilds.cache.get(tourney.server_id);
-    let roles = [];
-    tourney.rolename.forEach(role => {
-        let role_ = guild.roles.cache.find(r => r.name === role);
-        if (!role_) return message.reply(`role **${role}** not found.`);
-        roles.push(role_);
-    });
-    if (roles.length == 0) return;
+    let roles = { captain: getRoles(tourney.captainroles, guild), player: getRoles(tourney.playerroles, guild) };
 
-    let notFound = [];
-    let roleGiven = [];
-    let already = [];
-    users.forEach(user => {
-        let name = user.discord.split("#")[0].trim();
-        let disc = user.discord.split("#")[1].trim();
-        let foundUser = client.users.cache.find(u => u.username.toLowerCase() === name.toLowerCase() && u.discriminator === disc);
-        if (!foundUser) foundUser = client.users.cache.find(u => u.username.toLowerCase() === name.toLowerCase()); // try without discriminator
-        if (!foundUser) foundUser = client.users.cache.find(u => u.username.toLowerCase() === user.username.toLowerCase()); // try with osu username
-        if (!foundUser) foundUser = guild.members.cache.find(u => u.nickname && u.nickname.toLowerCase() === user.username.toLowerCase()); // try with nickname
+    if (roles.captain.length == 0 && roles.player.length) return;
 
-        if (foundUser) {
-            let member = guild.member(foundUser);
-            if (member) {
-                if (!member.roles.cache.has(roles[user.tier - 1].id)) {
-                    member.roles.add(roles[user.tier - 1]).catch(err => { return console.error(err); });
-                    return roleGiven.push(user);
+    let processed = [];
+
+    teams.forEach(team => {
+        team.players.forEach(player => {
+            if (!player.discord) return;
+            let name = player.discord.split("#")[0].trim();
+            let disc = player.discord.split("#")[1].trim();
+
+            let foundUser = client.users.cache.find(u => u.username.toLowerCase() === name.toLowerCase() && u.discriminator === disc);
+
+            // try without discriminator
+            if (!foundUser) foundUser = client.users.cache.find(u => u.username.toLowerCase() === name.toLowerCase());
+
+            // try with osu username
+            if (!foundUser) foundUser = client.users.cache.find(u => u.username.toLowerCase() === player.username.toLowerCase());
+
+            // try with nickname
+            if (!foundUser) foundUser = guild.members.cache.find(u => u.nickname && u.nickname.toLowerCase() === player.username.toLowerCase());
+
+            if (foundUser) {
+                let member = guild.member(foundUser);
+                if (member) {
+                    if (!member.roles.cache.has(roles.player[player.tier - 1].id)) {
+                        member.roles.add(roles.player[player.tier - 1]).catch(err => { return console.error(err); });
+                        processed.push({ name: player.username, state: "player" });
+                    }
+                    if (player.captain && !member.roles.cache.has(roles.captain[player.tier - 1].id)) {
+                        member.roles.add(roles.captain[player.tier - 1]).catch(err => { return console.error(err); });
+                        processed.push({ name: player.username, state: "captain" });
+                    }
                 }
-                else return already.push(user);
+                else return processed.push({ name: player.username, state: "notfound", c: player.captain });
             }
-            else return notFound.push(user);
-        }
-        else return notFound.push(user);
+            else return processed.push({ name: player.username, state: "notfound", c: player.captain });
+        });
     });
 
-    let alreadytext = `${already.length > 0 ? `**${already.length} user${already.length == 1 ? "" : "s"} already had the role.**` : ""}`;
+    let captains = processed.filter(e => e.state == "captain");
+    let players = processed.filter(e => e.state == "player");
+    let notfound = processed.filter(e => e.state == "notfound");
 
-    let giventext = `${roleGiven.length > 0 ? `**Role given to following user${roleGiven.length == 1 ? "" : "s"}: (${roleGiven.length})**\n\`${roleGiven.map(u => u.username).sort((a, b) => { return a.localeCompare(b, 'en', { 'sensitivity': 'base' }); }).join(`\`, \``)}\`` : ""}`;
+    let fields = [];
 
-    let failedtext = `${notFound.length > 0 ? `**Following user${notFound.length == 1 ? "" : "s"} not found in the server: (${notFound.length})**\n\`${notFound.map(u => u.username).sort((a, b) => { return a.localeCompare(b, 'en', { 'sensitivity': 'base' }); }).join(`\`, \``)}\`` : ""}`;
+    if (tourney.teamsize > 1) fields.push({
+        name: captains.length == 0 ? "No users found with a missing captain role." : `Captain role given to ${captains.length} users.`,
+        value: captains.length == 0 ? "\u200b" : captains.map(e => `${e.name}`).join(", ")
+    });
 
-    let finaltext = (alreadytext.length == 0 && giventext.length == 0 && failedtext.length == 0) ? "nothing happened" : `${giventext}\n\n${failedtext}\n\n${alreadytext}`;
+    fields.push({
+        name: players.length == 0 ? "No users found with a missing player role." : `Player role given to ${players.length} users.`,
+        value: players.length == 0 ? "\u200b" : players.map(e => `${e.name}`).join(", ")
+    });
 
-    return message.channel.send(finaltext);
+    if (notfound.length > 0) fields.push({
+        name: notfound.length == 0 ? "No missing players found! (how)" : `${notfound.length} users not found in the server.`,
+        value: notfound.length == 0 ? "\u200b" : notfound.sort((a, b) => b.c - a.c).map(e => `${e.name}${e.c ? " (c)" : ""}`).join(", ")
+    });
+
+    return message.channel.send({
+        embed: {
+            color: 0xf56c7c,
+            fields: fields,
+        }
+    });
 };
+
+function getRoles(rolenames, guild) {
+    let output = [];
+    if (rolenames.length > 0) {
+        rolenames.forEach(role => {
+            let role_ = guild.roles.cache.find(r => r.name === role);
+            if (!role_) return console.log(`role **${role}** not found.`);
+            output.push(role_);
+        });
+    }
+    return output;
+}
 
 module.exports.help = {
     name: "addroles",
