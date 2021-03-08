@@ -12,10 +12,16 @@ let api = axios.create({
 });
 
 module.exports.run = async (message, args) => {
-    if (args.length == 0) return message.reply(`correct usage: \`${config.prefix}weather [city] [<state>] [<country code>]\``);
-    let query = args.filter(a => !a.startsWith("-")).join(" ");
+    let query = "";
+    if (args.length == 0) {
+        let user = statObj.users.find(u => u.discord == message.author.id);
+        //query = `${user.location.lat},${user.location.lon}`;
+        query = user.location.string;
+    }
+    else query = args.filter(a => !a.startsWith("-")).join(" ");
 
-    let location_array = await tools.getLocation(query);
+    let location_array = await tools.getLocation(query, false /*args.length == 0 ? true : false*/);
+    if (location_array.error) return message.reply("place not found.");
     let location = location_array[0];
     let w = await getWeather(location.latitude, location.longitude);
 
@@ -124,6 +130,10 @@ module.exports.run = async (message, args) => {
     else {
         let weatherdata = [
             {
+                name: "Current Time",
+                value: `${moment.utc().add(w.timezone_offset, "s").format("HH:mm (dddd)")}`
+            },
+            {
                 name: "Temperature",
                 value: `${w.current.temp}°C (feels ${w.current.feels_like}°C)`
             },
@@ -136,37 +146,22 @@ module.exports.run = async (message, args) => {
                 value: `${w.current.clouds}%`
             },
             {
-                name: "Wind Speed",
-                value: `${w.current.wind_speed} m/s`
-            },
-            {
-                name: "Wind Direction",
-                value: `${getDirection(w.current.wind_deg)}`
+                name: "Wind",
+                value: `${w.current.wind_speed} m/s ${getDirection(w.current.wind_deg)}`
             }
-        ]
+        ];
 
         let embed = {
             color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
             author: {
-                name: `Weather for ${typeof location.city === "undefined" ? "" : `${location.city}, `}${location.country}`,
-                icon_url: `https://osu.ppy.sh/images/flags/${location.countryCode}.png`,
+                name: `Weather for ${location.label}`,
+                icon_url: location.country_module ? `https://osu.ppy.sh/images/flags/${location.country_module.global.alpha2}.png` : "",
             },
             thumbnail: {
                 url: `https://openweathermap.org/img/wn/${w.current.weather[0].icon}@2x.png`,
             },
-            description: `${w.current.weather[0].description[0].toUpperCase()}${w.current.weather[0].description.slice(1)}`,
-            fields: [
-                {
-                    name: "**Current time**",
-                    value: weatherdata.map(o => `**${o.name}**`).join("\n"),
-                    inline: true
-                },
-                {
-                    name: moment.utc().add(w.timezone_offset, "s").format("HH:mm (dddd)"),
-                    value: weatherdata.map(o => o.value).join("\n"),
-                    inline: true
-                }
-            ]
+            title: `${w.current.weather[0].description[0].toUpperCase()}${w.current.weather[0].description.slice(1)}`,
+            description: `${weatherdata.map(wd => `**${wd.name}:** ${wd.value}`).join("\n")}`,
         }
 
         return message.channel.send({ embed: embed });
@@ -174,7 +169,7 @@ module.exports.run = async (message, args) => {
 }
 
 function getDirection(deg) {
-    return ["North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest"][(Math.floor((deg / 45) + 0.5) % 8)];
+    return ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"][(Math.floor((deg / 45) + 0.5) % 8)];
 }
 
 async function getWeather(lat, lon) {

@@ -5,10 +5,21 @@ const api = axios.create();
 
 module.exports.run = async (message, args) => {
     try {
+        let showResults = false;
+        if (args.includes("-r")) {
+            args.splice(args.indexOf("-r"), 1);
+            showResults = true;
+        }
+
+        let showImage = false;
+        if (args.includes("-i")) {
+            args.splice(args.indexOf("-i"), 1);
+            showImage = true;
+        }
+
         if (args.length < 1) return message.reply("missing arguments.");
 
-        var query;
-        query = args.join("_");
+        let query = args.join("_");
         api.get("https://en.wikipedia.org/w/api.php", {
             params: { action: "opensearch", limit: "5", namespace: "0", format: "json", search: query }
         }).then(response => {
@@ -17,50 +28,55 @@ module.exports.run = async (message, args) => {
             var links = data[3];
             if (results.length == 0) return message.reply("no articles found.");
 
-            let emotes = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"];
-
-            var resultText = "";
-            for (var i = 0; i < results.length; i++) {
-                resultText += `${emotes[i]} - [${results[i]}](${links[i]})\n`
+            if (!showResults) {
+                return getPage(0, results, message, showImage);
             }
+            else {
+                let emotes = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"];
 
-            if (results.length == 1) {
-                return getPage(0, results, message);
-            }
-
-            let embed = {
-                color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
-                author: {
-                    name: `Wikipedia results for '${args.join(" ")}':`,
-                },
-                description: `${resultText}`,
-                footer: {
-                    text: `Choose an article by reacting to this message.`
-                }
-            }
-
-            message.channel.send({ embed: embed }).then(async sentMsg => {
+                var resultText = "";
                 for (var i = 0; i < results.length; i++) {
-                    await sentMsg.react(emotes[i]);
+                    resultText += `${emotes[i]} - [${results[i]}](${links[i]})\n`
                 }
 
-                const filter = (reaction, user) => {
-                    return emotes.includes(reaction.emoji.name) && user.id === message.author.id;
-                };
+                if (results.length == 1) {
+                    return getPage(0, results, message);
+                }
 
-                const collector = sentMsg.createReactionCollector(filter, { max: 1, time: 20000 });
-
-                collector.on('end', collected => {
-                    if (collected.size > 0) {
-                        var reaction = collected.first().emoji.name;
-                        var position = emotes.indexOf(reaction);
-                        getPage(position, results, message);
-                        sentMsg.delete();
+                let embed = {
+                    color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
+                    author: {
+                        name: `Wikipedia results for '${args.join(" ")}':`,
+                    },
+                    description: `${resultText}`,
+                    footer: {
+                        text: `Choose an article by reacting to this message.`
                     }
-                    else return message.channel.send("**too slow** 😩");
+                }
+
+                message.channel.send({ embed: embed }).then(async sentMsg => {
+                    for (var i = 0; i < results.length; i++) {
+                        await sentMsg.react(emotes[i]);
+                    }
+
+                    const filter = (reaction, user) => {
+                        return emotes.includes(reaction.emoji.name) && user.id === message.author.id;
+                    };
+
+                    const collector = sentMsg.createReactionCollector(filter, { max: 1, time: 20000 });
+
+                    collector.on('end', collected => {
+                        if (collected.size > 0) {
+                            var reaction = collected.first().emoji.name;
+                            var position = emotes.indexOf(reaction);
+                            getPage(position, results, message);
+                            sentMsg.delete();
+                        }
+                        else return message.channel.send("**too slow** 😩");
+                    });
+                    return;
                 });
-                return;
-            });
+            }
         });
     }
     catch (err) {
@@ -69,15 +85,15 @@ module.exports.run = async (message, args) => {
 
 };
 
-function getPage(position, results, message) {
+function getPage(position, results, message, showImage) {
     try {
         api.get(`https://en.wikipedia.org/api/rest_v1/page/summary/${results[position].replace(/ /g, "_").replace(/\//g, "")}`).then(response => {
             var data = response.data;
 
             var time = moment(data.timestamp).format("MMMM Do, YYYY [at] HH:mm")
 
-            var thumbnail =  "";
-            if (typeof data.thumbnail !== "undefined") thumbnail = data.thumbnail.source;
+            var thumbnail = "";
+            if (showImage && typeof data.thumbnail !== "undefined") thumbnail = data.thumbnail.source;
 
             var textString = data.extract;
             if (textString.length > 802) {
