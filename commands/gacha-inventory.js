@@ -2,6 +2,8 @@ const Canvas = require("canvas");
 const manager = require("./gacha-manager.js");
 const { MessageAttachment } = require('discord.js');
 
+Canvas.registerFont('./fonts/B2-Medium.ttf', { family: 'B2-Medium' });
+
 module.exports.run = async (message, args, client) => {
     let id = message.mentions.members.first() ? message.mentions.members.first().id : message.author.id;
     let user = gacha.users.find(u => u.id == id);
@@ -47,11 +49,15 @@ module.exports.run = async (message, args, client) => {
         let columns = 8;
         let rows = Math.ceil(lolis.length / columns);
 
-        let width = 710;
-        let height = rows * 120 + Math.max(rows - 1, 0) * 10;
+        let padding = 10;
+        let width = 710 + padding * 2;
+        let height = rows * 140 + Math.max(rows - 1, 0) * 10 + padding * 2;
 
         var canvas = Canvas.createCanvas(width, height);
         var ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = "#1f1f1f";
+        ctx.fillRect(0, 0, width, height);
 
         new Promise(resolve => {
             lolis.forEach(async (loli_, i, a) => {
@@ -61,7 +67,18 @@ module.exports.run = async (message, args, client) => {
                 let column = i % 8;
 
                 let card = await manager.drawCard(loli, "canvas");
-                ctx.drawImage(card, column * 90, row * 130, 80, 120);
+                ctx.drawImage(card, padding + column * 90, padding + row * 150, 80, 120);
+
+                ctx.textAlign = "center";
+                let text = loli.name;
+
+                let fontSize = 13;
+                ctx.font = `${fontSize}px B2-Medium`;
+                do { ctx.font = `${fontSize -= 0.2}px B2-Medium`; }
+                while (ctx.measureText(text).width > 80);
+
+                ctx.fillStyle = "#ffffff";
+                ctx.fillText(text, padding + column * 90 + 40, padding + row * 150 + 120 + 16)
 
                 if (i === a.length - 1) resolve();
             });
