@@ -1,4 +1,3 @@
-const { forEach, ctransposeDependencies } = require("mathjs");
 const config = require("../config.json");
 const osu = require("../osu.js");
 const moment = require("moment");
