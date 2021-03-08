@@ -1,184 +1,77 @@
 const moment = require("moment");
 const fetch = require("node-fetch");
+const tools = require("../tools.js");
+const chrono = require("chrono-node");
 
-module.exports.init = async (client) => {
-    for (var i = 0; i < statObj.reminders.length; i++) {
-        startTimer(statObj.reminders[i].user, statObj.reminders[i].subject, statObj.reminders[i].start, statObj.reminders[i].end, client);
-    }
-    console.log(statObj.reminders.length + " reminder(s) running.");
-    return;
-}
+let interval = 5 * 60 * 60 * 1000; // 5 minutes
+
+module.exports.init = async (client) => { return runInterval(client); }
 
 module.exports.run = async (message, args, client) => {
-    if (args.length < 1) return;
+    if (args.length == 0) return;
 
-    if (args.includes("-list")) {
-        if (statObj.reminders.length == 0) return message.reply("no active reminders founds.");
-        var reminders = statObj.reminders.sort(GetSortOrder("end"));
-        var remindersText = `**Reminders for ${message.member.displayName}:**\n`;
-        var amount = 1;
-        var found = false;
-        for (var i = 0; i < reminders.length; i++) {
-            if (reminders[i].user == message.author.id) {
-                var date = moment.utc(reminders[i].end);
-                remindersText += `**${amount}.** *${reminders[i].subject}* on ${date.format("**dddd, MMMM Do YYYY** [at] **HH:mm:ss UTC**")} (${date.fromNow()})\n`;
-                found = true;
-            }
-        }
-        if (found) return message.channel.send(remindersText);
-        return message.reply("no active reminders founds.");
-    }
+    let query = args.join(" ");
+    let result = chrono.parse(query, new Date(), { forwardDate: true });
+    if (result.length == 0) return message.reply("error processing date/time.");
+    let reminderTime = moment.utc(result[0].start.date());
 
-    if (args.includes("-all") && message.author.id == "250693235091963904") {
-        if (statObj.reminders.length == 0) return message.reply("no active reminders founds.");
-        var reminders = statObj.reminders.sort(GetSortOrder("end"));
-
-        var remindersText = `**All reminders:**\n`;
-        var amount = 1;
-        for (var i = 0; i < reminders.length; i++) {
-            remindersText += `**${amount}.** ${client.users.cache.get(reminders[i].user).username}: *${reminders[i].subject}* on ${moment.utc(reminders[i].end).format("**dddd, MMMM Do YYYY** [at] **HH:mm:ss UTC**")} (${moment.utc(reminders[i].end).fromNow()})\n`;
-            amount++;
-        }
-        return message.channel.send(remindersText);
-    }
-
-    if (args.includes("-remove")) {
-        var index = !isNaN(args[args.indexOf("-remove") + 1]) ? args[args.indexOf("-remove") + 1] : 0;
-        var found = false;
-        if (index == 0) {
-            for (var i = 0; i < statObj.reminders.length; i++) {
-                if (statObj.reminders[i].user == message.author.id) {
-                    if (statObj.reminders.length == 1) statObj.reminders = [];
-                    else statObj.reminders.splice(i, 1);
-                    found = true;
-                }
-            }
-            if (!found) return message.reply("no active reminders founds.");
-            return message.reply("your previous reminder(s) have been removed.");
-        }
-        else {
-            var counter = 1;
-            for (var i = 0; i < statObj.reminders.length; i++) {
-                if (statObj.reminders[i].user == message.author.id) {
-                    if (counter == index) {
-                        if (statObj.reminders.length == 1) statObj.reminders = [];
-                        else statObj.reminders.splice(i, 1);
-                        return message.reply("your reminder has been removed.");
-                    }
-                    counter++;
-                }
-            }
-            return message.reply("no active reminders founds.");
+    if (!args.includes("utc")) {
+        let user = statObj.users.find(u => u.discord == message.author.id);
+        if (user && user.location) {
+            let location = await tools.getLocation(`${user.location.lat},${user.location.lon}`, true);
+            let offset = location[0].timezone_module.offset_sec;
+            reminderTime.subtract(offset, "seconds").subtract(new Date().getTimezoneOffset(), "minutes");
         }
     }
+    if (reminderTime.isBefore(moment.utc())) reminderTime.add(1, "days");
 
-    var subject;
-    var current = moment.utc();
-    var final;
-
-    if (args.join(" ").toLowerCase().includes(" in ")) {
-        try {
-            var timestring = args.join(" ").toLowerCase().split(" in ")[1]
-            var time = timestring.split(" ");
-            subject = args.join(" ").split(" in ")[0];
-
-            var duration = moment.duration({
-                seconds: timestring.match(/seconds?/) ? time[time.indexOf(timestring.match(/seconds?/)[0]) - 1] : 0,
-                minutes: timestring.match(/minutes?/) ? time[time.indexOf(timestring.match(/minutes?/)[0]) - 1] : 0,
-                hours: timestring.match(/hours?/) ? time[time.indexOf(timestring.match(/hours?/)[0]) - 1] : 0,
-                days: timestring.match(/days?/) ? time[time.indexOf(timestring.match(/days?/)[0]) - 1] : 0,
-                weeks: timestring.match(/weeks?/) ? time[time.indexOf(timestring.match(/weeks?/)[0]) - 1] : 0,
-                months: timestring.match(/months?/) ? time[time.indexOf(timestring.match(/months?/)[0]) - 1] : 0,
-                years: timestring.match(/years?/) ? time[time.indexOf(timestring.match(/years?/)[0]) - 1] : 0
-            });
-
-            final = current.add(duration);
-        }
-        catch (error) {
-            message.reply("error processing date/time.");
-            return console.log(error);
-        }
-    }
-    else if (args.join(" ").toLowerCase().includes(" at ")) {
-        try {
-            subject = args.join(" ").split(" at ")[0];
-            var datestring = args.join(" ").split(" at ")[1].replace(/\//g, "-");
-            if (!datestring.match(/\d+\-\d+\-\d+/)) datestring = moment.utc().format("YYYY-MM-DD") + " " + datestring;
-            else if (!datestring.match(/\d+\:\d+/)) datestring = datestring + " " + moment.utc().format("HH:mm");
-            final = moment.utc(datestring);
-        }
-        catch (error) {
-            message.reply("error processing date/time.");
-            return console.log(error);
-        }
-    }
-
-    var obj = {
+    let reminder = {
         user: message.author.id,
-        subject: subject,
+        subject: query,
         start: moment.utc().valueOf(),
-        end: final.valueOf()
+        end: reminderTime.valueOf()
     }
 
-    statObj.reminders.push(obj);
-    message.reply(`I will remind you on ${final.format("**dddd, MMMM Do YYYY** [at] **HH:mm:ss UTC**")}!`);
+    message.channel.send(`Got it ${message.author}! I will remind you on ${reminderTime.format("**dddd, MMMM Do YYYY** [at] **HH:mm:ss UTC**")}!`);
 
-    startTimer(message.author.id, subject, current, final, client);
+    let diff = Math.max(reminder.end - reminder.start, 0);
+    if (diff < interval) {
+        setTimeout(async () => { sendReminder(reminder, client) }, diff);
+    }
+    else statObj.reminders.push(reminder);
 };
 
-function startTimer(userid, subject, start, end, client) {
-    var time = end > moment.utc().valueOf() ? moment.utc(end).diff(moment.utc().valueOf()) : 1000;
-    var user = client.users.cache.get(userid);
-    var late = end + 20000 < moment.utc().valueOf() ? `\n\nLooks like i was late by about **${moment.utc().to(moment.utc(end), true)}**. oops! >w<` : "";
-
-    reminder = setTimeout(async () => {
-        let found = false;
-        for (i = 0; i < statObj.reminders.length; i++) {
-            if (statObj.reminders[i].user == userid && statObj.reminders[i].end == end && statObj.reminders[i].subject == subject) {
-                found = true;
-                if (statObj.reminders.length == 1) statObj.reminders = [];
-                else statObj.reminders.splice(i, 1);
-            }
-        }
-        if (!found) return;
-
-        var response = await fetch("https://official-joke-api.appspot.com/random_joke");
-        var jokejson = await response.json();
-        var joke = jokejson.setup + " " + jokejson.punchline;
-
-        let embed = {
-            color: 0xeb9ba4,
-            author: {
-                name: `Your reminder is done!`,
-            },
-            description: `On ${moment(start).format("**dddd, MMMM Do YYYY** [at] **HH:mm:ss UTC**")} you asked me to remind you to **${subject}**.${late}`,
-            footer: {
-                text: joke,
-            }
-        }
-
-        console.log(`\n[${new Date().toLocaleTimeString()}] Reminder sent to ${user.username}.`);
-        return user.send({ embed: embed });
-
-    }, time > 15 * 24 * 60 * 60 * 1000 ? 15 * 24 * 60 * 60 * 1000 : time);
+runInterval = async client => {
+    checkReminders(client);
+    checker = setInterval(async () => { checkReminders(client); }, interval);
 }
 
-function GetSortOrder(prop) {
-    return function (a, b) {
-        if (a[prop] > b[prop]) {
-            return 1;
-        } else if (a[prop] < b[prop]) {
-            return -1;
+checkReminders = async client => {
+    statObj.reminders.forEach((reminder, i) => {
+        let diff = Math.max(new Date(reminder.end) - new Date(), 0);
+        if (diff < interval) {
+            statObj.reminders.splice(i, 1);
+            setTimeout(async () => { sendReminder(reminder, client) }, diff);
         }
-        return 0;
+    });
+}
+
+sendReminder = (reminder, client) => {
+    let embed = {
+        color: 0xf56c7c,
+        author: {
+            name: `Your reminder is done!`,
+        },
+        description: `On ${moment(reminder.start).format("**dddd, MMMM Do YYYY** [at] **HH:mm:ss UTC**")} you asked for a reminder to **${reminder.subject}**. The time has arrived.`,
     }
+
+    return client.users.cache.get(reminder.user).send({ embed: embed });
 }
 
 module.exports.help = {
     name: "remindme",
-    description: "Set a timed reminder.\nSupported units are: \`seconds\`, \`minutes\`, \`hours\`, \`days\`, \`weeks\`, \`months\` and \`years\`.\nCorrect date format is \`YYYY/MM/DD HH:mm\`.",
-    usage: "remindme <subject> in/at <time/date>",
-    example: "remindme fix the bot again in 2 hours 30 minutes",
-    example2: "remindme play the pool at 2020/05/20 13:30",
+    description: "Set a timed reminder.",
+    usage: "remindme <subject> <time/date/whatever>",
+    example: "remindme buy donuts tomorrow at 8 pm",
     category: "Tools"
 }
