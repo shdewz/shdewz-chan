@@ -1,6 +1,7 @@
 const config = require("../config.json");
 const osu = require("../osu.js");
 const moment = require("moment");
+const tools = require('../tools.js');
 
 const { CanvasRenderService } = require('chartjs-node-canvas');
 const Canvas = require("canvas");
@@ -19,7 +20,7 @@ module.exports.run = async (message, args) => {
         }
         else {
             let user = statObj.users.find(u => u.discord == message.author.id);
-            if (!user) return message.channel.send(`Looks like you haven't linked your account yet.\nLink it with the command \`${config.prefix}osuset <user>\`.`);
+            if (!user) return tools.osu.noAccountAlert(message);
 
             usernames = [user.osu_id];
         }

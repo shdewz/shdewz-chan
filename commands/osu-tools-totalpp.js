@@ -1,6 +1,7 @@
 const config = require("../config.json");
 const fetch = require('node-fetch');
 const Discord = require('discord.js');
+const tools = require('../tools.js');
 
 module.exports.run = async (message, args) => {
     try {
@@ -15,7 +16,7 @@ module.exports.run = async (message, args) => {
                     break;
                 }
             }
-            if (!found) return message.channel.send(`Looks like you haven't linked your account yet.\nLink it with the command \`${config.prefix}osuset <user>\`.`)
+            if (!found) return tools.osu.noAccountAlert(message);
         }
 
         else uid = args.join('_');

@@ -2,6 +2,7 @@ const config = require("../config.json");
 const fetch = require('node-fetch');
 const { MessageAttachment } = require('discord.js');
 const Canvas = require('canvas');
+const tools = require('../tools.js');
 const registerFont = require('canvas');
 
 module.exports.run = async (message, args) => {
@@ -22,7 +23,7 @@ module.exports.run = async (message, args) => {
                     break;
                 }
             }
-            if (!found) return message.channel.send(`Looks like you haven't linked your account yet.\nLink it with the command \`${config.prefix}osuset <user>\`.`)
+            if (!found) return tools.osu.noAccountAlert(message);
         }
         else if (args.length <= 1) {
             uid = args.join("_");

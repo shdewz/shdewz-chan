@@ -1,6 +1,7 @@
 const config = require("../config.json");
 const osu = require("../osu.js");
 const moment = require("moment");
+const tools = require('../tools.js');
 
 module.exports.run = async (message, args) => {
 
@@ -29,7 +30,7 @@ module.exports.run = async (message, args) => {
                     break;
                 }
             }
-            if (!found) return message.channel.send(`Looks like you haven't linked your account yet.\nLink it with the command \`${config.prefix}osuset <user>\`.`)
+            if (!found) return tools.osu.noAccountAlert(message);
         }
 
         if (best) {
@@ -38,7 +39,7 @@ module.exports.run = async (message, args) => {
             osu.addLastMap(message, s.plays[0].mapid);
 
             let embed = {
-                color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
+                color: s.plays[0].grade.color,
                 author: {
                     name: `Most recent osu! top play for ${s.user.username}:`,
                     icon_url: `${s.user.avatar}?${+new Date()}`,
@@ -47,7 +48,7 @@ module.exports.run = async (message, args) => {
                 thumbnail: {
                     url: s.plays[0].banner,
                 },
-                description: `**${s.plays[0].position}. [${s.plays[0].title} [${s.plays[0].difficulty}]](https://osu.ppy.sh/b/${s.plays[0].mapid}) ${s.plays[0].mods == "" ? "" : "+" + s.plays[0].mods}** (${s.plays[0].stars.toFixed(2)}★)\n${s.plays[0].grade} — ${s.plays[0].pp} — **${s.plays[0].acc.toFixed(2)}%**\n${s.plays[0].score.toLocaleString()} — **x${s.plays[0].combo.toLocaleString()}**/${s.plays[0].maxcombo.toLocaleString()} — \`[ ${s.plays[0].c300.toLocaleString()} / ${s.plays[0].c100.toLocaleString()} / ${s.plays[0].c50.toLocaleString()} / ${s.plays[0].cmiss.toLocaleString()} ]\``,
+                description: `**${s.plays[0].position}. [${s.plays[0].title} [${s.plays[0].difficulty}]](https://osu.ppy.sh/b/${s.plays[0].mapid}) ${s.plays[0].mods == "" ? "" : "+" + s.plays[0].mods}** (${s.plays[0].stars.toFixed(2)}★)\n${s.plays[0].grade.emoji} — ${s.plays[0].pp} — **${s.plays[0].acc.toFixed(2)}%**\n${s.plays[0].score.toLocaleString()} — **x${s.plays[0].combo.toLocaleString()}**/${s.plays[0].maxcombo.toLocaleString()} — \`[ ${s.plays[0].c300.toLocaleString()} / ${s.plays[0].c100.toLocaleString()} / ${s.plays[0].c50.toLocaleString()} / ${s.plays[0].cmiss.toLocaleString()} ]\``,
                 footer: {
                     text: `${moment.utc(s.plays[0].date).fromNow()}`
                 },
@@ -62,7 +63,7 @@ module.exports.run = async (message, args) => {
             osu.addLastMap(message, s.mapid);
 
             let embed = {
-                color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
+                color: s.grade.color,
                 author: {
                     name: `Most recent osu! play for ${s.username}:`,
                     icon_url: `${s.avatar}?${+new Date()}`,
@@ -71,7 +72,7 @@ module.exports.run = async (message, args) => {
                 thumbnail: {
                     url: s.banner,
                 },
-                description: `**[${s.title} \[${s.difficulty}\]](https://osu.ppy.sh/b/${s.mapid})** ${s.mods == "" ? "" : `**+${s.mods}**`} (${s.stars.toFixed(2)}★)\n${s.grade} — ${s.pp} — **${s.accuracy.toFixed(2)}%**\n${s.score.toLocaleString()} — **x${s.combo.toLocaleString()}**/${s.maxcombo.toLocaleString()} — \`[ ${s.c300.toLocaleString()} / ${s.c100.toLocaleString()} / ${s.c50.toLocaleString()} / ${s.cmiss.toLocaleString()} ]\`${s.finished == true ? "" : "\n" + (s.completion * 100).toFixed(2) + "% completion"}`,
+                description: `**[${s.title} \[${s.difficulty}\]](https://osu.ppy.sh/b/${s.mapid})** ${s.mods == "" ? "" : `**+${s.mods}**`} (${s.stars.toFixed(2)}★)\n${s.grade.emoji} — ${s.pp} — **${s.accuracy.toFixed(2)}%**\n${s.score.toLocaleString()} — **x${s.combo.toLocaleString()}**/${s.maxcombo.toLocaleString()} — \`[ ${s.c300.toLocaleString()} / ${s.c100.toLocaleString()} / ${s.c50.toLocaleString()} / ${s.cmiss.toLocaleString()} ]\`${s.finished == true ? "" : "\n" + (s.completion * 100).toFixed(2) + "% completion"}`,
                 footer: {
                     text: `${moment.utc(s.date).fromNow()}`
                 },

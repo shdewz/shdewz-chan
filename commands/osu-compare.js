@@ -1,4 +1,5 @@
 const config = require("../config.json");
+const tools = require('../tools.js');
 
 module.exports.run = async (message, args, client) => {
     let mapfound = false;
@@ -30,7 +31,7 @@ module.exports.run = async (message, args, client) => {
                 break;
             }
         }
-        if (!found) return message.channel.send(`Looks like you haven't linked your account yet.\nLink it with the command \`${config.prefix}osuset <user>\`.`)
+        if (!found) return tools.osu.noAccountAlert(message);
     }
 
     let embed = await client.commands.get("scores").score(username, mapid, message);
