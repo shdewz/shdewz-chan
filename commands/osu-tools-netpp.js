@@ -1,206 +1,112 @@
-const config = require("../config.json");
+const config = require('../config.json');
 const fetch = require('node-fetch');
-const Discord = require('discord.js');
-const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+const osu = require('../osu.js');
+const tools = require('../tools.js');
+const XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
 module.exports.run = async (message, args) => {
     try {
-        var mode = 0
-        var derank = false;
-        var derankpos = 0;
-        var uid = "";
-        var modes = {
-            "osu": 0,
-            "taiko": 1,
-            "ctb": 2,
-            "mania": 3
+        if (args.length == 0) return;
+
+        let derank = args.includes('-o') ? parseInt(args[args.indexOf('-o') + 1]) : 0;
+        let acc = args.includes('-a') ? parseFloat(args[args.indexOf('-a') + 1]) / 100 : -1;
+
+        args = args.filter((e, i, a) => !e.startsWith('-') && !a[Math.max(i - 1, 0)].startsWith('-')); // remove params
+        let raw_pp = args.filter(a => !isNaN(a))[0];
+        args.splice(args.indexOf(raw_pp));
+
+        let user = args.length > 0 ? args.join(' ') : statObj.users.find(u => u.discord == message.author.id).osu_id;
+        if (!user) return tools.osu.noAccountAlert(message);
+
+        // get user top scores
+        let scores = await getTop(user);
+        let userobj = await osu.getUser(user);
+
+        // apply weighting
+        let new_scores = scores.map(e => ({
+            pp: e.pp,
+            acc: tools.osu.getAcc(e.count300, e.count100, e.count50, e.countmiss),
+        }));
+
+        // use overall acc as score acc if not specified
+        if (acc === -1) acc = userobj.acc / 100;
+
+        let totalpp_old = userobj.pp;
+        let totalpp_old_sum = new_scores.reduce((a, b, i) => a + b['pp'] * weight(i), 0); // ignores 'bonus pp'
+        let acc_old = new_scores.reduce((a, b, i) => a + b['acc'] * weight(i), 0) / new_scores.reduce((a, b, i) => a + weight(i), 0);
+
+        if (derank > 0) new_scores.splice(derank - 1, 1); // remove specified score
+        new_scores.push({ pp: parseFloat(raw_pp), acc: acc }); // add new score
+        new_scores = new_scores.sort((a, b) => b.pp - a.pp).slice(0, 100); // sort and limit to 100 scores
+
+        let position = new_scores.findIndex(e => e.pp == parseFloat(raw_pp));
+
+        let totalpp_new_sum = new_scores.reduce((a, b, i) => a + b['pp'] * weight(i), 0); // weighted sum of new scores
+        let totalpp_new = totalpp_new_sum + (totalpp_old - totalpp_old_sum); // attempt to add 'bonus pp'
+        let acc_new = new_scores.reduce((a, b, i) => a + b['acc'] * weight(i), 0) / new_scores.reduce((a, b, i) => a + weight(i), 0);
+
+        let rank_old = userobj.rank;
+        let rank_new = await getRank(totalpp_new);
+
+        let f = {
+            pp_old: format(totalpp_old, 2, 2),
+            pp_new: format(totalpp_new, 2, 2),
+            pp_diff: `${totalpp_new >= totalpp_old ? '+' : '-'}${format(Math.abs(totalpp_old - totalpp_new), 0, 2)}`,
+            rank_old: '#' + format(rank_old, 0, 0),
+            rank_new: '#' + format(rank_new, 0, 0),
+            rank_diff: `${rank_new <= rank_old ? '+' : '-'}${format(Math.abs(rank_old - rank_new), 0, 0)}`,
+            acc_old: (acc_old * 100).toFixed(2) + '%',
+            acc_new: (acc_new * 100).toFixed(2) + '%',
+            acc_diff: `${acc_new >= acc_old ? '+' : '-'}${format(Math.abs(acc_old - acc_new) * 100, 0, 2)}%`,
         }
 
-        if (args.length == 0) return message.channel.send(`Correct usage: \`${config.prefix}netpp [<-u username>] <raw pp> [-o <position>] [<-m taiko/ctb/mania>]\``);
-        else {
-            if (args.includes("-m")) {
-                mode = modes[args[args.indexOf("-m") + 1].toLowerCase()];
-                args.splice(args.indexOf("-m"), 2);
-            }
+        // calculate padding length
+        let l_chars = Math.max(f.pp_old.length, f.rank_old.length, f.acc_old.length);
+        let r_chars = Math.max(f.pp_new.length, f.rank_new.length, f.acc_new.length);
 
-            if (args.includes("-o")) {
-                derank = true;
-                derankpos = args[args.indexOf("-o") + 1]
-                args.splice(args.indexOf("-o"), 2);
-            }
-
-            if (args.includes("-u")) {
-                uid = args[args.indexOf("-u") + 1]
-                args.splice(args.indexOf("-u"), 2);
-            }
-
-            var ppraw = args.filter(a => !isNaN(a))[0];
-
-            if (uid == "") {
-                let found = false;
-                for (var i = 0; i < statObj.users.length; i++) {
-                    if (statObj.users[i].discord == message.author.id) {
-                        uid = statObj.users[i].osu_id;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) return message.channel.send(`Looks like you haven't linked your account yet.\nLink it with the command \`${config.prefix}osuset <user>\`.`)
-            }
+        let embed = {
+            color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
+            author: {
+                name: `What if ${userobj.username} got a new ${format(raw_pp, 0, 2)}pp play?`,
+                icon_url: userobj.avatar,
+                url: userobj.url
+            },
+            description: `\n*with ${(acc * 100).toFixed(2)}% accuracy, ${derank == 0 ? `becoming their #${position + 1}` : `overwriting their #${derank}`} score*\`\`\`pp:   ${f.pp_old.padStart(l_chars, ' ')} > ${f.pp_new} ${' '.repeat(r_chars - f.pp_new.length)}| ${f.pp_diff}\nacc:  ${f.acc_old.padStart(l_chars, ' ')} > ${f.acc_new} ${' '.repeat(r_chars - f.acc_new.length)}| ${f.acc_diff}\nrank: ${f.rank_old.padStart(l_chars, ' ')} > ${f.rank_new} ${' '.repeat(r_chars - f.rank_new.length)}| ${f.rank_diff}\`\`\``,
         }
 
-        var apikey = config.keys.osu.apikey_old;
-
-        // declare the variables
-        var scores = [];
-        var scoresoldw = [];
-        var weighedscores = [];
-
-        var bottomscore = 0;
-
-        var totalppold = 0;
-        var totalpp = 0;
-        var difference = 0;
-        var newpp = 0;
-
-        var diffsymbol = "";
-        var differencerounded = 0;
-
-        // adjust the gamemode
-
-        // get the top 100 plays from the api
-        fetch(`https://osu.ppy.sh/api/get_user_best?k=${apikey}&m=${mode}&limit=100&u=${uid}`).then(function (response) {
-            return response.json();
-        }).then(plays => {
-
-            // add the pp values of the plays to an array
-            for (var play in plays) {
-                scores.push(parseFloat(plays[play].pp));
-            }
-
-            // get the lowest score on the list
-            bottomscore = parseInt(scores[scores.length - 1]);
-
-            // get user stats
-            fetch(`https://osu.ppy.sh/api/get_user?k=${apikey}&m=${mode}&u=${uid}`).then(function (response) {
-                return response.json();
-            }).then(function (rawjsonuser) {
-
-                var ppfull = rawjsonuser[0].pp_raw;
-                var username = rawjsonuser[0].username;
-                var uid = rawjsonuser[0].user_id;
-                var country = rawjsonuser[0].country;
-                var oldrank = rawjsonuser[0].pp_rank;
-
-                // see if the inputted pp is below the lowest score
-                if (scores.length >= 100 && ppraw < scores[scores.length - 1]) {
-                    message.reply(`play outside your top 100 plays. Your lowest play is ${bottomscore}pp.`)
-                }
-                else {
-                    // apply weighting to the old scores and insert them to a new list
-                    var i = 1;
-                    for (var score in scores) {
-                        scoresoldw[scoresoldw.length] = scores[i - 1] * Math.pow(0.95, i - 1);
-                        i++;
-                    }
-                    if (derank) scores.splice(derankpos - 1, 1);
-                    else scores.pop();
-
-                    // add the hypothetical play to the list and sort it
-                    scores.push(ppraw);
-                    scores.sort((a, b) => b - a);
-
-                    // apply weighting again with the new score in place
-                    var ii = 1;
-                    for (var score in scores) {
-                        weighedscores[weighedscores.length] = scores[ii - 1] * Math.pow(0.95, ii - 1);
-                        ii++;
-                    }
-
-                    // sum the score arrays
-                    totalppold = scoresoldw.reduce((a, b) => a + b, 0);
-                    totalpp = weighedscores.reduce((a, b) => a + b, 0);
-
-                    // calculate difference between the arrays and add it to the total pp
-                    difference = parseFloat(totalpp) - parseFloat(totalppold);
-                    newpp = parseFloat(ppfull) + parseFloat(difference);
-
-                    // change the +/- symbol
-                    if (difference < 0.005 && difference > -0.005) { diffsymbol = "±"; }
-                    else if (difference >= 0.005) { diffsymbol = "+"; }
-                    else { diffsymbol = ""; }
-
-                    differencerounded = Math.round(difference * 100) / 100;
-
-                    var newrank;
-                    var flagurl = `https://osu.ppy.sh/images/flags/${country.toUpperCase()}.png`;
-
-                    xhttp = new XMLHttpRequest();
-                    xhttp.onreadystatechange = function () {
-                        if (this.readyState == 4 && this.status == 200) {
-                            if (done) return;
-                            newrank = this.responseText
-                            clearTimeout(dead);
-
-                            let embed = {
-                                color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
-                                author: {
-                                    name: username,
-                                    icon_url: flagurl,
-                                    url: `https://osu.ppy.sh/u/${uid}`
-                                },
-                                description: `**${(Math.round(ppfull * 100) / 100).toLocaleString()}pp** *currently*
-                                **${(Math.round(newpp * 100) / 100).toLocaleString()}pp** *after ${(Math.round(ppraw * 100) / 100).toLocaleString()}pp play*
-                                **${diffsymbol}${differencerounded}pp** *difference*
-                                **#${Math.round(oldrank).toLocaleString()} → #${Math.round(newrank).toLocaleString()}** *rank change*`
-                            }
-
-                            return message.channel.send({ embed: embed });
-                        };
-                    };
-
-                    xhttp.open("GET", "https://osudaily.net/data/getPPRank.php?t=pp&v=" + Math.round(newpp) + "&m=" + mode, true);
-                    xhttp.send();
-
-                    var dead;
-                    var done = false;
-
-                    dead = setTimeout(function () {
-                        let embed = {
-                            color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
-                            author: {
-                                name: username,
-                                icon_url: flagurl,
-                                url: `https://osu.ppy.sh/u/${uid}`
-                            },
-                            description: `**${(Math.round(ppfull * 100) / 100).toLocaleString()}pp** *currently*
-                            **${(Math.round(newpp * 100) / 100).toLocaleString()}pp** *after ${(Math.round(ppraw * 100) / 100).toLocaleString()}pp play*
-                            **${diffsymbol}${differencerounded}pp** *difference*`
-                        }
-
-                        done = true;
-                        return message.channel.send({ embed: embed });
-
-                    }, 5000);
-                }
-
-            }).catch(error => {
-                return console.log(error);
-            });
-
-        }).catch(error => {
-            return console.log(error);
-        });
+        return message.channel.send({ embed: embed });
     }
     catch (error) {
         return console.log(error);
     }
 };
 
+async function getTop(user) {
+    return new Promise(async resolve => {
+        fetch(`https://osu.ppy.sh/api/get_user_best?k=${config.keys.osu.apikey_old}&u=${user}&limit=100`).then(async response => {
+            let data = await response.json();
+            resolve(data);
+        });
+    });
+}
+
+async function getRank(pp) {
+    return new Promise(async resolve => {
+        fetch(`https://osudaily.net/data/getPPRank.php?t=pp&v=${pp}&m=0`).then(async response => {
+            let data = await response.json();
+            resolve(data);
+        });
+    });
+}
+
+const format = (number, min, max) => number.toLocaleString(undefined, { minimumFractionDigits: min, maximumFractionDigits: max });
+
+const weight = index => Math.pow(0.95, index - 1);
+
 module.exports.help = {
-    name: "netpp",
-    description: "Calculate how much a new play would affect your total pp and rank.\n\nParameters:\n\`-m <taiko/ctb/mania>\` change the gamemode\n\`-o <position>\` overwrite a play (1-100) on your top plays.",
-    usage: "netpp [<user>] <raw pp> [<parameters>]",
-    example: "netpp shdewz 500",
-    category: "osu!"
+    name: 'netpp',
+    description: 'Calculate how much a new play would affect your total pp, rank and overall acc.\n\nParameters:\n\`-a <acc>\` specify acc for the score\n\`-o <position>\` overwrite a play (1-100) on your top plays.',
+    usage: 'netpp [<user>] <raw pp> [<parameters>]',
+    example: 'netpp shdewz 500 -a 99.50% -o 2',
+    category: 'osu!'
 }
