@@ -133,6 +133,11 @@ module.exports = {
             mods.forEach(mod => value += mods_enum[mod]);
             return value;
         },
+        noAccountAlert: (message) => {
+            let server = statObj.serverstats.find(s => s.id == message.guild.id);
+            let prefix = server && server.prefix ? server.prefix : config.prefix;
+            return message.channel.send(`Looks like you haven't linked your account yet.\nLink it with the command \`${prefix}osuset <user>\`.`);
+        }
     }
 }
 
