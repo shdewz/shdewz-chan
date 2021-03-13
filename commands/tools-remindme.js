@@ -1,9 +1,8 @@
 const moment = require("moment");
-const fetch = require("node-fetch");
 const tools = require("../tools.js");
 const chrono = require("chrono-node");
 
-let interval = 5 * 60 * 60 * 1000; // 5 minutes
+const interval = 5 * 60 * 60 * 1000; // 5 minutes
 
 module.exports.init = async (client) => { return runInterval(client); }
 
@@ -15,7 +14,7 @@ module.exports.run = async (message, args, client) => {
     if (result.length == 0) return message.reply("error processing date/time.");
     let reminderTime = moment.utc(result[0].start.date());
 
-    if (!args.includes("utc")) {
+    if (!query.includes("utc") && !query.match(/ in ([0-9]+|a|an) /gi)) {
         let user = statObj.users.find(u => u.discord == message.author.id);
         if (user && user.location) {
             let location = await tools.getLocation(`${user.location.lat},${user.location.lon}`, true);
@@ -59,9 +58,7 @@ checkReminders = async client => {
 sendReminder = (reminder, client) => {
     let embed = {
         color: 0xf56c7c,
-        author: {
-            name: `Your reminder is done!`,
-        },
+        author: { name: `Your reminder is done!`, },
         description: `On ${moment(reminder.start).format("**dddd, MMMM Do YYYY** [at] **HH:mm:ss UTC**")} you asked for a reminder to **${reminder.subject}**. The time has arrived.`,
     }
 
