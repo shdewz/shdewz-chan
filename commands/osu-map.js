@@ -22,7 +22,7 @@ module.exports.run = async (message, args, client) => {
     let lb = [];
     m.lb.forEach((l, i) => {
         let obj = {
-            a: `\`#${i + 1}\` ${l.grade} **[${l.username}](https://osu.ppy.sh/u/${l.user_id})**`,
+            a: `\`#${i + 1}\` ${l.grade.emoji} **[${l.username}](https://osu.ppy.sh/u/${l.user_id})**`,
             b: `**+${l.mods.join("") == "" ? "NM" : l.mods.join("")}** \u200b \`x${l.combo}\` \u200b \`${(l.acc * 100).toFixed(2)}%\``,
             c: `**\`${l.pp.toFixed(0)}pp\` \u200b **${l.replay ? ` [Replay](${l.replay})` : ""}`
         }
