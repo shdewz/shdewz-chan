@@ -10,8 +10,17 @@ const tools = require("./tools.js");
 
 let api, apikey;
 
-const rankemojis = ["<:rankingF:799961417498230824>", "<:rankingD:799961417197420546>", "<:rankingC:799961417474113536>", "<:rankingB:799961417552887870>", "<:rankingA:799961417431777290>", "<:rankingS:799961417490366464>", "<:rankingSH:799961417481715722>", "<:rankingX:799961417637822495>", "<:rankingXH:799961496062132225>"];
-const ranknames = ["F", "D", "C", "B", "A", "S", "SH", "X", "XH"];
+const ranks = [
+    { grade: 'XH', color: 0xc1c1c1, emoji: '<:rankingXH:799961496062132225>' },
+    { grade: 'X', color: 0xedc936, emoji: '<:rankingX:799961417637822495>' },
+    { grade: 'SH', color: 0xc1c1c1, emoji: '<:rankingSH:799961417481715722>' },
+    { grade: 'S', color: 0xedc936, emoji: '<:rankingS:799961417490366464>' },
+    { grade: 'A', color: 0x23ec57, emoji: '<:rankingA:799961417431777290>' },
+    { grade: 'B', color: 0x26abf8, emoji: '<:rankingB:799961417552887870>' },
+    { grade: 'C', color: 0xde25f4, emoji: ':rankingC:799961417474113536>' },
+    { grade: 'D', color: 0xf52424, emoji: '<:rankingD:799961417197420546>' },
+    { grade: 'F', color: 0xfc7c59, emoji: '<:rankingF:799961417498230824>' },
+];
 
 module.exports = {
     init: function (api_key) {
@@ -164,7 +173,7 @@ module.exports = {
 
                 let modsParam = mods == 0 ? 0 : tools.osu.modsToParam(modsNames);
 
-                let grade = rankemojis[ranknames.indexOf(eventdata.rank)];
+                let grade = ranks.find(e => e.grade == eventdata.rank);
                 let finished = eventdata.rank == "F" ? false : true;
                 let date = moment.utc(eventdata.date).valueOf();
 
@@ -269,7 +278,7 @@ module.exports = {
                         stars: Number(map.stars),
                         accuracy: acc,
                         score: Number(score.score),
-                        grade: rankemojis[ranknames.indexOf(score.rank)],
+                        grade: ranks.find(e => e.grade == score.rank),
                         combo: combo,
                         c300: hits.c300,
                         c100: hits.c100,
@@ -309,7 +318,6 @@ module.exports = {
                 if (response.length == 0) return resolve({ error: `No plays found for **${user.username}**.` });
 
                 let plays = [];
-                let userobj = {};
 
                 if (typeof sortby == undefined) sortby = "pp";
 
@@ -347,14 +355,6 @@ module.exports = {
 
                     let ppText = await getPPText(map, mods, combo, hits, score.pp);
 
-                    userobj = {
-                        username: user.username,
-                        id: user.id,
-                        avatar: user.avatar,
-                        url: user.url,
-                        flag: `https://osu.ppy.sh/images/flags/${user.country}.png`
-                    }
-
                     let obj = {
                         artist: map.artist,
                         title: map.title,
@@ -365,13 +365,14 @@ module.exports = {
                         stars: Number(map.stars),
                         acc: acc,
                         score: Number(score.score),
-                        grade: rankemojis[ranknames.indexOf(score.rank)],
+                        grade: ranks.find(e => e.grade == score.rank),
                         combo: combo,
                         maxcombo: map.maxcombo,
                         c300: hits.c300,
                         c100: hits.c100,
                         c50: hits.c50,
                         cmiss: hits.cmiss,
+                        pp_value: score.pp,
                         pp: ppText,
                         date: moment.utc(score.date).valueOf(),
                         position: score.position,
@@ -381,7 +382,7 @@ module.exports = {
                     plays.push(obj);
                 }
 
-                resolve({ user: userobj, plays: plays });
+                resolve({ user: user, plays: plays });
             }).catch(err => {
                 if (err.status == 404) return resolve({ error: `No plays found for ${user.username}.` });
                 else {
@@ -612,7 +613,7 @@ async function getMapLeaderboard(mapid, mods) {
                     pp: Number(score.pp),
                     replay: score.replay_available == 1 ? `https://osu.ppy.sh/scores/osu/${score.score_id}/download` : false,
                     date: moment.utc(score.date).valueOf(),
-                    grade: rankemojis[ranknames.indexOf(score.rank)],
+                    grade: ranks.find(e => e.grade == score.rank),
                     mods: tools.osu.getMods(score.enabled_mods)
                 }
                 scores.push(obj);
