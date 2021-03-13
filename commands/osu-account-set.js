@@ -3,14 +3,10 @@ const osu = require("../osu.js");
 
 module.exports.run = async (message, args) => {
 
-    if (args.length == 0) message.reply(`Correct usage: \`${config.prefix}osuset <username>\``);
+    if (args.length == 0) return;
 
-    try {
-        return osu.setUser(args.join("_"), message);
-    }
-    catch (error) {
-        return console.log(error);
-    }
+    try { return osu.setUser(args.join("_"), message); }
+    catch (error) { return console.log(error); }
 };
 
 module.exports.help = {
