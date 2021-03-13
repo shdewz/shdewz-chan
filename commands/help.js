@@ -3,6 +3,8 @@ const config = require("../config.json");
 module.exports.run = async (message, args, client) => {
 
     if (args[0]) {
+        let server = statObj.serverstats.find(s => s.id == message.guild.id);
+        let prefix = server && server.prefix ? server.prefix : config.prefix;
         var command = args[0];
         if (client.commands.has(command) || client.aliases.has(command)) {
             if (client.commands.has(command)) command = client.commands.get(command);
@@ -11,8 +13,8 @@ module.exports.run = async (message, args, client) => {
             if (command.help.servers && !command.help.servers.includes(message.guild.id) && message.guild.id != config.testserver) return;
 
             var exampletext = "";
-            if (command.help.example) exampletext = `\n**Example:** \`${config.prefix}${command.help.example}\``;
-            if (command.help.example2) exampletext += `\n**Example:** \`${config.prefix}${command.help.example2}\``;
+            if (command.help.example) exampletext = `\n**Example:** \`${prefix}${command.help.example}\``;
+            if (command.help.example2) exampletext += `\n**Example:** \`${prefix}${command.help.example2}\``;
 
             if (!command.help.usage) var usage = command.help.name;
             else var usage = command.help.usage;
@@ -25,11 +27,11 @@ module.exports.run = async (message, args, client) => {
             let embed = {
                 color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
                 author: {
-                    name: `${config.prefix}${command.help.name}`
+                    name: `${prefix}${command.help.name}`
                 },
-                description: `*${command.help.description}*\n\n**Usage:** \`${config.prefix}${usage}\`${exampletext}${aliastext}`,
+                description: `*${command.help.description}*\n\n**Usage:** \`${prefix}${usage}\`${exampletext}${aliastext}`,
                 footer: {
-                    text: `Use ${config.prefix}help for a list of all commands`
+                    text: `Use ${prefix}help for a list of all commands`
                 }
             }
             return message.channel.send({ embed: embed });
