@@ -1,30 +1,20 @@
 const config = require("../config.json");
 const osu = require("../osu.js");
 const moment = require("moment");
+const tools = require('../tools.js');
 
 module.exports.run = async (message, args) => {
     if (args.length == 0) return;
 
-    let username;
-    let map = args.join(" ").match(/(<?https?:\/\/)?(osu|old)\.ppy\.sh\/(beatmapsets\/\d+.*|b)?\/\d+>?|\d+/)[0];
-    let mapID = map.match(/\d+/g)[map.match(/\d+/g).length - 1];
+    let map = args.filter(e => e.match(/\d+$/))[0];
+    let mapID = map.match(/\d+$/)[0];
+
     args.splice(args.indexOf(map), 1);
 
-    if (args.length > 0) {
-        username = args.join(" ");
-    }
-    else {
-        for (var i = 0; i < statObj.users.length; i++) {
-            if (statObj.users[i].discord == message.author.id) {
-                username = statObj.users[i].osu_id;
-                var found = true;
-                break;
-            }
-        }
-        if (!found) return message.channel.send(`Looks like you haven't linked your account yet.\nLink it with the command \`${config.prefix}osuset <user>\`.`)
-    }
+    let user = args.length > 1 ? args.join(" ") : statObj.users.find(u => u.discord == message.author.id).osu_id;
+    if (!user) return tools.osu.noAccountAlert(message);
 
-    let embed = await getScores(username, mapID, message);
+    let embed = await getScores(user, mapID, message);
     if (embed.error) return message.channel.send(embed.error);
 
     return message.channel.send({ embed: embed })
@@ -44,13 +34,13 @@ async function getScores(user, mapid, message) {
     for (var i = 0; i < s.scores.length; i++) {
         var obj = {
             name: `**${s.scores[i].mods == "" ? "NM" : s.scores[i].mods}** (${s.scores[i].stars.toFixed(2)}★) — ${moment.utc(s.scores[i].date).fromNow()} (${moment.utc(s.scores[i].date).format("MMM Do, YYYY")})`,
-            value: `${s.scores[i].grade} — ${s.scores[i].ppText} — **${s.scores[i].accuracy.toFixed(2)}%**\n${s.scores[i].score.toLocaleString()} — **x${s.scores[i].combo.toLocaleString()}**/${s.stats.maxcombo.toLocaleString()} — \`[ ${s.scores[i].c300.toLocaleString()} / ${s.scores[i].c100.toLocaleString()} / ${s.scores[i].c50.toLocaleString()} / ${s.scores[i].cmiss.toLocaleString()} ]\`\n`
+            value: `${s.scores[i].grade.emoji} — ${s.scores[i].ppText} — **${s.scores[i].accuracy.toFixed(2)}%**\n${s.scores[i].score.toLocaleString()} — **x${s.scores[i].combo.toLocaleString()}**/${s.stats.maxcombo.toLocaleString()} — \`[ ${s.scores[i].c300.toLocaleString()} / ${s.scores[i].c100.toLocaleString()} / ${s.scores[i].c50.toLocaleString()} / ${s.scores[i].cmiss.toLocaleString()} ]\`\n`
         }
         fields.push(obj);
     }
 
     let embed = {
-        color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
+        color: s.scores[0].grade.color,
         author: {
             name: `${s.stats.artist} - ${s.stats.title} [${s.stats.difficulty}]`,
             icon_url: `${s.stats.avatar}?${+new Date()}`,

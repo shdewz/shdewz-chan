@@ -1,6 +1,7 @@
 const config = require("../config.json");
 const osu = require("../osu.js");
 const moment = require("moment");
+const tools = require('../tools.js');
 const sortable = ["pp", "date", "combo", "acc", "score", "mapid", "300s", "100s", "50s", "misses"];
 const sortable_ = ["pp", "date", "maxcombo", "acc", "score", "beatmap_id", "count300", "count100", "count50", "countmiss"];
 
@@ -48,10 +49,8 @@ module.exports.run = async (message, args) => {
                     break;
                 }
             }
-            if (!found) return message.channel.send(`Looks like you haven't linked your account yet.\nLink it with the command \`${config.prefix}osuset <user>\`.`)
+            if (!found) return tools.osu.noAccountAlert(message);
         }
-
-
 
         let s = await osu.getTop(username, limit, length, sortby, reverse, position);
         if (s.error) return message.channel.send(s.error);
@@ -59,14 +58,14 @@ module.exports.run = async (message, args) => {
 
         let fields = [];
         for (var i = 0; i < length; i++) {
-            fields.push(`**${s.plays[i].position}. [${s.plays[i].title} [${s.plays[i].difficulty}]](https://osu.ppy.sh/b/${s.plays[i].mapid}) ${s.plays[i].mods == "" ? "" : "+" + s.plays[i].mods}** (${s.plays[i].stars.toFixed(2)}★)\n${s.plays[i].grade} — ${s.plays[i].pp} — **${s.plays[i].acc.toFixed(2)}%**\n${s.plays[i].score.toLocaleString()} — **x${s.plays[i].combo.toLocaleString()}**/${s.plays[i].maxcombo.toLocaleString()} — \`[ ${s.plays[i].c300.toLocaleString()} / ${s.plays[i].c100.toLocaleString()} / ${s.plays[i].c50.toLocaleString()} / ${s.plays[i].cmiss.toLocaleString()} ]\`\n**${moment.utc(s.plays[i].date).fromNow()}** (${moment.utc(s.plays[i].date).format("MMMM Do, YYYY")})\n${sortby == "beatmap_id" ? `Map submitted **${moment.utc(s.plays[i].submitdate).fromNow()}** (${moment.utc(s.plays[i].submitdate).format("MMMM Do, YYYY")})\n` : ""}`);
+            fields.push(`**${s.plays[i].position}. [${s.plays[i].title} [${s.plays[i].difficulty}]](https://osu.ppy.sh/b/${s.plays[i].mapid}) ${s.plays[i].mods == "" ? "" : "+" + s.plays[i].mods}** (${s.plays[i].stars.toFixed(2)}★)\n${s.plays[i].grade.emoji} — ${s.plays[i].pp} — **${s.plays[i].acc.toFixed(2)}%**\n${s.plays[i].score.toLocaleString()} — **x${s.plays[i].combo.toLocaleString()}**/${s.plays[i].maxcombo.toLocaleString()} — \`[ ${s.plays[i].c300.toLocaleString()} / ${s.plays[i].c100.toLocaleString()} / ${s.plays[i].c50.toLocaleString()} / ${s.plays[i].cmiss.toLocaleString()} ]\`\n**${moment.utc(s.plays[i].date).fromNow()}** (${moment.utc(s.plays[i].date).format("MMMM Do, YYYY")})\n${sortby == "beatmap_id" ? `Map submitted **${moment.utc(s.plays[i].submitdate).fromNow()}** (${moment.utc(s.plays[i].submitdate).format("MMMM Do, YYYY")})\n` : ""}`);
         }
 
         let embed = {
             color: message.member.displayColor == 0 ? 0xFFFFFF : message.member.displayColor,
             author: {
                 name: `Top ${length} osu! plays for ${s.user.username}${position == 0 ? "" : ` starting at #${position + 1}`}`,
-                icon_url: `${s.user.flag}?${+new Date()}`,
+                icon_url: `https://osu.ppy.sh/images/flags/${s.user.country}.png?${+new Date()}`,
                 url: s.user.url
             },
             thumbnail: {
