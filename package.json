@@ -1,21 +1,21 @@
 {
-  "name": "shdewz-chan-v2",
-  "version": "1.0.0",
+  "name": "shdewz-chan",
+  "version": "1.2.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "run": "node index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shdewz/shdewz-chan-v2.git"
+    "url": "git+https://github.com/shdewz/shdewz-chan.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/shdewz/shdewz-chan-v2/issues"
+    "url": "https://github.com/shdewz/shdewz-chan/issues"
   },
-  "homepage": "https://github.com/shdewz/shdewz-chan-v2#readme",
+  "homepage": "https://github.com/shdewz/shdewz-chan#readme",
   "dependencies": {
     "@discordjs/uws": "^10.149.0",
     "archiver": "^5.0.0",
