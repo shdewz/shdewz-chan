@@ -24,7 +24,7 @@
     "chance": "^1.1.7",
     "chart.js": "^2.9.4",
     "chartjs-node-canvas": "^3.0.6",
-    "chrono-node": "^2.2.1",
+    "chrono-node": "^2.2.4",
     "countries-list": "^2.5.4",
     "discord.js": "^12.2.0",
     "fs": "0.0.1-security",
