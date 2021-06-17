@@ -1,7 +1,7 @@
 {
   "name": "shdewz-chan",
-  "version": "1.2.0",
-  "description": "",
+  "version": "3.0.0",
+  "description": "hey",
   "main": "index.js",
   "scripts": {
     "run": "node index.js"
@@ -17,26 +17,17 @@
   },
   "homepage": "https://github.com/shdewz/shdewz-chan#readme",
   "dependencies": {
-    "@discordjs/uws": "^10.149.0",
-    "archiver": "^5.0.0",
     "axios": "^0.21.1",
     "canvas": "^2.6.1",
     "chance": "^1.1.7",
-    "chart.js": "^2.9.4",
-    "chartjs-node-canvas": "^3.0.6",
     "chrono-node": "^2.2.4",
-    "countries-list": "^2.5.4",
     "discord.js": "^12.2.0",
     "fs": "0.0.1-security",
-    "fuzzysort": "^1.1.4",
     "google-spreadsheet": "^3.1.15",
-    "minimist": "^1.2.5",
     "moment": "^2.26.0",
-    "moment-timezone": "^0.5.31",
     "mongoose": "^5.11.15",
     "node-fetch": "^2.6.1",
     "ojsama": "^2.1.0",
-    "request": "^2.88.2",
-    "xmlhttprequest": "^1.8.0"
+    "request": "^2.88.2"
   }
 }

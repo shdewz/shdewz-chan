@@ -3,7 +3,8 @@ config.json
 sys-p-*.js
 gacha-admin.js
 
-# yea
+# a
+commands/old
 settings/
 start.bat
 loadlolis.js
