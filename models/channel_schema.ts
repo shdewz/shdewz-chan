@@ -1,4 +1,3 @@
-export { };
 const mongoose = require('mongoose');
 
 const channelSchema = new mongoose.Schema({
@@ -7,4 +6,4 @@ const channelSchema = new mongoose.Schema({
 });
 
 const model = mongoose.model('channels', channelSchema);
-module.exports = model;
+export default model;
