@@ -12,13 +12,14 @@ export const execute = async (client: Client, message: Message, _args: string[])
     const args: any = parseArgs(_args.slice(1));
 
     const mode = parseMode(args.mode || '');
+    const modetext = mode === 'osu' ? '' : mode === 'fruits' ? 'catch' : mode;
     const userString = args._.join(' '); // todo: add saved user ids from db
 
     const user: any = await getUser(userString, mode);
     if (!user) message.reply(`**User \`${userString}\` not found!**`);
 
     const stats = user.statistics;
-    const rank_delta = !stats.global_rank ? null : user.rank_history.data[Math.floor(user.rank_history.data.length * (2 / 3))] - stats.global_rank;
+    // const rank_delta = !stats.global_rank ? null : user.rank_history.data[Math.floor(user.rank_history.data.length * (2 / 3))] - stats.global_rank;
 
     const lines = [
         !stats.global_rank ? null : {
@@ -110,11 +111,13 @@ export const execute = async (client: Client, message: Message, _args: string[])
         },
     ];
 
+    console.log(user);
+
     message.reply({
         embeds: [{
             color: !user.profile_colour ? undefined : parseInt(user.profile_colour.substr(1), 16),
             author: {
-                name: `osu!${mode === 'osu' ? '' : mode === 'fruits' ? 'catch' : mode} profile for ${user.username}`,
+                name: `osu!${cleanMode(mode === '' ? user.playmode : modetext)} profile for ${user.username}`,
                 icon_url: `https://assets.ppy.sh/old-flags/${user.country_code}.png`,
                 url: `https://osu.ppy.sh/users/${user.id}/${mode}`,
             },
@@ -128,5 +131,7 @@ export const execute = async (client: Client, message: Message, _args: string[])
         }]
     })
 };
+
+const cleanMode = (mode: string) => mode === 'osu' ? '' : mode === 'fruits' ? 'catch' : mode;
 
 export const { name, aliases, description } = attributes;
