@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "declaration": false,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "resolveJsonModule": true,
+    "typeRoots": [
+      "src/@types",
+      "node_modules/@types"
+    ],
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "commands/*": [
+        "src/commands/*"
+      ]
+    }
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

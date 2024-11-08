@@ -2,10 +2,25 @@
   "name": "shdewz-chan",
   "version": "2.0.0",
   "description": "A Discord bot with *osu!* -related tools and other cool more or less useful functions.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node ."
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5",
+    "node-fetch": "^3.3.2",
+    "numeral": "^2.0.6",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "@types/numeral": "^2.0.5",
+    "@types/yargs": "^17.0.33",
+    "tsx": "^4.19.2"
+  }
 }
