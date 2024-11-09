@@ -64,5 +64,5 @@ const apiCall = async (url: string) => {
     const auth = await getAuth();
     const response = await fetch(url, { headers: { Authorization: `Bearer ${auth.token.access_token}` } });
     const data = await response.json();
-    return data ?? null;
+    return data;
 }
