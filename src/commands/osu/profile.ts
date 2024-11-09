@@ -116,8 +116,6 @@ export const execute = async (client: Client, message: Message, _args: string[],
         },
     ];
 
-    console.log(user);
-
     message.reply({
         embeds: [{
             color: !user.profile_colour ? undefined : parseInt(user.profile_colour.substr(1), 16),
