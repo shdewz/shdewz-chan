@@ -1,6 +1,7 @@
 import { Client, Message } from 'discord.js';
 import { parseArgs, formatNum, plural } from '../../helpers/utils';
 import { getUser, parseMode, getEmote } from 'src/helpers/osu';
+import userSchema from '../../schemas/user'
 
 const attributes = {
     name: 'osu',
@@ -8,18 +9,23 @@ const attributes = {
     description: ''
 }
 
-export const execute = async (client: Client, message: Message, _args: string[]) => {
+export const execute = async (client: Client, message: Message, _args: string[], prefix: string) => {
     const args: any = parseArgs(_args.slice(1));
+    const userSettings = await userSchema.findOne({ user_id: message.author.id });
 
     const mode = parseMode(args.mode || '');
     const modetext = mode === 'osu' ? '' : mode === 'fruits' ? 'catch' : mode;
-    const userString = args._.join(' '); // todo: add saved user ids from db
+    let userString = args._.join(' ');
+
+    if (userString === '') {
+        if (userSettings?.prefs?.osu?.user_id) userString = userSettings.prefs.osu.user_id;
+        else return message.reply({ embeds: [{ description: `**You have not linked your osu! account yet!**\nDo it with the command \`${prefix}set -osu <user>\`` }] });
+    }
 
     const user: any = await getUser(userString, mode);
-    if (!user) message.reply(`**User \`${userString}\` not found!**`);
+    if (!user?.id) return message.reply({ embeds: [{ description: `**User \`${userString}\` not found!**` }] });
 
     const stats = user.statistics;
-    // const rank_delta = !stats.global_rank ? null : user.rank_history.data[Math.floor(user.rank_history.data.length * (2 / 3))] - stats.global_rank;
 
     const lines = [
         !stats.global_rank ? null : {
@@ -27,7 +33,6 @@ export const execute = async (client: Client, message: Message, _args: string[])
             content: [
                 `**#${formatNum(stats.global_rank, '0,0')}**`,
                 `:flag_${user.country_code.toLowerCase()}: #${formatNum(stats.country_rank, '0,0')}`,
-                // rank_delta !== null ? `${getEmote(rank_delta > 0 ? 'increase' : 'decrease')?.emoji} **${formatNum(Math.abs(rank_delta), '0.[0]a')}**` : null
             ]
         },
         {
