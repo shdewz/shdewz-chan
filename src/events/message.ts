@@ -6,13 +6,14 @@ const attributes = {
     once: false
 }
 
-const PREFIX = process.env.DEFAULT_PREFIX || '?';
+const defaultPrefix = process.env.DEFAULT_PREFIX || '?';
 
 export const execute = (client: Client, message: Message) => {
-    if (message.content?.startsWith(PREFIX)) {
-        const args = message.content.slice(PREFIX.length).split(' ');
+    const prefix = defaultPrefix;
+    if (message.content?.startsWith(prefix)) {
+        const args = message.content.slice(prefix.length).split(' ');
         const command = args[0];
-        client.commands.get(command)?.execute(client, message, args);
+        client.commands.get(command)?.execute(client, message, args, prefix);
     }
 };
 
