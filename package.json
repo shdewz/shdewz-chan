@@ -13,6 +13,7 @@
   "dependencies": {
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.5",
+    "mongoose": "^8.8.1",
     "node-fetch": "^3.3.2",
     "numeral": "^2.0.6",
     "yargs": "^17.7.2"
