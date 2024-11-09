@@ -9,6 +9,7 @@ const client = new Client({
 });
 
 client.commands = new Collection();
+require('./helpers/db').init();
 require('./handlers/commandHandler').loadCommands(client);
 require('./handlers/eventHandler').loadEvents(client);
 
