@@ -119,15 +119,11 @@ export const execute = async (client: Client, message: Message, _args: string[])
             author: {
                 name: `osu!${cleanMode(mode === '' ? user.playmode : modetext)} profile for ${user.username}`,
                 icon_url: `https://assets.ppy.sh/old-flags/${user.country_code}.png`,
-                url: `https://osu.ppy.sh/users/${user.id}/${mode}`,
+                url: `https://osu.ppy.sh/users/${user.id}${mode === '' ? '' : `/${mode}`}`,
             },
             title: !user.title ? '' : user.title,
             description: lines.filter(e => e !== null).map(line => line.indent + line.content.filter(e => e).join(line.separator)).join('\n'),
-            thumbnail: { url: user.avatar_url },
-            // footer: {
-            //     icon_url: `https://shdewz.me/assets/icons/${user.is_online ? 'online.png' : 'offline.png'}`,
-            //     text: user.is_online ? 'Currently online' : user.last_visit == null ? '' : `Last online ${new Date(user.last_visit)}`
-            // }
+            thumbnail: { url: user.avatar_url }
         }]
     })
 };
