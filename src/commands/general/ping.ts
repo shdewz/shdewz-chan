@@ -2,6 +2,7 @@ import { Client, Message } from 'discord.js';
 
 const attributes = {
     name: 'ping',
+    group: 'general',
     aliases: [],
     description: ''
 }

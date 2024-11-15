@@ -5,6 +5,7 @@ import userSchema from '../../schemas/user'
 
 const attributes = {
     name: 'osu',
+    group: 'osu',
     aliases: ['osu-profile'],
     description: ''
 }

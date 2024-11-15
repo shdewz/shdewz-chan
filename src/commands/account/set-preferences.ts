@@ -5,6 +5,7 @@ import userSchema from '../../schemas/user'
 
 const attributes = {
     name: 'set',
+    group: 'account',
     aliases: ['set-preferences'],
     description: ''
 }
