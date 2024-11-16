@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { Client, Message } from 'discord.js';
+import { randomString } from 'src/helpers/utils';
 
 const attributes = {
     name: 'messageCreate',
@@ -11,9 +12,16 @@ const defaultPrefix = process.env.DEFAULT_PREFIX || '?';
 export const execute = (client: Client, message: Message) => {
     const prefix = defaultPrefix;
     if (message.content?.startsWith(prefix)) {
-        const args = message.content.slice(prefix.length).split(' ');
+        const newContent = randomString(message.content);
+        const args = newContent.slice(prefix.length).split(' ');
         const command = args[0];
-        client.commands.get(command)?.execute(client, message, args, prefix);
+        try {
+            client.commands.get(command)?.execute(client, message, args, prefix);
+        }
+        catch (error) {
+            console.log(error);
+            message.reply('Error running this command!');
+        }
     }
 };
 
