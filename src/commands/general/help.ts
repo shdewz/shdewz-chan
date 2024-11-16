@@ -56,7 +56,7 @@ export const execute = (client: Client, message: Message, _args: string[], prefi
                     icon_url: client.user?.avatarURL() ?? undefined,
                     url: undefined // replace with commands.md eventually
                 },
-                description: `${command.description}`,
+                description: `${command.description.replace(/{{prefix}}/g, prefix)}`,
                 fields: fields
             }]
         });
