@@ -35,7 +35,7 @@ export const parseMode = (mode: string) => {
     const modes = [
         { mode: 'osu', aliases: ['osu', 'std', 'standard'] },
         { mode: 'taiko', aliases: ['taiko'] },
-        { mode: 'fruits', aliases: ['fruits', 'catch'] },
+        { mode: 'fruits', aliases: ['fruits', 'catch', 'ctb'] },
         { mode: 'mania', aliases: ['mania'] },
     ]
     const _mode = modes.find(m => m.aliases.includes(searchString));
