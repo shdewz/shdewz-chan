@@ -5,10 +5,15 @@ import userSchema from '../../schemas/user'
 
 const attributes = {
     name: 'osu',
-    group: 'osu',
+    group: 'osu!',
     aliases: ['osu-profile'],
-    description: ''
+    description: `Show someone's osu! profile.`,
+    params: [
+        { name: `mode <osu/taiko/catch/mania>`, description: `Specify the gamemode. Defaults to the user's selected main gamemode.` }
+    ]
 }
+
+export const { name, group, aliases, description, params } = attributes;
 
 export const execute = async (client: Client, message: Message, _args: string[], prefix: string) => {
     const args: any = parseArgs(_args.slice(1));
@@ -133,5 +138,3 @@ export const execute = async (client: Client, message: Message, _args: string[],
 };
 
 const cleanMode = (mode: string) => mode === 'osu' ? '' : mode === 'fruits' ? 'catch' : mode;
-
-export const { name, aliases, description } = attributes;

@@ -5,14 +5,20 @@ import userSchema from '../../schemas/user'
 
 const attributes = {
     name: 'set',
-    group: 'account',
+    group: 'Account',
     aliases: ['set-preferences'],
-    description: ''
+    description: 'Set various account preferences',
+    params: [
+        { name: `osu <username>`, description: `Link an osu! user to your account.` }
+    ]
 }
+
+export const { name, group, aliases, description, params } = attributes;
 
 export const execute = async (client: Client, message: Message, _args: string[], prefix: string) => {
     const args: any = parseArgs(_args.slice(1));
 
+    const embeds = [];
     if (args.osu) {
         const user: any = await getUser(args.osu, 'osu');
         if (!user) return message.reply(`**User \`${args.osu}\` not found!**`);
@@ -20,8 +26,9 @@ export const execute = async (client: Client, message: Message, _args: string[],
         const update = setPreference(message.author.id, { $set: { 'prefs.osu.user_id': user.id } });
         if (!update) return message.reply(`**Something went wrong updating your linked osu! account.**`);
 
-        return message.reply({ embeds: [{ author: { name: `Successfully linked to osu! account ${user.username}!`, icon_url: `https://a.ppy.sh/${user.id || '1'}` || '' } }] });
+        embeds.push({ author: { name: `Successfully linked to osu! account ${user.username}!`, icon_url: `https://a.ppy.sh/${user.id || '1'}` || '' } });
     }
+    return message.reply({ embeds: embeds.length > 0 ? embeds : [{ author: { name: 'No preferences selected!' } }] });
 };
 
 export const setPreference = async (user: string, update: any) => {
@@ -35,5 +42,3 @@ export const setPreference = async (user: string, update: any) => {
 }
 
 const update_user = async (query: any, update: any) => await userSchema.findOneAndUpdate(query, update, { upsert: true, new: true });
-
-export const { name, aliases } = attributes;
