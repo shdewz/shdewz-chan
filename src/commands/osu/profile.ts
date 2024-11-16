@@ -19,7 +19,7 @@ export const execute = async (client: Client, message: Message, _args: string[],
     const args: any = parseArgs(_args.slice(1));
     const userSettings = await userSchema.findOne({ user_id: message.author.id });
 
-    const mode = parseMode(args.mode || '');
+    const mode = parseMode(args.mode?.toString() || '');
     const modetext = mode === 'osu' ? '' : mode === 'fruits' ? 'catch' : mode;
     let userString = args._.join(' ');
 
