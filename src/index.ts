@@ -11,4 +11,4 @@ require('./helpers/db').init();
 require('./handlers/commandHandler').loadCommands(client);
 require('./handlers/eventHandler').loadEvents(client);
 
-client.login(process.env.ENV == 'production' ? process.env.TOKEN : process.env.TOKEN_DEV);
+client.login(process.env.NODE_ENV == 'production' ? process.env.TOKEN : process.env.TOKEN_DEV);
