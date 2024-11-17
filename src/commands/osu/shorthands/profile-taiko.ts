@@ -2,7 +2,7 @@ import { Client, Message } from 'discord.js';
 
 const attributes = {
     name: 'taiko',
-    group: 'osu!',
+    group: 'shorthand',
     aliases: [],
     description: `Shorthand for \`{{prefix}}osu -mode taiko\`.`,
     params: []

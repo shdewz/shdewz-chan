@@ -2,7 +2,7 @@ import { Client, Message } from 'discord.js';
 
 const attributes = {
     name: 'mania',
-    group: 'osu!',
+    group: 'shorthand',
     aliases: [],
     description: `Shorthand for \`{{prefix}}osu -mode mania\`.`,
     params: []

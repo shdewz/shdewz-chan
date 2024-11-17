@@ -12,7 +12,7 @@ export const { name, group, aliases, description, params } = attributes;
 
 export const execute = (client: Client, message: Message, _args: string[], prefix: string) => {
     if (_args.slice(1).length === 0) {
-        const commands = Array.from(client.commands).map(e => e[1]).filter(e => !e.alias && e.group !== 'dev');
+        const commands = Array.from(client.commands).map(e => e[1]).filter(e => !e.alias && e.group !== 'dev' && e.group !== 'shorthand');
         const groups = [...new Set(commands.map(c => c.group))].sort();
 
         const fields = [];

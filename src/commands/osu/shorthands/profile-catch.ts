@@ -2,7 +2,7 @@ import { Client, Message } from 'discord.js';
 
 const attributes = {
     name: 'catch',
-    group: 'osu!',
+    group: 'shorthand',
     aliases: ['ctb'],
     description: `Shorthand for \`{{prefix}}osu -mode catch\`.`,
     params: []
