@@ -1,16 +1,15 @@
 import 'dotenv/config';
 import { Client, Message } from 'discord.js';
 import { randomString } from 'src/helpers/utils';
+import { getPrefix } from 'src/handlers/prefixHandler';
 
 const attributes = {
     name: 'messageCreate',
     once: false
 }
 
-const defaultPrefix = process.env.DEFAULT_PREFIX || '?';
-
 export const execute = (client: Client, message: Message) => {
-    const prefix = defaultPrefix;
+    const prefix = getPrefix(message.guild?.id ?? null);
     if (message.content?.startsWith(prefix)) {
         const newContent = randomString(message.content);
         const args = newContent.slice(prefix.length).split(' ');
