@@ -1,3 +1,3 @@
 # shdewz-chan
 
-A Discord bot with *osu!* -related tools and other cool more or less useful functions.
+A Discord bot mostly focused on [osu!](https://osu.ppy.sh/)-related tools and features.
