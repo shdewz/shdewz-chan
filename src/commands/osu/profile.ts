@@ -1,5 +1,5 @@
 import { Client, Message } from 'discord.js';
-import { parseArgs, formatNum, plural } from '../../helpers/utils';
+import { getArgs, formatNum, plural } from '../../helpers/utils';
 import { getUser, parseMode, getEmote } from 'src/helpers/osu';
 import userSchema from '../../schemas/user'
 
@@ -16,7 +16,7 @@ const attributes = {
 export const { name, group, aliases, description, params } = attributes;
 
 export const execute = async (client: Client, message: Message, _args: string[], prefix: string) => {
-    const args: any = parseArgs(_args.slice(1));
+    const args: any = getArgs(_args.slice(1));
     const userSettings = await userSchema.findOne({ user_id: message.author.id });
 
     const mode = parseMode(args.mode?.toString() || '');

@@ -1,5 +1,5 @@
 import { Client, Message } from 'discord.js';
-import { parseArgs } from '../../helpers/utils';
+import { getArgs } from '../../helpers/utils';
 import { getUser } from 'src/helpers/osu';
 import userSchema from '../../schemas/user'
 
@@ -16,7 +16,7 @@ const attributes = {
 export const { name, group, aliases, description, params } = attributes;
 
 export const execute = async (client: Client, message: Message, _args: string[], prefix: string) => {
-    const args: any = parseArgs(_args.slice(1));
+    const args: any = getArgs(_args.slice(1));
 
     const embeds = [];
 

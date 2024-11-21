@@ -2,8 +2,8 @@ import yargs from 'yargs';
 import numeral from 'numeral';
 import { Message } from 'discord.js';
 
-export const parseArgs = (args: string[]) => {
-    return yargs(args).parserConfiguration({ 'short-option-groups': false }).parse();
+export const getArgs = (args: string[]) => {
+    return yargs(args).parserConfiguration({ 'short-option-groups': false }).parseSync();
 }
 
 export const formatNum = (num: number, format: string) => numeral(num).format(format);
