@@ -21,7 +21,7 @@ export const execute = async (client: Client, message: Message, _args: string[],
             const newPrefix = args._[0];
             const update = await updatePrefix(message.guild.id, newPrefix);
             if (update) {
-                return message.reply({ embeds: [{ description: `Successfully changed the server prefix to \`${newPrefix}\`!` }] });
+                return message.reply({ embeds: [{ description: `Successfully changed the server prefix to \`${newPrefix}\`` }] });
             }
             else return message.reply({ embeds: [{ description: `🔻 Unknown error changing the server prefix.` }] });
         }
