@@ -1,5 +1,6 @@
 import yargs from 'yargs';
 import numeral from 'numeral';
+import { Message } from 'discord.js';
 
 export const parseArgs = (args: string[]) => {
     return yargs(args).parserConfiguration({ 'short-option-groups': false }).parse();
@@ -17,3 +18,5 @@ export const randomString = (str: string) => {
     }
     return str;
 }
+
+export const getNameString = (message: Message) => message.member?.nickname || message.author.globalName || message.author.username;
