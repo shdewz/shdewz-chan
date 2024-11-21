@@ -4,7 +4,7 @@ const attributes = {
     name: 'help',
     group: 'General',
     aliases: ['commands'],
-    description: '',
+    description: 'Show help about commands',
     params: []
 }
 
@@ -39,7 +39,7 @@ export const execute = (client: Client, message: Message, _args: string[], prefi
     }
     else {
         const command = client.commands.get(_args.slice(1).join('_'));
-        if (!command) return;
+        if (!command) return message.reply(`🔻 No command found with the name **${_args.slice(1).join('_')}**.`);
 
         const fields = [];
         if (command.params.length > 0) {
