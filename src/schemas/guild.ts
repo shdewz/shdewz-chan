@@ -5,5 +5,5 @@ const guildSchema = new mongoose.Schema({
     prefix: String
 });
 
-const model = mongoose.model('guilds', guildSchema);
+const model = mongoose.models.guilds || mongoose.model('guilds', guildSchema);
 export default model;

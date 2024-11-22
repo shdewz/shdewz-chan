@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { Client, Message } from 'discord.js';
-import { randomString } from 'src/helpers/utils';
-import { getPrefix } from 'src/handlers/prefixHandler';
+import { randomString } from '../helpers/utils.js';
+import { getPrefix } from '../handlers/prefixHandler.js';
 
 const attributes = {
     name: 'messageCreate',

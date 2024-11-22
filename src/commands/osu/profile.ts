@@ -1,7 +1,7 @@
 import { Client, Message } from 'discord.js';
-import { getArgs, formatNum, plural } from '../../helpers/utils';
-import { getUser, parseMode, getEmote } from 'src/helpers/osu';
-import userSchema from '../../schemas/user'
+import { getArgs, formatNum, plural } from '../../helpers/utils.js';
+import { getUser, parseMode, getEmote } from '../../helpers/osu.js';
+import userSchema from '../../schemas/user.js'
 
 const attributes = {
     name: 'osu',

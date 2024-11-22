@@ -1,7 +1,7 @@
 import { Client, Message } from 'discord.js';
-import { getArgs } from '../../helpers/utils';
-import { getUser } from 'src/helpers/osu';
-import userSchema from '../../schemas/user'
+import { getArgs } from '../../helpers/utils.js';
+import { getUser } from '../../helpers/osu.js';
+import userSchema from '../../schemas/user.js'
 
 const attributes = {
     name: 'set',

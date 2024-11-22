@@ -1,5 +1,9 @@
 import 'dotenv/config';
 import { Client, Collection, GatewayIntentBits } from 'discord.js';
+import * as db from './helpers/db.js';
+import * as prefixHandler from './handlers/prefixHandler.js';
+import { loadCommands } from './handlers/commandHandler.js';
+import { loadEvents } from './handlers/eventHandler.js';
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent],
@@ -7,9 +11,9 @@ const client = new Client({
 });
 
 client.commands = new Collection();
-require('./helpers/db').init();
-require('./handlers/prefixHandler').init();
-require('./handlers/commandHandler').loadCommands(client);
-require('./handlers/eventHandler').loadEvents(client);
+db.init();
+prefixHandler.init();
+loadCommands(client);
+loadEvents(client);
 
 client.login(process.env.NODE_ENV == 'production' ? process.env.TOKEN : process.env.TOKEN_DEV);

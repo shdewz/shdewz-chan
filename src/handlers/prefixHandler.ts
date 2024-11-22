@@ -1,4 +1,4 @@
-import guildSchema from '../schemas/guild';
+import guildSchema from '../schemas/guild.js';
 
 const defaultPrefix = process.env.DEFAULT_PREFIX || '?';
 const prefixes: { guildId: string; prefix: string; }[] = [];

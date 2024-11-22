@@ -1,5 +1,5 @@
 import { Client, Message } from 'discord.js';
-import { getNameString, getArgs, plural } from '../../helpers/utils';
+import { getNameString, getArgs, plural } from '../../helpers/utils.js';
 
 const attributes = {
     name: 'roll',

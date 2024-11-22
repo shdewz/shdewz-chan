@@ -1,6 +1,6 @@
 import { Client, Message, PermissionsBitField } from 'discord.js';
-import { updatePrefix } from 'src/handlers/prefixHandler';
-import { getArgs } from '../../helpers/utils';
+import { updatePrefix } from '../../handlers/prefixHandler.js';
+import { getArgs } from '../../helpers/utils.js';
 
 const attributes = {
     name: 'prefix',

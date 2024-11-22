@@ -5,5 +5,5 @@ const channelSchema = new mongoose.Schema({
     last_beatmap: String
 });
 
-const model = mongoose.model('channels', channelSchema);
+const model = mongoose.models.channels || mongoose.model('channels', channelSchema);
 export default model;
