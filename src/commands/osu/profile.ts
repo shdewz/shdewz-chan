@@ -20,7 +20,6 @@ export const execute = async (client: Client, message: Message, _args: string[],
     const userSettings = await userSchema.findOne({ user_id: message.author.id });
 
     const mode = parseMode(args.mode?.toString() || '');
-    const modetext = mode === 'osu' ? '' : mode === 'fruits' ? 'catch' : mode;
     let userString = args._.join(' ');
 
     if (userString === '') {
@@ -28,8 +27,14 @@ export const execute = async (client: Client, message: Message, _args: string[],
         else return message.reply({ embeds: [{ description: `**You have not linked your osu! account yet!**\nDo it with the command \`${prefix}set -osu <user>\`` }] });
     }
 
-    const user: any = await getUser(userString, mode);
-    if (!user?.id) return message.reply({ embeds: [{ description: `**User \`${userString}\` not found!**` }] });
+    const embed = await getOsuProfile(userString, mode);
+
+    message.reply({ embeds: [embed] });
+};
+
+export const getOsuProfile = async (userId: string, mode: string) => {
+    const user: any = await getUser(userId, mode);
+    if (!user?.id) return { description: `**User \`${userId}\` not found!**` };
 
     const stats = user.statistics;
 
@@ -122,19 +127,18 @@ export const execute = async (client: Client, message: Message, _args: string[],
         },
     ];
 
-    message.reply({
-        embeds: [{
-            color: !user.profile_colour ? undefined : parseInt(user.profile_colour.substr(1), 16),
-            author: {
-                name: `osu!${cleanMode(mode === '' ? user.playmode : modetext)} profile for ${user.username}`,
-                icon_url: `https://assets.ppy.sh/old-flags/${user.country_code}.png`,
-                url: `https://osu.ppy.sh/users/${user.id}${mode === '' ? '' : `/${mode}`}`,
-            },
-            title: !user.title ? '' : user.title,
-            description: lines.filter(e => e !== null).map(line => line.indent + line.content.filter(e => e).join(line.separator)).join('\n'),
-            thumbnail: { url: user.avatar_url }
-        }]
-    })
-};
+    const embed = {
+        color: !user.profile_colour ? undefined : parseInt(user.profile_colour.substr(1), 16),
+        author: {
+            name: `osu!${cleanMode(mode === '' ? user.playmode : mode === 'osu' ? '' : mode === 'fruits' ? 'catch' : mode)} profile for ${user.username}`,
+            icon_url: `https://assets.ppy.sh/old-flags/${user.country_code}.png`,
+            url: `https://osu.ppy.sh/users/${user.id}${mode === '' ? '' : `/${mode}`}`,
+        },
+        title: !user.title ? '' : user.title,
+        description: lines.filter(e => e !== null).map(line => line.indent + line.content.filter(e => e).join(line.separator)).join('\n'),
+        thumbnail: { url: user.avatar_url }
+    };
+    return embed;
+}
 
 const cleanMode = (mode: string) => mode === 'osu' ? '' : mode === 'fruits' ? 'catch' : mode;
