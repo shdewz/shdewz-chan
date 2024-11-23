@@ -1,15 +1,13 @@
 import { Client, Message } from 'discord.js';
 import { getNameString, getArgs, plural } from '../../helpers/utils.js';
 
-const attributes = {
+export const attributes = {
     name: 'roll',
     group: 'General',
     aliases: [],
     description: 'Roll a random number.\n**Usage:** `{{prefix}}roll [min] [max]`',
     params: []
 }
-
-export const { name, group, aliases, description, params } = attributes;
 
 export const execute = (client: Client, message: Message, _args: string[], prefix: string) => {
     const args: any = getArgs(_args.slice(1));

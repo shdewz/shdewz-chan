@@ -2,15 +2,13 @@ import { Client, Message, PermissionsBitField } from 'discord.js';
 import { updatePrefix } from '../../handlers/prefixHandler.js';
 import { getArgs } from '../../helpers/utils.js';
 
-const attributes = {
+export const attributes = {
     name: 'prefix',
     group: 'General',
     aliases: [],
     description: 'Change the server\'s command prefix',
     params: []
 }
-
-export const { name, group, aliases, description, params } = attributes;
 
 export const execute = async (client: Client, message: Message, _args: string[], prefix: string) => {
     if (!message.guild) return;

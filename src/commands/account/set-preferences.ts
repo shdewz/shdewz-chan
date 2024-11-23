@@ -3,7 +3,7 @@ import { getArgs } from '../../helpers/utils.js';
 import { getUser } from '../../helpers/osu.js';
 import userSchema from '../../schemas/user.js'
 
-const attributes = {
+export const attributes = {
     name: 'set',
     group: 'Account',
     aliases: ['set-preferences'],
@@ -12,8 +12,6 @@ const attributes = {
         { name: `osu <username>`, description: `Link an osu! user to your account.` }
     ]
 }
-
-export const { name, group, aliases, description, params } = attributes;
 
 export const execute = async (client: Client, message: Message, _args: string[], prefix: string) => {
     const args: any = getArgs(_args.slice(1));
