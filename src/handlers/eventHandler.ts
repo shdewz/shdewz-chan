@@ -1,4 +1,4 @@
-import { readdirSync, statSync } from 'fs';
+import { readdirSync } from 'fs';
 import { Client } from 'discord.js';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';

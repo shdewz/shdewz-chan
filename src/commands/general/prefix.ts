@@ -10,7 +10,7 @@ export const attributes = {
     params: []
 }
 
-export const execute = async (client: Client, message: Message, _args: string[], prefix: string) => {
+export const execute = async (_client: Client, message: Message, _args: string[], _prefix: string) => {
     if (!message.guild) return;
 
     const args: any = getArgs(_args.slice(1));

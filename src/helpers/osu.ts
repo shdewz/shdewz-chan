@@ -42,10 +42,10 @@ export const parseMode = (mode: string) => {
     return _mode?.mode || '';
 }
 
-const getAuth = async () => { return !osuauth.token || osuauth.expires - 5000 < Date.now() ? await authorize() : osuauth }
+const getAuth = async () => { return osuauth.token === null || osuauth.expires - 5000 < Date.now() ? await authorize() : osuauth }
 
 const authorize = async () => {
-    let response = await fetch('https://osu.ppy.sh/oauth/token', {
+    const response = await fetch('https://osu.ppy.sh/oauth/token', {
         method: 'post',
         headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify({

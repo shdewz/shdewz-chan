@@ -20,6 +20,7 @@ export const updatePrefix = async (guildId: string, prefix: string) => {
         return true;
     }
     catch (error) {
+        console.error(error);
         return false;
     }
 }

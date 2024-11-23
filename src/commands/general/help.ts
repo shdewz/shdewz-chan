@@ -50,7 +50,7 @@ export const execute = (client: Client, message: Message, _args: string[], prefi
         return message.reply({
             embeds: [{
                 author: {
-                    name: `${prefix}${command.attributes.name} • command help`,
+                    name: `${prefix}${command.attributes.name} • command help`,
                     icon_url: client.user?.avatarURL() ?? undefined,
                     url: undefined // replace with commands.md eventually
                 },

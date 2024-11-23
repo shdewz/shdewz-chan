@@ -9,7 +9,7 @@ export const attributes = {
     params: []
 }
 
-export const execute = (client: Client, message: Message, _args: string[], prefix: string) => {
+export const execute = (_client: Client, message: Message, _args: string[], _prefix: string) => {
     const args: any = getArgs(_args.slice(1));
     const nums = args._.filter((e: any) => !isNaN(e));
     const start = nums.length > 1 ? nums[0] : 1;
