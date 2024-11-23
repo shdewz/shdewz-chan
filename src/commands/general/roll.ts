@@ -7,7 +7,7 @@ export const attributes = {
     aliases: [],
     description: 'Roll a random number.\n**Usage:** `{{prefix}}roll [min] [max]`',
     params: []
-}
+};
 
 export const execute = (_client: Client, message: Message, _args: string[], _prefix: string) => {
     const args: any = getArgs(_args.slice(1));

@@ -6,7 +6,7 @@ import { getPrefix } from '../handlers/prefixHandler.js';
 const attributes = {
     name: 'messageCreate',
     once: false
-}
+};
 
 export const execute = (client: Client, message: Message) => {
     const prefix = getPrefix(message.guild?.id ?? null);

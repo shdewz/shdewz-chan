@@ -3,7 +3,7 @@ import { Client, ActivityType } from 'discord.js';
 const attributes = {
     name: 'ready',
     once: true
-}
+};
 
 export const execute = (client: Client) => {
     if (client.user) {

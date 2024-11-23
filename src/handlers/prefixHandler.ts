@@ -9,7 +9,7 @@ export const init = async () => {
         if (guild.prefix) prefixes.push({ guildId: guild.guild_id, prefix: guild.prefix });
     }
     console.log(`Settings loaded for ${guilds.length} servers`);
-}
+};
 
 export const updatePrefix = async (guildId: string, prefix: string) => {
     try {
@@ -23,9 +23,9 @@ export const updatePrefix = async (guildId: string, prefix: string) => {
         console.error(error);
         return false;
     }
-}
+};
 
 export const getPrefix = (guildId: string | null) => {
     if (guildId === null) return defaultPrefix;
     return prefixes.find(e => e.guildId === guildId)?.prefix ?? defaultPrefix;
-}
+};

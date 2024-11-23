@@ -1,7 +1,7 @@
 import { Client, Message } from 'discord.js';
 import { getArgs } from '../../helpers/utils.js';
 import { getUser } from '../../helpers/osu.js';
-import userSchema from '../../schemas/user.js'
+import userSchema from '../../schemas/user.js';
 
 export const attributes = {
     name: 'set',
@@ -11,7 +11,7 @@ export const attributes = {
     params: [
         { name: 'osu <username>', description: 'Link an osu! user to your account.' }
     ]
-}
+};
 
 export const execute = async (_client: Client, message: Message, _args: string[], _prefix: string) => {
     const args: any = getArgs(_args.slice(1));
@@ -41,6 +41,6 @@ export const setPreference = async (user: string, update: any) => {
         console.error(error);
         return false;
     }
-}
+};
 
 const update_user = async (query: any, update: any) => await userSchema.findOneAndUpdate(query, update, { upsert: true, new: true });

@@ -6,7 +6,7 @@ export const attributes = {
     aliases: ['commands'],
     description: 'Show help about commands',
     params: []
-}
+};
 
 export const execute = (client: Client, message: Message, _args: string[], prefix: string) => {
     if (_args.slice(1).length === 0) {

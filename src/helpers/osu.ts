@@ -37,12 +37,12 @@ export const parseMode = (mode: string) => {
         { mode: 'taiko', aliases: ['taiko'] },
         { mode: 'fruits', aliases: ['fruits', 'catch', 'ctb'] },
         { mode: 'mania', aliases: ['mania'] },
-    ]
+    ];
     const _mode = modes.find(m => m.aliases.includes(searchString));
     return _mode?.mode || '';
-}
+};
 
-const getAuth = async () => { return osuauth.token === null || osuauth.expires - 5000 < Date.now() ? await authorize() : osuauth }
+const getAuth = async () => { return osuauth.token === null || osuauth.expires - 5000 < Date.now() ? await authorize() : osuauth; };
 
 const authorize = async () => {
     const response = await fetch('https://osu.ppy.sh/oauth/token', {
@@ -58,11 +58,11 @@ const authorize = async () => {
     const token: any = await response.json();
     osuauth = { token: token, expires: Date.now() + token.expires_in };
     return osuauth;
-}
+};
 
 const apiCall = async (url: string) => {
     const auth = await getAuth();
     const response = await fetch(url, { headers: { Authorization: `Bearer ${auth.token.access_token}` } });
     const data = await response.json();
     return data;
-}
+};

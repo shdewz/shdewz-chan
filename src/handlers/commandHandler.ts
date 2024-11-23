@@ -12,7 +12,7 @@ export const loadCommands = async (client: Client) => {
     const commands = readdir(commandsDir, client);
     await importCommands(commands, client);
     console.log(`Successfully loaded ${client.commands.filter(e => !e.alias).size} commands`);
-}
+};
 
 const commandFiles: string[] = [];
 
@@ -32,7 +32,7 @@ const readdir = (path: string = commandsDir, client: Client) => {
         catch (error) { console.error(error); }
     }
     return commandFiles;
-}
+};
 
 const importCommands = async (commmandFiles: string[], client: Client) => {
     for (const commandFile of commmandFiles) {
@@ -44,4 +44,4 @@ const importCommands = async (commmandFiles: string[], client: Client) => {
             if (alias) client.commands.set(alias, { ...command, alias: true });
         }
     }
-}
+};

@@ -8,7 +8,7 @@ export const attributes = {
     aliases: [],
     description: 'Change the server\'s command prefix',
     params: []
-}
+};
 
 export const execute = async (_client: Client, message: Message, _args: string[], _prefix: string) => {
     if (!message.guild) return;

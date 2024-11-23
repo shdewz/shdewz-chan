@@ -17,6 +17,6 @@ export const loadEvents = async (client: Client) => {
         if (event.once) client.once(event.name, (...args) => event.execute(...cleanArgs(args, client)));
         else client.on(event.name, (...args) => event.execute(...cleanArgs(args, client)));
     }
-}
+};
 
 const cleanArgs = (args: any[], client: Client) => [...new Set([client, ...args])];

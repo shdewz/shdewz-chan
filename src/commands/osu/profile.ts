@@ -1,7 +1,7 @@
 import { Client, Message } from 'discord.js';
 import { getArgs, formatNum, plural } from '../../helpers/utils.js';
 import { getUser, parseMode, getEmote } from '../../helpers/osu.js';
-import userSchema from '../../schemas/user.js'
+import userSchema from '../../schemas/user.js';
 
 export const attributes = {
     name: 'osu',
@@ -12,7 +12,7 @@ export const attributes = {
     params: [
         { name: 'mode <osu/taiko/catch/mania>', description: 'Specify the gamemode. Defaults to the user\'s selected main gamemode.' }
     ]
-}
+};
 
 export const execute = async (client: Client, message: Message, _args: string[], prefix: string) => {
     const command = _args[0].toLowerCase(); //
@@ -140,6 +140,6 @@ export const getOsuProfile = async (userId: string, mode: string) => {
         thumbnail: { url: user.avatar_url }
     };
     return embed;
-}
+};
 
 const cleanMode = (mode: string) => mode === 'osu' ? '' : mode === 'fruits' ? 'catch' : mode;
