@@ -29,5 +29,6 @@ export default tseslint.config({
         '@stylistic/ts/indent': ['warn', 4],
         '@stylistic/ts/quotes': ['warn', 'single'],
         '@stylistic/ts/semi': ['error', 'always'],
+        '@stylistic/ts/block-spacing': ['warn', 'always'],
     },
 });
