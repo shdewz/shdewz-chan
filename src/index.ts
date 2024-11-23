@@ -16,4 +16,4 @@ prefixHandler.init();
 loadCommands(client);
 loadEvents(client);
 
-client.login(process.env.NODE_ENV == 'production' ? process.env.TOKEN : process.env.TOKEN_DEV);
+client.login(process.env.ENV == 'production' ? process.env.TOKEN : process.env.TOKEN_DEV);
