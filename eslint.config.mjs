@@ -2,9 +2,13 @@
 
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import stylisticTs from '@stylistic/eslint-plugin-ts'
 
 export default tseslint.config({
     files: ['**/*.ts'],
+    plugins: {
+        '@stylistic/ts': stylisticTs
+    },
     extends: [
         eslint.configs.recommended,
         tseslint.configs.recommended,
@@ -19,6 +23,11 @@ export default tseslint.config({
                 'caughtErrorsIgnorePattern': '^_'
             }
         ],
-        '@typescript-eslint/no-explicit-any': 'off'
+        '@typescript-eslint/no-explicit-any': 'off',
+
+        // stylistic
+        '@stylistic/ts/indent': ['warn', 4],
+        '@stylistic/ts/quotes': ['warn', 'single'],
+        '@stylistic/ts/semi': ['error', 'always'],
     },
 });
