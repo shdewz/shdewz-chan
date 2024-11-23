@@ -22,6 +22,6 @@ export const execute = async (_client: Client, message: Message, _args: string[]
         if (update) {
             return message.reply({ embeds: [{ description: `Successfully changed the server prefix to \`${newPrefix}\`` }] });
         }
-        else return message.reply({ embeds: [{ description: `🔻 Unknown error changing the server prefix.` }] });
+        else return message.reply({ embeds: [{ description: '🔻 Unknown error changing the server prefix.' }] });
     }
 };

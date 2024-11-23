@@ -9,7 +9,7 @@ export const attributes = {
     aliases: ['set-preferences'],
     description: 'Set various account preferences',
     params: [
-        { name: `osu <username>`, description: `Link an osu! user to your account.` }
+        { name: 'osu <username>', description: 'Link an osu! user to your account.' }
     ]
 }
 
@@ -20,11 +20,11 @@ export const execute = async (_client: Client, message: Message, _args: string[]
 
     // osu username
     if (args.osu) {
-        const user: any = await getUser(args.osu, "osu");
+        const user: any = await getUser(args.osu, 'osu');
         if (!user) return message.reply(`**User \`${args.osu}\` not found!**`);
 
         const update = setPreference(message.author.id, { $set: { 'prefs.osu.user_id': user.id } });
-        if (!update) return message.reply(`**Something went wrong updating your linked osu! account.**`);
+        if (!update) return message.reply('**Something went wrong updating your linked osu! account.**');
 
         embeds.push({ author: { name: `Successfully linked to osu! account ${user.username}!`, icon_url: `https://a.ppy.sh/${user.id || '1'}` } });
     }

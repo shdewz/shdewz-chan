@@ -8,9 +8,9 @@ export const attributes = {
     group: 'osu!',
     aliases: ['osu-profile'],
     hiddenAliases: ['taiko', 'catch', 'fruits', 'ctb', 'mania'],
-    description: `Show someone's osu! profile.`,
+    description: 'Show someone\'s osu! profile.',
     params: [
-        { name: `mode <osu/taiko/catch/mania>`, description: `Specify the gamemode. Defaults to the user's selected main gamemode.` }
+        { name: 'mode <osu/taiko/catch/mania>', description: 'Specify the gamemode. Defaults to the user\'s selected main gamemode.' }
     ]
 }
 
