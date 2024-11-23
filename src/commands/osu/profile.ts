@@ -3,23 +3,24 @@ import { getArgs, formatNum, plural } from '../../helpers/utils.js';
 import { getUser, parseMode, getEmote } from '../../helpers/osu.js';
 import userSchema from '../../schemas/user.js'
 
-const attributes = {
+export const attributes = {
     name: 'osu',
     group: 'osu!',
     aliases: ['osu-profile'],
+    hiddenAliases: ['taiko', 'catch', 'fruits', 'ctb', 'mania'],
     description: `Show someone's osu! profile.`,
     params: [
         { name: `mode <osu/taiko/catch/mania>`, description: `Specify the gamemode. Defaults to the user's selected main gamemode.` }
     ]
 }
 
-export const { name, group, aliases, description, params } = attributes;
-
 export const execute = async (client: Client, message: Message, _args: string[], prefix: string) => {
+    const command = _args[0].toLowerCase(); //
+
     const args: any = getArgs(_args.slice(1));
     const userSettings = await userSchema.findOne({ user_id: message.author.id });
 
-    const mode = parseMode(args.mode?.toString() || '');
+    const mode = parseMode(command) ?? parseMode(args.mode?.toString() || '');
     let userString = args._.join(' ');
 
     if (userString === '') {

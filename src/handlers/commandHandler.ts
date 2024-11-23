@@ -11,7 +11,7 @@ const commandsDir = path.join(__dirname, '../commands');
 export const loadCommands = async (client: Client) => {
     const commands = readdir(commandsDir, client);
     await importCommands(commands, client);
-    console.log(`Successfully loaded ${client.commands.size} commands and aliases`);
+    console.log(`Successfully loaded ${client.commands.filter(e => !e.alias).size} commands`);
 }
 
 const commandFiles: string[] = [];
@@ -38,10 +38,10 @@ const importCommands = async (commmandFiles: string[], client: Client) => {
     for (const commandFile of commmandFiles) {
         const command = await import(commandFile);
 
-        client.commands.set(command.name, command);
+        client.commands.set(command.attributes.name, command);
 
-        for (const alias of command.aliases || []) {
-            client.commands.set(alias, { ...command, alias: true });
+        for (const alias of [...command.attributes.aliases, ...(command.attributes.hiddenAliases || [])]) {
+            if (alias) client.commands.set(alias, { ...command, alias: true });
         }
     }
 }
