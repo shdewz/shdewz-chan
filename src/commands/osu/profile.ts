@@ -21,7 +21,6 @@ export const execute = async (client: Client, message: Message, _args: string[],
     const userSettings = await userSchema.findOne({ user_id: message.author.id });
 
     const mode = getMode(args.mode, command);
-    console.log(mode);
     let userString = args._.join(' ');
 
     if (userString === '') {
