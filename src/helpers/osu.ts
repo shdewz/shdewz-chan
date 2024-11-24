@@ -24,23 +24,34 @@ const emotes = [
     { name: 'discord', color: 0xdcddde, emoji: '<:discord:949331827460550757>' },
 ];
 
+const modes = [
+    { mode: 'osu', display: 'osu!', aliases: ['osu', 'std', 'standard'] },
+    { mode: 'taiko', display: 'osu!taiko', aliases: ['taiko'] },
+    { mode: 'fruits', display: 'osu!catch', aliases: ['fruits', 'catch', 'ctb'] },
+    { mode: 'mania', display: 'osu!mania', aliases: ['mania'] },
+];
+
 export const getEmote = (name: string) => { return emotes.find(r => r.name === name); };
 
 export const getUser = async (user_id: string, mode: string) => {
     return await apiCall(baseurl + `/users/${user_id}${mode ? `/${mode}` : ''}`);
 };
 
-export const parseMode = (mode: string) => {
-    const searchString = mode.replace('osu!', '').toLowerCase();
-    const modes = [
-        { mode: 'osu', aliases: ['osu', 'std', 'standard'] },
-        { mode: 'taiko', aliases: ['taiko'] },
-        { mode: 'fruits', aliases: ['fruits', 'catch', 'ctb'] },
-        { mode: 'mania', aliases: ['mania'] },
-    ];
+const parseMode = (searchString: string) => {
     const _mode = modes.find(m => m.aliases.includes(searchString));
     return _mode?.mode || '';
 };
+
+export const getMode = (modeArg: string, command: string) => {
+    if (modeArg) return parseMode(modeArg);
+    else {
+        if (!command) return 'osu';
+        const commandMode = command.match(/(osu|taiko|fruits|catch|ctb|mania)/);
+        return commandMode ? parseMode(commandMode[0]) : 'osu';
+    }
+};
+
+export const getDisplayMode = (mode: string) => modes.find(m => m.aliases.includes(mode))?.display;
 
 const getAuth = async () => { return osuauth.token === null || osuauth.expires - 5000 < Date.now() ? await authorize() : osuauth; };
 

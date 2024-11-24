@@ -1,6 +1,6 @@
 import { Client, Message } from 'discord.js';
 import { getArgs, formatNum, plural } from '../../helpers/utils.js';
-import { getUser, parseMode, getEmote } from '../../helpers/osu.js';
+import { getUser, getEmote, getMode, getDisplayMode } from '../../helpers/osu.js';
 import userSchema from '../../schemas/user.js';
 
 export const attributes = {
@@ -15,12 +15,13 @@ export const attributes = {
 };
 
 export const execute = async (client: Client, message: Message, _args: string[], prefix: string) => {
-    const command = _args[0].toLowerCase(); //
+    const command = _args[0].toLowerCase();
 
     const args: any = getArgs(_args.slice(1));
     const userSettings = await userSchema.findOne({ user_id: message.author.id });
 
-    const mode = parseMode(command) ?? parseMode(args.mode?.toString() || '');
+    const mode = getMode(args.mode, command);
+    console.log(mode);
     let userString = args._.join(' ');
 
     if (userString === '') {
@@ -131,7 +132,7 @@ export const getOsuProfile = async (userId: string, mode: string) => {
     const embed = {
         color: !user.profile_colour ? undefined : parseInt(user.profile_colour.substr(1), 16),
         author: {
-            name: `osu!${cleanMode(mode === '' ? user.playmode : mode === 'osu' ? '' : mode === 'fruits' ? 'catch' : mode)} profile for ${user.username}`,
+            name: `${getDisplayMode(mode)} profile for ${user.username}`,
             icon_url: `https://assets.ppy.sh/old-flags/${user.country_code}.png`,
             url: `https://osu.ppy.sh/users/${user.id}${mode === '' ? '' : `/${mode}`}`,
         },
@@ -141,5 +142,3 @@ export const getOsuProfile = async (userId: string, mode: string) => {
     };
     return embed;
 };
-
-const cleanMode = (mode: string) => mode === 'osu' ? '' : mode === 'fruits' ? 'catch' : mode;
