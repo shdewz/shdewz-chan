@@ -31,11 +31,9 @@ const modes = [
     { mode: 'mania', display: 'osu!mania', aliases: ['mania'] },
 ];
 
-export const getEmote = (name: string) => { return emotes.find(r => r.name === name); };
+export const noAccountSet = '**You have not linked your osu! account yet!**\nDo it with the command `{{prefix}}set -osu <user>`';
 
-export const getUser = async (user_id: string, mode: string) => {
-    return await apiCall(baseurl + `/users/${user_id}${mode ? `/${mode}` : ''}`);
-};
+export const getEmote = (name: string) => { return emotes.find(r => r.name === name); };
 
 const parseMode = (searchString: string) => {
     const _mode = modes.find(m => m.aliases.includes(searchString));
@@ -52,6 +50,12 @@ export const getMode = (modeArg: string, command: string) => {
 };
 
 export const getDisplayMode = (mode: string) => modes.find(m => m.aliases.includes(mode))?.display;
+
+// api calls:
+
+export const getUser = async (user_id: string, mode: string) => {
+    return await apiCall(baseurl + `/users/${user_id}${mode ? `/${mode}` : ''}`);
+};
 
 const getAuth = async () => { return osuauth.token === null || osuauth.expires - 5000 < Date.now() ? await authorize() : osuauth; };
 

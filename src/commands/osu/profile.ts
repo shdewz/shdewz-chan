@@ -1,6 +1,6 @@
 import { Client, Message } from 'discord.js';
 import { getArgs, formatNum, plural } from '../../helpers/utils.js';
-import { getUser, getEmote, getMode, getDisplayMode } from '../../helpers/osu.js';
+import { getUser, getEmote, getMode, getDisplayMode, noAccountSet } from '../../helpers/osu.js';
 import userSchema from '../../schemas/user.js';
 
 export const attributes = {
@@ -25,7 +25,7 @@ export const execute = async (client: Client, message: Message, _args: string[],
 
     if (userString === '') {
         if (userSettings?.prefs?.osu?.user_id) userString = userSettings.prefs.osu.user_id;
-        else return message.reply({ embeds: [{ description: `**You have not linked your osu! account yet!**\nDo it with the command \`${prefix}set -osu <user>\`` }] });
+        else return message.reply({ embeds: [{ description: noAccountSet.replace(/{{prefix}}/g, prefix) }] });
     }
 
     const embed = await getOsuProfile(userString, mode);
