@@ -1,4 +1,4 @@
-import { Client, Message } from 'discord.js';
+import { Client, Message, TextChannel } from 'discord.js';
 
 export const attributes = {
     name: 'ping',
@@ -8,6 +8,8 @@ export const attributes = {
     params: []
 };
 
-export const execute = (_client: Client, message: Message, _args: string[], _prefix: string) => {
-    message.reply(`${(Date.now() - message.createdTimestamp).toLocaleString()}ms :ping_pong:`);
+export const execute = async (_client: Client, message: Message, _args: string[], _prefix: string) => {
+    const msg = await (message.channel as TextChannel).send('...');
+    await msg.delete();
+    message.reply(`:ping_pong: **${(msg.createdTimestamp - message.createdTimestamp).toLocaleString()}**ms`);
 };
