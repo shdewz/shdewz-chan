@@ -41,7 +41,7 @@ export const execute = (client: Client, message: Message, _args: string[], prefi
 
         const fields = [];
         if (command.attributes.params.length > 0) {
-            fields.push({ name: 'Arguments', value: `> ${command.attributes.params.map((e: any) => `\`-${e.name}\`: ${e.description}`).join('\n')}` });
+            fields.push({ name: 'Arguments', value: `${command.attributes.params.map((e: any) => `> \`-${e.name}\`: ${e.description}`).join('\n')}` });
         }
         if (command.attributes.aliases.length > 0) {
             fields.push({ name: 'Aliases', value: `> ${[...command.attributes.aliases, command.attributes.name].sort().map((e: string) => `\`${e}\``).join(' ')}` });
