@@ -2,6 +2,7 @@ dist/
 node_modules/
 _test_*
 _dev/
+cache/
 
 .npm
 *.tsbuildinfo
