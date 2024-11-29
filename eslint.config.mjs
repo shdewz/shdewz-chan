@@ -24,6 +24,7 @@ export default tseslint.config({
             }
         ],
         '@typescript-eslint/no-explicit-any': 'off',
+        'no-irregular-whitespace': 'off',
 
         // stylistic
         '@stylistic/ts/indent': ['warn', 4],
