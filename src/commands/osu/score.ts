@@ -12,7 +12,8 @@ export const attributes = {
     description: 'score.',
     params: [
         { name: 'beatmap <id>', description: 'Specify the beatmap.' },
-        { name: 'sort <property>', description: 'Specify the sorting property.' }
+        { name: 'sort <property>', description: 'Specify the sorting property.' },
+        { name: 'reverse', description: 'Reverse the sort order.' }
     ]
 };
 
@@ -35,12 +36,12 @@ export const execute = async (_client: Client, message: Message, _args: string[]
 
     const sort = args.sort || args.s || 'pp';
 
-    const embed: any = await getOsuScore(userString, beatmapID, mode, sort);
+    const embed: any = await getOsuScore(userString, beatmapID, mode, { prop: sort, reverse: !!args.reverse });
 
     message.reply({ embeds: [embed] });
 };
 
-export const getOsuScore = async (userID: string, beatmapID: string, mode: string, sort: string = 'pp') => {
+export const getOsuScore = async (userID: string, beatmapID: string, mode: string, sort: any = { prop: 'pp', reverse: false }) => {
     const user: any = await getUser(userID, mode);
     if (!user?.id) return { description: `🔻 **User \`${userID}\` not found!**` };
 
@@ -52,7 +53,8 @@ export const getOsuScore = async (userID: string, beatmapID: string, mode: strin
         return { description: `🔻 **No scores found for [${user.username}](https://osu.ppy.sh/users/${user.id}) on [${beatmap.beatmapset.title} [${beatmap.version}]](https://osu.ppy.sh/b/${beatmap.id})**` };
     }
 
-    const scores = _scores.scores.sort((a: any, b: any) => b[sort] - a[sort]);
+    const scores = _scores.scores.sort((a: any, b: any) => b[sort.prop] - a[sort.prop]);
+    if (sort.reverse) scores.reverse();
     const score = scores[0];
     const s = score.statistics;
 
@@ -67,7 +69,9 @@ export const getOsuScore = async (userID: string, beatmapID: string, mode: strin
         {
             separator: ' • ', indent: '> ',
             content: [
-                `${getEmote(score.rank)?.emoji} **[+${score.mods.join('') || 'NM'}](https://osu.ppy.sh/scores/osu/${score.best_id})** (${formatNum(score.perf.max.difficulty.stars || 0, '0,0.00')}★)`,
+                score.best_id ?
+                    `${getEmote(score.rank)?.emoji} **[+${score.mods.join('') || 'NM'}](https://osu.ppy.sh/scores/osu/${score.best_id})** (${formatNum(score.perf.max.difficulty.stars || 0, '0,0.00')}★)`
+                    : `${getEmote(score.rank)?.emoji} **+${score.mods.join('') || 'NM'}** (${formatNum(score.perf.max.difficulty.stars || 0, '0,0.00')}★)`,
                 formatNum(score.accuracy, '0.00%'),
                 score.accuracy < 1 ? ` ${[
                     s.count_100 ? `**${s.count_100}** ${getEmote('hit100')?.emoji} ` : null,
@@ -93,7 +97,9 @@ export const getOsuScore = async (userID: string, beatmapID: string, mode: strin
         ...scores.slice(1, Math.min(scores.length, 5)).map((sc: any) => ({
             separator: ' • ', indent: '> ',
             content: [
-                `${getEmote(sc.rank)?.emoji} **[+${sc.mods.join('') || 'NM'}](https://osu.ppy.sh/scores/osu/${sc.best_id})** ${formatNum(sc.pp, '0,0')}pp`,
+                sc.best_id ?
+                    `${getEmote(sc.rank)?.emoji} **[+${sc.mods.join('') || 'NM'}](https://osu.ppy.sh/scores/osu/${sc.best_id})** ${formatNum(sc.pp, '0,0')}pp`
+                    : `${getEmote(sc.rank)?.emoji} **+${sc.mods.join('') || 'NM'}** ${formatNum(sc.pp, '0,0')}pp`,
                 `**${formatNum(sc.accuracy, '0.00%')}** ${formatNum(sc.max_combo, '0,0')}x${sc.statistics.count_miss ? ` **${sc.statistics.count_miss}**${getEmote('miss')?.emoji}` : ''}`,
                 `<t:${Math.round(new Date(sc.created_at).valueOf() / 1000)}:R>`
             ]
