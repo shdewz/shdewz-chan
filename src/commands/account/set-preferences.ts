@@ -1,6 +1,6 @@
 import { Client, Message } from 'discord.js';
 import { getArgs } from '../../helpers/utils.js';
-import { getUser } from '../../helpers/osu.js';
+import { getUser } from '../../helpers/osu/api.js';
 import userSchema from '../../schemas/user.js';
 
 export const attributes = {

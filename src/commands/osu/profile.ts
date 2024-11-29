@@ -1,7 +1,8 @@
 import { Client, Message } from 'discord.js';
 import { getArgs, formatNum, plural } from '../../helpers/utils.js';
-import { getUser, getEmote, getMode, getDisplayMode, noAccountSet } from '../../helpers/osu.js';
 import userSchema from '../../schemas/user.js';
+import { getDisplayMode, getEmote, getMode, noAccountSet } from '../../helpers/osu/utils.js';
+import { getUser } from '../../helpers/osu/api.js';
 
 export const attributes = {
     name: 'osu',
@@ -35,7 +36,7 @@ export const execute = async (_client: Client, message: Message, _args: string[]
 
 export const getOsuProfile = async (userId: string, mode: string) => {
     const user: any = await getUser(userId, mode);
-    if (!user?.id) return { description: `**User \`${userId}\` not found!**` };
+    if (!user?.id) return { description: `🔻 **User \`${userId}\` not found!**` };
 
     const stats = user.statistics;
 
