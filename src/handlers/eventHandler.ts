@@ -14,8 +14,8 @@ export const loadEvents = async (client: Client) => {
     for (const file of files) {
         const fileUrl = pathToFileURL(`${eventsDir}/${file}`).href;
         const event = await import(fileUrl);
-        if (event.once) client.once(event.name, (...args) => event.execute(...cleanArgs(args, client)));
-        else client.on(event.name, (...args) => event.execute(...cleanArgs(args, client)));
+        if (event.attributes.once) client.once(event.attributes.name, (...args) => event.execute(...cleanArgs(args, client)));
+        else client.on(event.attributes.name, (...args) => event.execute(...cleanArgs(args, client)));
     }
 };
 

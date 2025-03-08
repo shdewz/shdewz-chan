@@ -3,7 +3,7 @@ import { Client, Message } from 'discord.js';
 import { randomString } from '../helpers/utils.js';
 import { getPrefix } from '../handlers/prefixHandler.js';
 
-const attributes = {
+export const attributes = {
     name: 'messageCreate',
     once: false
 };
@@ -23,5 +23,3 @@ export const execute = (client: Client, message: Message) => {
         }
     }
 };
-
-export const { name, once } = attributes;
