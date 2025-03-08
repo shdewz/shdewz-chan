@@ -45,13 +45,13 @@ export const getOsuProfile = async (userId: string, mode: string) => {
             separator: ' • ', indent: '> ',
             content: [
                 `**#${formatNum(stats.global_rank, '0,0')}**`,
-                `:flag_${user.country_code.toLowerCase()}: #${formatNum(stats.country_rank, '0,0')}`,
+                `:flag_${user.country_code.toLowerCase()}: **#${formatNum(stats.country_rank, '0,0')}**`,
             ]
         },
         {
             separator: ' • ', indent: '> ',
             content: [
-                !stats.pp ? null : `**${formatNum(stats.pp, '0,0')}** pp`,
+                !stats.pp ? null : `**${formatNum(stats.pp, '0,0')}**pp`,
                 `**${stats.hit_accuracy.toFixed(2)}%** accuracy`
             ]
         },
@@ -81,7 +81,7 @@ export const getOsuProfile = async (userId: string, mode: string) => {
             content: [
                 `**${formatNum(stats.play_count, '0,0')}** playcount`,
                 `**${formatNum(Math.round(stats.play_time / 60 / 60), '0,0')}** hours`,
-                `**${formatNum(Math.round((stats.count_300 + stats.count_100 + stats.count_50 + stats.count_miss) / stats.play_count), '0,0')}** hits/play`
+                // `**${formatNum(Math.round((stats.count_300 + stats.count_100 + stats.count_50 + stats.count_miss) / stats.play_count), '0,0')}** hits/play`
             ]
         },
         {
@@ -134,7 +134,7 @@ export const getOsuProfile = async (userId: string, mode: string) => {
         color: !user.profile_colour ? undefined : parseInt(user.profile_colour.substr(1), 16),
         author: {
             name: `${getDisplayMode(mode)} profile for ${user.username}`,
-            icon_url: `https://assets.ppy.sh/old-flags/${user.country_code}.png`,
+            icon_url: `https://cdn.shdewz.me/flags/full/${user.country_code}.png`,
             url: `https://osu.ppy.sh/users/${user.id}${mode === '' ? '' : `/${mode}`}`,
         },
         title: !user.title ? '' : user.title,
