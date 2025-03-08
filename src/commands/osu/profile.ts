@@ -80,7 +80,8 @@ export const getOsuProfile = async (userId: string, mode: string) => {
             separator: ' • ', indent: '> ',
             content: [
                 `**${formatNum(stats.play_count, '0,0')}** playcount`,
-                `**${formatNum(Math.round(stats.play_time / 60 / 60), '0,0')}** hours`
+                `**${formatNum(Math.round(stats.play_time / 60 / 60), '0,0')}** hours`,
+                `**${formatNum(Math.round((stats.count_300 + stats.count_100 + stats.count_50 + stats.count_miss) / stats.play_count), '0,0')}** hits/play`
             ]
         },
         {
