@@ -109,7 +109,7 @@ export const getOsuScore = async (userID: string, beatmapID: string, mode: strin
 
     const embed = {
         color: getEmote(score.rank)?.color,
-        title: `${beatmap.beatmapset.title} [${beatmap.version}]`,
+        title: `${beatmap.beatmapset.artist} - ${beatmap.beatmapset.title} [${beatmap.version}]`,
         url: `https://osu.ppy.sh/b/${beatmap.id}`,
         author: {
             name: `${user.username} (#${formatNum(user.statistics.global_rank, '0,0')})`,
