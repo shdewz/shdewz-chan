@@ -36,12 +36,12 @@ export const execute = async (_client: Client, message: Message, _args: string[]
 
     const sort = args.sort || args.s || 'pp';
 
-    const embed: any = await getOsuScore(userString, beatmapID, mode, { prop: sort, reverse: !!args.reverse });
+    const embed: any = await getOsuScore(userString, beatmapID, mode, { prop: sort, reverse: !!args.reverse }, true);
 
     message.reply({ embeds: [embed] });
 };
 
-export const getOsuScore = async (userID: string, beatmapID: string, mode: string, sort: any = { prop: 'pp', reverse: false }) => {
+export const getOsuScore = async (userID: string, beatmapID: string, mode: string, sort: any = { prop: 'pp', reverse: false }, includeOthers: boolean) => {
     const user: any = await getUser(userID, mode);
     if (!user?.id) return { description: `🔻 **User \`${userID}\` not found!**` };
 
@@ -92,8 +92,8 @@ export const getOsuScore = async (userID: string, beatmapID: string, mode: strin
             separator: ' • ', indent: '> ',
             content: [`Score set <t:${Math.round(new Date(score.created_at).valueOf() / 1000)}:R>`]
         },
-        scores.length > 1 ? { separator: '', indent: '', content: ['\u200b'] } : null,
-        scores.length > 1 ? { separator: '', indent: '', content: ['**Other scores:**'] } : null,
+        (includeOthers && scores.length > 1) ? { separator: '', indent: '', content: ['\u200b'] } : null,
+        (includeOthers && scores.length > 1) ? { separator: '', indent: '', content: ['**Other scores:**'] } : null,
         ...scores.slice(1, Math.min(scores.length, 5)).map((sc: any) => ({
             separator: ' • ', indent: '> ',
             content: [
@@ -104,7 +104,7 @@ export const getOsuScore = async (userID: string, beatmapID: string, mode: strin
                 `<t:${Math.round(new Date(sc.created_at).valueOf() / 1000)}:R>`
             ]
         })),
-        scores.length > 5 ? { separator: '', indent: '', content: [`**+${scores.length - 5} more**`] } : null,
+        (includeOthers && scores.length > 5) ? { separator: '', indent: '', content: [`**+${scores.length - 5} more**`] } : null,
     ];
 
     const embed = {
