@@ -15,7 +15,7 @@ export const execute = async (_client: Client, message: Message, _args: string[]
 
     const args: any = getArgs(_args.slice(1));
     if (args._[0]) {
-        if (!message.member?.permissions.has(PermissionsBitField.Flags.Administrator)) return message.reply('🔻 Insufficient permissions to change the server prefix.');
+        if (!message.member?.permissions.has(PermissionsBitField.Flags.Administrator)) message.reply({ embeds: [{ description: '🔻 Insufficient permissions to change the server prefix.' }] });
 
         const newPrefix = args._[0];
         const update = await updatePrefix(message.guild.id, newPrefix);
@@ -24,4 +24,5 @@ export const execute = async (_client: Client, message: Message, _args: string[]
         }
         else return message.reply({ embeds: [{ description: '🔻 Unknown error changing the server prefix.' }] });
     }
+    else return message.reply({ embeds: [{ description: '🔻 No arguments provided.' }] });
 };
