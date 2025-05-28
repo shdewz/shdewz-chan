@@ -19,7 +19,7 @@ The following features need to be implemented to supersede the older version:
 - [x] Profile info
 - [ ] Score info
   - [x] Specific score
-  - [ ] Recent score
+  - [x] Recent score
   - [ ] Compare
 - [ ] Map info
 - [ ] Match costs
