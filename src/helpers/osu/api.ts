@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import fetch from 'node-fetch';
 const baseurl = 'https://osu.ppy.sh/api/v2';
-let osuauth: any = { token: null, expires: 0 };
+const osuauth: any = { token: null, expires: 0 };
 
 export const getUser = async (userID: string, mode: string) => {
     return await apiCall(baseurl + `/users/${userID}${mode ? `/${mode}` : ''}`);
@@ -9,6 +9,10 @@ export const getUser = async (userID: string, mode: string) => {
 
 export const getScores = async (userID: string, beatmapID: string, mode: string) => {
     return await apiCall(baseurl + `/beatmaps/${beatmapID}/scores/users/${userID}/all?mode=${mode}`);
+};
+
+export const getRecentScores = async (userID: string, mode: string, includeFails: boolean = true, limit: number = 1) => {
+    return await apiCall(baseurl + `/users/${userID}/scores/recent?mode=${mode}&include_fails=${includeFails}&limit=${limit}`);
 };
 
 export const getBeatmap = async (beatmapID: string) => {
@@ -30,7 +34,8 @@ const authorize = async () => {
         })
     });
     const token: any = await response.json();
-    osuauth = { token: token, expires: Date.now() + token.expires_in };
+    osuauth.token = token;
+    osuauth.expires = Date.now() + token.expires_in;
     return osuauth;
 };
 
