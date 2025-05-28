@@ -25,6 +25,7 @@ export default tseslint.config({
         ],
         '@typescript-eslint/no-explicit-any': 'off',
         'no-irregular-whitespace': 'off',
+        'eol-last': ['error', 'always'],
 
         // stylistic
         '@stylistic/ts/indent': ['warn', 4],
