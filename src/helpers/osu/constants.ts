@@ -59,3 +59,7 @@ export const modsEnum = {
     'V2': 536870912,
     'MR': 1073741824,
 };
+
+export const separator = ' • ';
+
+export const noAccountSet = '**You have not linked your osu! account yet!**\nDo it with the command `{{prefix}}set -osu <user>`';
