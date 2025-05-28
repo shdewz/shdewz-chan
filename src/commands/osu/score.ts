@@ -1,9 +1,10 @@
 import { Client, Message } from 'discord.js';
 import { formatNum, getArgs } from '../../helpers/utils.js';
 import userSchema from '../../schemas/user.js';
-import { getEmote, getMode, guessFC, noAccountSet } from '../../helpers/osu/utils.js';
+import { getEmote, getMode } from '../../helpers/osu/utils.js';
 import { getBeatmap, getScores, getUser } from '../../helpers/osu/api.js';
-import { perfCalc } from '../../helpers/osu/performance.js';
+import { noAccountSet } from '../../helpers/osu/constants.js';
+import { formatScore } from '../../helpers/osu/formatters.js';
 
 export const attributes = {
     name: 'score',
@@ -26,7 +27,7 @@ export const execute = async (_client: Client, message: Message, _args: string[]
     const mode = getMode(args.mode, command);
     let userString = args._.join(' ');
 
-    const beatmapID = args.beatmap || args.b || args.map;
+    const beatmapID = args.beatmap ?? args.b ?? args.map;
     if (!beatmapID) return message.reply({ embeds: [{ description: '🔻 No beatmap ID specified!' }] });
 
     if (userString === '') {
@@ -34,7 +35,7 @@ export const execute = async (_client: Client, message: Message, _args: string[]
         else return message.reply({ embeds: [{ description: noAccountSet.replace(/{{prefix}}/g, prefix) }] });
     }
 
-    const sort = args.sort || args.s || 'pp';
+    const sort = args.sort ?? args.s ?? 'pp';
 
     const embed: any = await getOsuScore(userString, beatmapID, mode, { prop: sort, reverse: !!args.reverse }, true);
 
@@ -56,42 +57,10 @@ export const getOsuScore = async (userID: string, beatmapID: string, mode: strin
     const scores = _scores.scores.sort((a: any, b: any) => b[sort.prop] - a[sort.prop]);
     if (sort.reverse) scores.reverse();
     const score = scores[0];
-    const s = score.statistics;
 
-    const isFc = guessFC(score, beatmap.max_combo);
-    score.perf = await perfCalc(beatmap.id, score, isFc);
+    const _lines = await formatScore(score, beatmap, false);
 
-    const lines = [
-        // {
-        //     separator: ' • ', indent: '> ',
-        //     content: [`🏅 **#${1} Personal Best**`]
-        // },
-        {
-            separator: ' • ', indent: '> ',
-            content: [
-                score.best_id ?
-                    `${getEmote(score.rank)?.emoji} **[+${score.mods.join('') || 'NM'}](https://osu.ppy.sh/scores/osu/${score.best_id})** (${formatNum(score.perf.max.difficulty.stars || 0, '0,0.00')}★)`
-                    : `${getEmote(score.rank)?.emoji} **+${score.mods.join('') || 'NM'}** (${formatNum(score.perf.max.difficulty.stars || 0, '0,0.00')}★)`,
-                formatNum(score.accuracy, '0.00%'),
-                score.accuracy < 1 ? ` ${[
-                    s.count_100 ? `**${s.count_100}** ${getEmote('hit100')?.emoji} ` : null,
-                    s.count_50 ? `**${s.count_50}**${getEmote('hit50')?.emoji}` : null,
-                    s.count_miss ? `**${s.count_miss}**${getEmote('miss')?.emoji}` : null,
-                ].filter(e => e).join(' ')}` : null,
-            ]
-        },
-        {
-            separator: ' • ', indent: '> ',
-            content: [
-                `**${formatNum(score.pp, '0,0')}pp**${isFc ? '' : `/${formatNum(score.perf.fc?.pp || 0, '0,0')}pp`}`,
-                `**${formatNum(score.max_combo, '0,0')}x**/${formatNum(beatmap.max_combo, '0,0')}x`,
-                formatNum(score.score, '0,0')
-            ]
-        },
-        {
-            separator: ' • ', indent: '> ',
-            content: [`Score set <t:${Math.round(new Date(score.created_at).valueOf() / 1000)}:R>`]
-        },
+    const lines = _lines.concat([
         (includeOthers && scores.length > 1) ? { separator: '', indent: '', content: ['\u200b'] } : null,
         (includeOthers && scores.length > 1) ? { separator: '', indent: '', content: ['**Other scores:**'] } : null,
         ...scores.slice(1, Math.min(scores.length, 5)).map((sc: any) => ({
@@ -104,8 +73,8 @@ export const getOsuScore = async (userID: string, beatmapID: string, mode: strin
                 `<t:${Math.round(new Date(sc.created_at).valueOf() / 1000)}:R>`
             ]
         })),
-        (includeOthers && scores.length > 5) ? { separator: '', indent: '', content: [`**+${scores.length - 5} more**`] } : null,
-    ];
+        (includeOthers && scores.length > 5) ? { separator: '', indent: '', content: [`**+${scores.length - 5} more**`] } : null
+    ]);
 
     const embed = {
         color: getEmote(score.rank)?.color,
