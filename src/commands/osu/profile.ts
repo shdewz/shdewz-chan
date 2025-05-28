@@ -1,8 +1,9 @@
 import { Client, Message } from 'discord.js';
 import { getArgs, formatNum, plural } from '../../helpers/utils.js';
 import userSchema from '../../schemas/user.js';
-import { getDisplayMode, getEmote, getMode, noAccountSet } from '../../helpers/osu/utils.js';
+import { getDisplayMode, getEmote, getMode } from '../../helpers/osu/utils.js';
 import { getUser } from '../../helpers/osu/api.js';
+import { separator, noAccountSet } from '../../helpers/osu/constants.js';
 
 export const attributes = {
     name: 'osu',
@@ -42,42 +43,42 @@ export const getOsuProfile = async (userId: string, mode: string) => {
 
     const lines = [
         !stats.global_rank ? null : {
-            separator: ' • ', indent: '> ',
+            separator, indent: '> ',
             content: [
                 `**#${formatNum(stats.global_rank, '0,0')}**`,
                 `:flag_${user.country_code.toLowerCase()}: **#${formatNum(stats.country_rank, '0,0')}**`,
             ]
         },
         {
-            separator: ' • ', indent: '> ',
+            separator, indent: '> ',
             content: [
                 !stats.pp ? null : `**${formatNum(stats.pp, '0,0')}**pp`,
                 `**${stats.hit_accuracy.toFixed(2)}%** accuracy`
             ]
         },
         {
-            separator: ' • ', indent: '> ',
+            separator, indent: '> ',
             content: [
                 `level **${stats.level.current}.${stats.level.progress}**`,
                 `**${user.user_achievements.length}** medals`
             ]
         },
         user.badges.length === 0 && user.scores_first_count === 0 ? null : {
-            separator: ' • ', indent: '> ',
+            separator, indent: '> ',
             content: [
                 user.badges.length > 0 ? `**${user.badges.length}** badge${plural(user.badges.length)}` : null,
                 user.scores_first_count > 0 ? `**${formatNum(user.scores_first_count, '0,0')}** first place${plural(user.scores_first_count)}` : null
             ]
         },
         !stats.global_rank ? null : {
-            separator: ' • ', indent: '> ',
+            separator, indent: '> ',
             content: [
                 `peak **#${formatNum(user.rank_highest.rank, '0,0')}** <t:${Math.round(new Date(user.rank_highest.updated_at).valueOf() / 1000)}:R>`,
             ]
         },
         { separator: '', indent: '', content: ['\u200b'] },
         {
-            separator: ' • ', indent: '> ',
+            separator, indent: '> ',
             content: [
                 `**${formatNum(stats.play_count, '0,0')}** playcount`,
                 `**${formatNum(Math.round(stats.play_time / 60 / 60), '0,0')}** hours`,
@@ -85,7 +86,7 @@ export const getOsuProfile = async (userId: string, mode: string) => {
             ]
         },
         {
-            separator: ' • ', indent: '> ',
+            separator, indent: '> ',
             content: [`**${formatNum(stats.ranked_score, '0.00a')}** ranked score`, `**${formatNum(stats.total_score, '0.00a')}** total`]
         },
         user.ranked_beatmapset_count == 0 ? null : {
@@ -115,14 +116,14 @@ export const getOsuProfile = async (userId: string, mode: string) => {
         },
         { separator: '', indent: '', content: ['\u200b'] },
         {
-            separator: ' • ', indent: '> ',
+            separator, indent: '> ',
             content: [
                 `joined <t:${Math.round(new Date(user.join_date).valueOf() / 1000)}:R>`,
                 user.is_online ? 'currently online' : user.last_visit ? `last seen <t:${Math.round(new Date(user.last_visit).valueOf() / 1000)}:R>` : null,
             ]
         },
         !user.twitter && !user.discord ? null : {
-            separator: ' • ', indent: '> ',
+            separator, indent: '> ',
             content: [
                 user.discord ? `${getEmote('discord')?.emoji} **${user.discord}**` : null,
                 user.twitter ? `${getEmote('twitter')?.emoji} **[@${user.twitter}](https://twitter.com/${user.twitter})**` : null,
@@ -137,7 +138,7 @@ export const getOsuProfile = async (userId: string, mode: string) => {
             icon_url: `https://cdn.shdewz.me/flags/full/${user.country_code}.png`,
             url: `https://osu.ppy.sh/users/${user.id}${mode === '' ? '' : `/${mode}`}`,
         },
-        title: !user.title ? '' : user.title,
+        title: user.title ?? '',
         description: lines.filter(e => e !== null).map(line => line.indent + line.content.filter(e => e).join(line.separator)).join('\n'),
         thumbnail: { url: user.avatar_url }
     };
