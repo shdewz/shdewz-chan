@@ -1,5 +1,5 @@
 import { Client, Message } from 'discord.js';
-import { getNameString, getArgs, plural } from '../../helpers/utils.js';
+import { getNameString, getArgs, plural, replyOptions } from '../../helpers/utils.js';
 
 export const attributes = {
     name: 'roll',
@@ -16,5 +16,5 @@ export const execute = (_client: Client, message: Message, _args: string[], _pre
     const end = nums.length > 1 ? nums[1] : nums[0] ?? 100;
     const randomNumber = start + Math.floor(Math.random() * (end - start + 1));
 
-    message.reply(`🎲 **${getNameString(message)}** rolls **${randomNumber}** point${plural(randomNumber)}!`);
+    message.reply({ content: `🎲 **${getNameString(message)}** rolls **${randomNumber}** point${plural(randomNumber)}!`, ...replyOptions });
 };

@@ -1,5 +1,5 @@
 import { Client, Message } from 'discord.js';
-import { getArgs, formatNum, plural } from '../../helpers/utils.js';
+import { getArgs, formatNum, plural, replyOptions } from '../../helpers/utils.js';
 import userSchema from '../../schemas/user.js';
 import { getDisplayMode, getEmote, getMode } from '../../helpers/osu/utils.js';
 import { getUser } from '../../helpers/osu/api.js';
@@ -10,7 +10,7 @@ export const attributes = {
     group: 'osu!',
     aliases: ['osu-profile'],
     hiddenAliases: ['taiko', 'catch', 'fruits', 'ctb', 'mania'],
-    description: 'Show someone\'s osu! profile.',
+    description: 'Display someone\'s osu! profile.\n\n**Hint:** most other osu! commands may be suffixed with t/c/m to quickly specify the gamemode.',
     params: [
         { name: 'mode <osu/taiko/catch/mania>', description: 'Specify the gamemode. Defaults to the user\'s selected main gamemode.' }
     ]
@@ -22,17 +22,17 @@ export const execute = async (_client: Client, message: Message, _args: string[]
     const args: any = getArgs(_args.slice(1));
     const userSettings = await userSchema.findOne({ user_id: message.author.id });
 
-    const mode = getMode(args.mode, command);
+    const mode = getMode(args.mode || args.m, command);
     let userString = args._.join(' ');
 
     if (userString === '') {
         if (userSettings?.prefs?.osu?.user_id) userString = userSettings.prefs.osu.user_id;
-        else return message.reply({ embeds: [{ description: noAccountSet.replace(/{{prefix}}/g, prefix) }] });
+        else return message.reply({ embeds: [{ description: noAccountSet.replace(/{{prefix}}/g, prefix) }], ...replyOptions });
     }
 
     const embed = await getOsuProfile(userString, mode);
 
-    message.reply({ embeds: [embed] });
+    message.reply({ embeds: [embed], ...replyOptions });
 };
 
 export const getOsuProfile = async (userId: string, mode: string) => {

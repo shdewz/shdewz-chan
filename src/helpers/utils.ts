@@ -20,3 +20,5 @@ export const randomString = (str: string) => {
 };
 
 export const getNameString = (message: Message) => message.member?.nickname || message.author.globalName || message.author.username;
+
+export const replyOptions = { allowedMentions: { repliedUser: false } };

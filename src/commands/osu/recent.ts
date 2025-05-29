@@ -3,7 +3,7 @@ import userSchema from '../../schemas/user.js';
 import { Client, Message } from 'discord.js';
 import { noAccountSet } from '../../helpers/osu/constants.js';
 import { getDisplayMode, getEmote, getMode, updateChannelBeatmap } from '../../helpers/osu/utils.js';
-import { formatNum, getArgs } from '../../helpers/utils.js';
+import { formatNum, getArgs, replyOptions } from '../../helpers/utils.js';
 import { getBeatmap, getRecentScores, getUser } from '../../helpers/osu/api.js';
 import { formatScore } from '../../helpers/osu/formatters.js';
 
@@ -24,12 +24,12 @@ export const execute = async (_client: Client, message: Message, _args: string[]
     const args: any = getArgs(_args.slice(1));
     const userSettings = await userSchema.findOne({ user_id: message.author.id });
 
-    const mode = getMode(args.mode, command, attributes.hiddenAliases.includes(command));
+    const mode = getMode(args.mode || args.m, command, attributes.hiddenAliases.includes(command));
     let userString = args._.join(' ');
 
     if (userString === '') {
         if (userSettings?.prefs?.osu?.user_id) userString = userSettings.prefs.osu.user_id;
-        else return message.reply({ embeds: [{ description: noAccountSet.replace(/{{prefix}}/g, prefix) }] });
+        else return message.reply({ embeds: [{ description: noAccountSet.replace(/{{prefix}}/g, prefix) }], ...replyOptions });
     }
 
     const pass = args.pass ?? args.ps ?? false;
@@ -37,7 +37,7 @@ export const execute = async (_client: Client, message: Message, _args: string[]
 
     const embed: any = await getOsuRecentScore(userString, mode, !pass, index, message.channel.id);
 
-    message.reply({ embeds: [embed] });
+    message.reply({ embeds: [embed], ...replyOptions });
 };
 
 export const getOsuRecentScore = async (userID: string, mode: string, includeFails: boolean = true, index: number = 1, channelID: string) => {

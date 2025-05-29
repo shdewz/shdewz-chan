@@ -1,7 +1,7 @@
 import userSchema from '../../schemas/user.js';
 
 import { Client, Message } from 'discord.js';
-import { formatNum, getArgs } from '../../helpers/utils.js';
+import { formatNum, getArgs, replyOptions } from '../../helpers/utils.js';
 import { getEmote, getMode, getBeatmapDate, updateChannelBeatmap } from '../../helpers/osu/utils.js';
 import { getBeatmap, getScores, getUser } from '../../helpers/osu/api.js';
 import { noAccountSet } from '../../helpers/osu/constants.js';
@@ -31,18 +31,18 @@ export const execute = async (_client: Client, message: Message, _args: string[]
     let userString = args._.join(' ');
 
     const beatmapID = args.beatmap ?? args.b ?? args.map;
-    if (!beatmapID) return message.reply({ embeds: [{ description: '🔻 No beatmap ID specified! Make sure to use the `-b` flag.' }] });
+    if (!beatmapID) return message.reply({ embeds: [{ description: '🔻 No beatmap ID specified! Make sure to use the `-b` flag.' }], ...replyOptions });
 
     if (userString === '') {
         if (userSettings?.prefs?.osu?.user_id) userString = userSettings.prefs.osu.user_id;
-        else return message.reply({ embeds: [{ description: noAccountSet.replace(/{{prefix}}/g, prefix) }] });
+        else return message.reply({ embeds: [{ description: noAccountSet.replace(/{{prefix}}/g, prefix) }], ...replyOptions });
     }
 
     const sort = args.sort ?? args.s ?? 'pp';
 
     const embed: any = await getOsuScore(userString, beatmapID, mode, { prop: sort, reverse: !!args.reverse }, true, message.channel.id);
 
-    message.reply({ embeds: [embed] });
+    message.reply({ embeds: [embed], ...replyOptions });
 };
 
 export const getOsuScore = async (userID: string, beatmapID: string, mode: string, sort: any = { prop: 'pp', reverse: false }, includeOthers: boolean, channelID: string) => {

@@ -1,4 +1,5 @@
 import { Client, Message } from 'discord.js';
+import { replyOptions } from '../../helpers/utils.js';
 
 export const attributes = {
     name: 'help',
@@ -32,16 +33,16 @@ export const execute = (client: Client, message: Message, _args: string[], prefi
                 },
                 description: `**Current prefix:** \`${prefix}\`\nType \`${prefix}help <command>\` for more information about specific commands.`,
                 fields: fields
-            }]
+            }], ...replyOptions
         });
     }
     else {
         const command = client.commands.get(_args.slice(1).join('_'));
-        if (!command) return message.reply(`🔻 No command found with the name **${_args.slice(1).join('_')}**.`);
+        if (!command) return message.reply({content: `🔻 No command found with the name **${_args.slice(1).join('_')}**.`, ...replyOptions});
 
         const fields = [];
         if (command.attributes.params.length > 0) {
-            fields.push({ name: 'Arguments', value: `${command.attributes.params.map((e: any) => `> \`-${e.name}\` • ${e.description}`).join('\n')}` });
+            fields.push({ name: 'Arguments', value: `${command.attributes.params.map((e: any) => `> - \`-${e.name}\` • ${e.description}`).join('\n')}` });
         }
         if (command.attributes.aliases.length > 0) {
             fields.push({ name: 'Aliases', value: `> ${[...command.attributes.aliases, command.attributes.name].sort().map((e: string) => `\`${e}\``).join(' ')}` });
@@ -56,7 +57,7 @@ export const execute = (client: Client, message: Message, _args: string[], prefi
                 },
                 description: `${command.attributes.description.replace(/{{prefix}}/g, prefix)}`,
                 fields: fields
-            }]
+            }], ...replyOptions
         });
     }
 };
