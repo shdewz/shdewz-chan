@@ -17,10 +17,10 @@ The following features need to be implemented to supersede the older version:
 ### osu!-related
 
 - [x] Profile info
-- [ ] Score info
+- [x] Score info
   - [x] Specific score
   - [x] Recent score
-  - [ ] Compare
+  - [x] Compare
 - [ ] Map info
 - [ ] Match costs
 - [ ] Top scores
