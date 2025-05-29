@@ -1,9 +1,10 @@
-import { existsSync, createWriteStream, readFileSync } from 'fs';
+import { existsSync, createWriteStream, readFileSync, mkdirSync } from 'fs';
 import * as https from 'https';
 import * as rosu from 'rosu-pp-js';
 import { reverseMods } from './utils.js';
 
 const downloadBeatmap = async (beatmapID: string) => {
+    if (!existsSync('cache/beatmaps')) mkdirSync('cache/beatmaps', { recursive: true });
     if (existsSync(`cache/beatmaps/${beatmapID}.osu`)) return;
     return await new Promise((resolve, reject) => {
         https.get(`https://osu.ppy.sh/osu/${beatmapID}`, response => {
