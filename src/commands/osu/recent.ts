@@ -53,7 +53,7 @@ export const getOsuRecentScore = async (userID: string, mode: string, includeFai
 
     const beatmap: any = await getBeatmap(score.beatmap.id);
 
-    const lines = await formatScore(score, beatmap, true);
+    const lines = await formatScore([score], beatmap, true, false);
 
     const embed = {
         color: getEmote(score.rank)?.color,

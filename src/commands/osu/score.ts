@@ -31,7 +31,7 @@ export const execute = async (_client: Client, message: Message, _args: string[]
     let userString = args._.join(' ');
 
     const beatmapID = args.beatmap ?? args.b ?? args.map;
-    if (!beatmapID) return message.reply({ embeds: [{ description: '🔻 No beatmap ID specified!' }] });
+    if (!beatmapID) return message.reply({ embeds: [{ description: '🔻 No beatmap ID specified! Make sure to use the `-b` flag.' }] });
 
     if (userString === '') {
         if (userSettings?.prefs?.osu?.user_id) userString = userSettings.prefs.osu.user_id;
@@ -61,21 +61,7 @@ export const getOsuScore = async (userID: string, beatmapID: string, mode: strin
     if (sort.reverse) scores.reverse();
     const score = scores[0];
 
-    const lines = (await formatScore(score, beatmap, false)).concat([
-        (includeOthers && scores.length > 1) ? { separator: '', indent: '', content: ['\u200b'] } : null,
-        (includeOthers && scores.length > 1) ? { separator: '', indent: '', content: ['**Other scores:**'] } : null,
-        ...scores.slice(1, Math.min(scores.length, 5)).map((sc: any) => ({
-            separator: ' • ', indent: '> ',
-            content: [
-                sc.best_id ?
-                    `${getEmote(sc.rank)?.emoji} **[+${sc.mods.join('') || 'NM'}](https://osu.ppy.sh/scores/osu/${sc.best_id})** ${formatNum(sc.pp, '0,0')}pp`
-                    : `${getEmote(sc.rank)?.emoji} **+${sc.mods.join('') || 'NM'}** ${formatNum(sc.pp, '0,0')}pp`,
-                `**${formatNum(sc.accuracy, '0.00%')}** ${formatNum(sc.max_combo, '0,0')}x${sc.statistics.count_miss ? ` **${sc.statistics.count_miss}**${getEmote('miss')?.emoji}` : ''}`,
-                `<t:${Math.round(new Date(sc.created_at).valueOf() / 1000)}:R>`
-            ]
-        })),
-        (includeOthers && scores.length > 5) ? { separator: '', indent: '', content: [`**+${scores.length - 5} more**`] } : null
-    ]);
+    const lines = await formatScore(scores, beatmap, false, includeOthers);
 
     const embed = {
         color: getEmote(score.rank)?.color,

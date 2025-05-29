@@ -3,12 +3,13 @@ import { getEmote, guessFC, scoreCompletion } from './utils.js';
 import { separator } from './constants.js';
 import { perfCalc } from './performance.js';
 
-export const formatScore = async (score: any, beatmap: any, recent: boolean) => {
+export const formatScore = async (scores: any[], beatmap: any, isRecent: boolean, includeOthers: boolean = false) => {
+    const score = scores[0];
     const s = score.statistics;
     const isFc = guessFC(score, beatmap);
     const perf = await perfCalc(beatmap.id, score, isFc);
 
-    const lines = [
+    const _lines = [
         // {
         //     separator: ' • ', indent: '> ',
         //     content: [`🏅 **#${1} Personal Best**`]
@@ -35,7 +36,7 @@ export const formatScore = async (score: any, beatmap: any, recent: boolean) => 
                 formatNum(score.score, '0,0')
             ]
         },
-        recent ? {
+        isRecent ? {
             separator, indent: '> ',
             content: [
                 score.rank === 'F' ? `**${formatNum(scoreCompletion(s, beatmap), '0%')}** completion` : null,
@@ -44,8 +45,24 @@ export const formatScore = async (score: any, beatmap: any, recent: boolean) => 
         {
             separator, indent: '> ',
             content: [`Score set <t:${Math.round(new Date(score.created_at).valueOf() / 1000)}:R>`]
-        },
+        }
     ];
+
+    const lines = !includeOthers ? _lines : _lines.concat([
+        scores.length > 1 ? { separator: '', indent: '', content: ['\u200b'] } : null,
+        scores.length > 1 ? { separator: '', indent: '', content: ['**Other scores:**'] } : null,
+        ...scores.slice(1, Math.min(scores.length, 5)).map((sc: any) => ({
+            separator: ' • ', indent: '> ',
+            content: [
+                sc.best_id ?
+                    `${getEmote(sc.rank)?.emoji} **[+${sc.mods.join('') || 'NM'}](https://osu.ppy.sh/scores/osu/${sc.best_id})** ${formatNum(sc.pp, '0,0')}pp`
+                    : `${getEmote(sc.rank)?.emoji} **+${sc.mods.join('') || 'NM'}** ${formatNum(sc.pp, '0,0')}pp`,
+                `**${formatNum(sc.accuracy, '0.00%')}** ${formatNum(sc.max_combo, '0,0')}x${sc.statistics.count_miss ? ` **${sc.statistics.count_miss}**${getEmote('miss')?.emoji}` : ''}`,
+                `<t:${Math.round(new Date(sc.created_at).valueOf() / 1000)}:R>`
+            ]
+        })),
+        scores.length > 5 ? { separator: '', indent: '', content: [`**+${scores.length - 5} more**`] } : null
+    ]);
 
     return lines;
 };
