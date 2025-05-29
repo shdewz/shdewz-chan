@@ -2,16 +2,19 @@ import { Client, Message } from 'discord.js';
 import userSchema from '../../schemas/user.js';
 import { noAccountSet } from '../../helpers/osu/constants.js';
 import { getDisplayMode, getEmote, getMode } from '../../helpers/osu/utils.js';
-import { getArgs } from '../../helpers/utils.js';
+import { formatNum, getArgs } from '../../helpers/utils.js';
 import { getBeatmap, getRecentScores, getUser } from '../../helpers/osu/api.js';
 import { formatScore } from '../../helpers/osu/formatters.js';
 
 export const attributes = {
     name: 'recent',
     group: 'osu!',
-    aliases: ['r', 'rs', 'recent-score'],
+    aliases: ['r', 'rs'],
+    hiddenAliases: ['rt', 'rc', 'rm'],
     description: 'new score.',
-    params: []
+    params: [
+        { name: 'mode <osu/taiko/catch/mania>', description: 'Specify the gamemode. Defaults to the user\'s selected main gamemode.' }
+    ]
 };
 
 export const execute = async (_client: Client, message: Message, _args: string[], prefix: string) => {
@@ -20,7 +23,7 @@ export const execute = async (_client: Client, message: Message, _args: string[]
     const args: any = getArgs(_args.slice(1));
     const userSettings = await userSchema.findOne({ user_id: message.author.id });
 
-    const mode = getMode(args.mode, command);
+    const mode = getMode(args.mode, command, attributes.hiddenAliases.includes(command));
     let userString = args._.join(' ');
 
     if (userString === '') {
@@ -56,7 +59,7 @@ export const getOsuRecentScore = async (userID: string, mode: string, includeFai
         title: `${beatmap.beatmapset.artist} - ${beatmap.beatmapset.title} [${beatmap.version}]`,
         url: `https://osu.ppy.sh/b/${beatmap.id}`,
         author: {
-            name: `Recent ${getDisplayMode(mode)} score for ${user.username}`,
+            name: `Recent ${getDisplayMode(mode)} score for ${user.username} (#${formatNum(user.statistics.global_rank, '0,0')})`,
             icon_url: `https://a.ppy.sh/${user.id}`,
             url: `https://osu.ppy.sh/users/${user.id}${mode === '' ? '' : `/${mode}`}`,
         },

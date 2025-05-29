@@ -1,7 +1,7 @@
 import { Client, Message } from 'discord.js';
 import { formatNum, getArgs } from '../../helpers/utils.js';
 import userSchema from '../../schemas/user.js';
-import { getEmote, getMode } from '../../helpers/osu/utils.js';
+import { getEmote, getMode, getBeatmapDate } from '../../helpers/osu/utils.js';
 import { getBeatmap, getScores, getUser } from '../../helpers/osu/api.js';
 import { noAccountSet } from '../../helpers/osu/constants.js';
 import { formatScore } from '../../helpers/osu/formatters.js';
@@ -10,9 +10,11 @@ export const attributes = {
     name: 'score',
     group: 'osu!',
     aliases: ['sc', 'scores'],
+    hiddenAliases: ['sct', 'scc', 'scm'],
     description: 'score.',
     params: [
         { name: 'beatmap <id>', description: 'Specify the beatmap.' },
+        { name: 'mode <osu/taiko/catch/mania>', description: 'Specify the gamemode. Defaults to the user\'s selected main gamemode.' },
         { name: 'sort <property>', description: 'Specify the sorting property.' },
         { name: 'reverse', description: 'Reverse the sort order.' }
     ]
@@ -24,7 +26,7 @@ export const execute = async (_client: Client, message: Message, _args: string[]
     const args: any = getArgs(_args.slice(1));
     const userSettings = await userSchema.findOne({ user_id: message.author.id });
 
-    const mode = getMode(args.mode, command);
+    const mode = getMode(args.mode || args.m, command, attributes.hiddenAliases.includes(command));
     let userString = args._.join(' ');
 
     const beatmapID = args.beatmap ?? args.b ?? args.map;
@@ -58,9 +60,7 @@ export const getOsuScore = async (userID: string, beatmapID: string, mode: strin
     if (sort.reverse) scores.reverse();
     const score = scores[0];
 
-    const _lines = await formatScore(score, beatmap, false);
-
-    const lines = _lines.concat([
+    const lines = (await formatScore(score, beatmap, false)).concat([
         (includeOthers && scores.length > 1) ? { separator: '', indent: '', content: ['\u200b'] } : null,
         (includeOthers && scores.length > 1) ? { separator: '', indent: '', content: ['**Other scores:**'] } : null,
         ...scores.slice(1, Math.min(scores.length, 5)).map((sc: any) => ({
@@ -89,7 +89,7 @@ export const getOsuScore = async (userID: string, beatmapID: string, mode: strin
         image: { url: beatmap.beatmapset.covers['cover'] },
         footer: {
             icon_url: `https://osu.ppy.sh/wiki/images/shared/status/${beatmap.beatmapset.status}.png`,
-            text: `${beatmap.beatmapset.status} (${beatmap.beatmapset.creator}, ${new Date(beatmap.beatmapset.ranked_date || beatmap.beatmapset.submitted_date).getFullYear()})`
+            text: `${beatmap.beatmapset.status} (${beatmap.beatmapset.creator}, ${getBeatmapDate(beatmap)})`
         }
     };
 
