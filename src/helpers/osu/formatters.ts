@@ -8,8 +8,6 @@ export const formatScore = async (score: any, beatmap: any, recent: boolean) => 
     const isFc = guessFC(score, beatmap);
     const perf = await perfCalc(beatmap.id, score, isFc);
 
-    console.log({perf: perf?.current});
-
     const lines = [
         // {
         //     separator: ' • ', indent: '> ',
