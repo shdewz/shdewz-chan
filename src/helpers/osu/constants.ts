@@ -20,9 +20,9 @@ export const emotes = [
 
 export const modes = [
     { mode: 'osu', display: 'osu!', aliases: ['osu', 'std', 'standard'] },
-    { mode: 'taiko', display: 'osu!taiko', aliases: ['taiko'] },
-    { mode: 'fruits', display: 'osu!catch', aliases: ['fruits', 'catch', 'ctb'] },
-    { mode: 'mania', display: 'osu!mania', aliases: ['mania'] },
+    { mode: 'taiko', display: 'osu!taiko', aliases: ['taiko', 't'] },
+    { mode: 'fruits', display: 'osu!catch', aliases: ['fruits', 'catch', 'ctb', 'c'] },
+    { mode: 'mania', display: 'osu!mania', aliases: ['mania', 'm'] },
 ];
 
 export const modsEnum = {
