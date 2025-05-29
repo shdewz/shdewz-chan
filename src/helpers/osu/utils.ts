@@ -7,13 +7,11 @@ const parseMode = (searchString: string) => {
     return _mode?.mode || '';
 };
 
-export const getMode = (modeArg: string, command: string) => {
+export const getMode = (modeArg: string, command: string, shorthand: boolean = false) => {
     if (modeArg) return parseMode(modeArg);
-    else {
-        if (!command) return 'osu';
-        const commandMode = command.match(/(osu|taiko|fruits|catch|ctb|mania)/);
-        return commandMode ? parseMode(commandMode[0]) : 'osu';
-    }
+    if (!command) return 'osu';
+    const commandMode = command.match(shorthand ? /(t|c|m)$/ : /(osu|taiko|fruits|catch|ctb|mania)$/);
+    return commandMode ? parseMode(commandMode[0]) : 'osu';
 };
 
 export const getDisplayMode = (mode: string) => modes.find(m => m.aliases.includes(mode))?.display;
@@ -37,3 +35,5 @@ export const scoreCompletion = (hits: any, beatmap: any) => {
     const maxHits = beatmap.count_circles + beatmap.count_sliders + beatmap.count_spinners;
     return userHits / maxHits;
 };
+
+export const getBeatmapDate = (beatmap: any) => new Date(beatmap.beatmapset.ranked_date || beatmap.beatmapset.submitted_date).getFullYear();
