@@ -1,7 +1,8 @@
+import userSchema from '../../schemas/user.js';
+
 import { Client, Message } from 'discord.js';
 import { formatNum, getArgs } from '../../helpers/utils.js';
-import userSchema from '../../schemas/user.js';
-import { getEmote, getMode, getBeatmapDate } from '../../helpers/osu/utils.js';
+import { getEmote, getMode, getBeatmapDate, updateChannelBeatmap } from '../../helpers/osu/utils.js';
 import { getBeatmap, getScores, getUser } from '../../helpers/osu/api.js';
 import { noAccountSet } from '../../helpers/osu/constants.js';
 import { formatScore } from '../../helpers/osu/formatters.js';
@@ -39,12 +40,12 @@ export const execute = async (_client: Client, message: Message, _args: string[]
 
     const sort = args.sort ?? args.s ?? 'pp';
 
-    const embed: any = await getOsuScore(userString, beatmapID, mode, { prop: sort, reverse: !!args.reverse }, true);
+    const embed: any = await getOsuScore(userString, beatmapID, mode, { prop: sort, reverse: !!args.reverse }, true, message.channel.id);
 
     message.reply({ embeds: [embed] });
 };
 
-export const getOsuScore = async (userID: string, beatmapID: string, mode: string, sort: any = { prop: 'pp', reverse: false }, includeOthers: boolean) => {
+export const getOsuScore = async (userID: string, beatmapID: string, mode: string, sort: any = { prop: 'pp', reverse: false }, includeOthers: boolean, channelID: string) => {
     const user: any = await getUser(userID, mode);
     if (!user?.id) return { description: `🔻 **User \`${userID}\` not found!**` };
 
@@ -92,6 +93,8 @@ export const getOsuScore = async (userID: string, beatmapID: string, mode: strin
             text: `${beatmap.beatmapset.status} (${beatmap.beatmapset.creator}, ${getBeatmapDate(beatmap)})`
         }
     };
+
+    updateChannelBeatmap(channelID, beatmap.id, mode);
 
     return embed;
 };

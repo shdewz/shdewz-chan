@@ -1,3 +1,4 @@
+import channelSchema from '../../schemas/channel.js';
 import { emotes, modes, modsEnum } from './constants.js';
 
 export const getEmote = (name: string) => { return emotes.find(r => r.name === name); };
@@ -37,3 +38,7 @@ export const scoreCompletion = (hits: any, beatmap: any) => {
 };
 
 export const getBeatmapDate = (beatmap: any) => new Date(beatmap.beatmapset.ranked_date || beatmap.beatmapset.submitted_date).getFullYear();
+
+export const updateChannelBeatmap = async (channelID: string, beatmapID: string, mode: string = 'osu') => {
+    await channelSchema.findOneAndUpdate({ channel_id: channelID }, { last_beatmap: { id: beatmapID, mode: mode } }, { upsert: true, new: true });
+};
