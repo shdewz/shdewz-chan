@@ -1,26 +1,39 @@
 # shdewz-chan
 
-A Discord bot mostly focused on [osu!](https://osu.ppy.sh/)-related tools and features.
+To install dependencies:
 
-> [!WARNING]
-> This project is currently in active development and is not yet ready for production use.
+```bash
+bun install
+```
 
-## Feature parity
+To run:
 
-The following features need to be implemented to supersede the older version:
+```bash
+bun src/index.ts
+```
 
-### General commands
+Docker
+------
 
-- [x] Help command
-- [x] Ability to change prefix
+### Development
 
-### osu!-related
+Start Postgres + app with development dependencies (bind-mounts the repo into the container):
 
-- [x] Profile info
-- [x] Score info
-  - [x] Specific score
-  - [x] Recent score
-  - [x] Compare
-- [ ] Map info
-- [ ] Match costs
-- [ ] Top scores
+```bash
+cp .env.example .env.dev
+# Edit .env.dev to add your dev DISCORD_TOKEN
+docker compose -f docker-compose.dev.yml up --build
+```
+
+This uses `Dockerfile.dev` (includes dev dependencies), runs migrations, and starts the bot. The `DATABASE_URL` is set to the Postgres service. Use a separate dev Discord bot token to avoid conflicts with production.
+
+### Production
+
+Build and run with production dependencies only:
+
+```bash
+docker compose up --build
+```
+
+Set `DISCORD_TOKEN` and other required env vars in your `.env` file or secrets manager before deploying.
+

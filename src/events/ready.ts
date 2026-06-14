@@ -1,19 +1,12 @@
-import { Client, ActivityType } from 'discord.js';
+import type { Event } from '@/types';
+import { Events, type Client } from 'discord.js';
 
-export const attributes = {
-    name: 'ready',
-    once: true
+const ready: Event<typeof Events.ClientReady> = {
+  name: Events.ClientReady,
+  once: true,
+  execute(client: Client<true>) {
+    console.log(`Logged in as ${client.user?.tag}`);
+  },
 };
 
-export const execute = (client: Client) => {
-    if (client.user) {
-        client.user.setPresence({
-            activities: [
-                { type: ActivityType.Watching, name: 'you' },
-            ],
-            status: 'online'
-        });
-
-        console.log(`Logged in as ${client.user.username}`);
-    }
-};
+export default ready;

@@ -1,35 +1,32 @@
 {
   "name": "shdewz-chan",
-  "version": "2.0.0",
-  "description": "A Discord bot with *osu!* -related tools and other cool more or less useful functions.",
+  "module": "src/index.ts",
   "type": "module",
-  "main": "dist/index.js",
+  "private": true,
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "node ."
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "discord.js": "^14.14.1",
-    "dotenv": "^16.4.5",
-    "mongoose": "^8.9.5",
-    "node-fetch": "^3.3.2",
-    "numeral": "^2.0.6",
-    "rosu-pp-js": "^3.0.1",
-    "yargs": "^17.7.2"
+    "start": "docker compose up",
+    "dev": "docker compose -f docker-compose.dev.yml up",
+    "lint": "eslint 'src/**/*.{ts,tsx}' --fix",
+    "format": "prettier --write 'src/**/*.{ts,tsx,json,md}'",
+    "migrate": "bun src/migrations/runMigrations.ts"
   },
   "devDependencies": {
-    "@eslint/js": "^9.27.0",
-    "@stylistic/eslint-plugin-ts": "^2.11.0",
-    "@types/node": "^22.9.0",
-    "@types/numeral": "^2.0.5",
-    "@types/yargs": "^17.0.33",
-    "eslint": "^9.27.0",
-    "globals": "^15.12.0",
-    "tsx": "^4.19.3",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^8.33.0"
+    "@types/bun": "latest",
+    "@types/pg": "^8.20.0",
+    "typescript": "^5",
+    "eslint": "latest",
+    "eslint-plugin-prefer-arrow": "latest",
+    "prettier": "latest",
+    "@typescript-eslint/parser": "latest",
+    "@typescript-eslint/eslint-plugin": "latest",
+    "eslint-config-prettier": "latest",
+    "eslint-plugin-prettier": "latest",
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^10.0.1",
+    "globals": "^17.6.0"
+  },
+  "dependencies": {
+    "discord.js": "^14.26.4",
+    "pg": "latest"
   }
 }

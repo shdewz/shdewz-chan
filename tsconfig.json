@@ -1,31 +1,40 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "Node",
+    // Environment setup & latest features
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "Preserve",
+    "moduleDetection": "force",
+    "allowJs": true,
+    "types": ["bun", "node"],
     "esModuleInterop": true,
-    "strict": true,
-    "noImplicitAny": true,
-    "declaration": false,
-    "skipLibCheck": true,
-    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "typeRoots": [
-      "src/@types",
-      "node_modules/@types"
-    ],
+    "isolatedModules": true,
+
+    // Bundler mode
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "rootDir": "src",
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
-      "commands/*": [
-        "src/commands/*"
-      ]
-    }
+      "@/*": ["src/*"]
+    },
+
+    // Best practices
+    "strict": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+
+    // Some stricter flags (disabled by default)
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noPropertyAccessFromIndexSignature": false
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["eslint.config.cjs", "node_modules"]
 }
