@@ -1,6 +1,21 @@
 import path from 'path';
 import type { Command } from '@/types';
 import { walkDir } from '@/utils/fs';
+import { MODE_PREFIX_ALIASES, MODE_SUFFIX_ALIASES } from '@/lib/osu/constants';
+
+const registerPrefixedAliases = (
+  cmdName: string,
+  aliases: Map<string, string>,
+) => {
+  for (const prefix of MODE_PREFIX_ALIASES) {
+    const alias = `${prefix}${cmdName}`;
+    if (!aliases.has(alias)) aliases.set(alias, cmdName);
+  }
+  for (const suffix of MODE_SUFFIX_ALIASES) {
+    const alias = `${cmdName}${suffix}`;
+    if (!aliases.has(alias)) aliases.set(alias, cmdName);
+  }
+};
 
 export const loadCommands = async (
   dir = path.join(process.cwd(), 'src', 'commands'),
@@ -23,6 +38,8 @@ export const loadCommands = async (
         console.warn('Skipping command (no default export):', file);
         continue;
       }
+
+      if (cmd.prefixable) registerPrefixedAliases(cmd.name, aliases);
 
       commands.set(cmd.name, cmd);
       for (const alias of cmd.aliases ?? []) {
