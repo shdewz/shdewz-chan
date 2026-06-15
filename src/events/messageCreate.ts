@@ -1,16 +1,16 @@
-import type { Event } from '@/types';
+import type { BotClient, Event } from '@/types';
 import { Events, Message } from 'discord.js';
 import { getPrefix } from '@/services/prefixService';
 
 const messageCreate: Event<typeof Events.MessageCreate> = {
   name: Events.MessageCreate,
   once: false,
-  async execute(message: Message) {
+  execute: async (message: Message) => {
     if (message.author?.bot) return;
 
-    const client = message.client as any;
-    const commands: Map<string, any> = client.commands;
-    const aliases: Map<string, string> = client.aliases;
+    const client = message.client as BotClient;
+    const commands = client.commands;
+    const aliases = client.aliases;
 
     const guildId = message.guild?.id ?? null;
     const prefix = await getPrefix(guildId);
@@ -25,16 +25,16 @@ const messageCreate: Event<typeof Events.MessageCreate> = {
     const args = parts;
 
     let commandName = invoked;
-    if (!commands.has(commandName) && aliases.has(commandName)) {
-      const primary = aliases.get(commandName)!;
-      if (primary) commandName = primary;
-    }
 
+    if (!commands.has(commandName) && aliases.has(commandName)) {
+      commandName = aliases.get(commandName)!;
+    }
     const cmd = commands.get(commandName);
+
     if (!cmd) return;
 
     try {
-      await cmd.execute(message.client, { message, args, prefix });
+      await cmd.execute(message.client, { message, args, prefix, invoked });
     } catch (err) {
       console.error('Error executing command', commandName, err);
     }
