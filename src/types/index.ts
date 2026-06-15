@@ -7,18 +7,25 @@ import type {
 } from 'discord.js';
 import type { ParsedArgs } from '@/utils/parseArgs';
 
+export type BotClient = {
+  commands: Map<string, Command>;
+  aliases: Map<string, string>;
+} & Client;
+
 export type CommandContext = {
   message?: Message;
   interaction?: CommandInteraction;
   args?: string[];
   parsed?: ParsedArgs;
   prefix?: string;
+  invoked?: string;
 };
 
 export type Command = {
   name: string;
   description?: string;
   aliases?: string[];
+  prefixable?: boolean;
   group?: string;
   schema?: ArgSchema;
   execute: (
