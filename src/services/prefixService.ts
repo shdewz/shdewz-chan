@@ -1,7 +1,7 @@
 import { getGuildPrefixFromDb, setGuildPrefixInDb } from '@/db';
 
 const DEFAULT_PREFIX = process.env.DEFAULT_PREFIX || '!';
-const TTL = Number(process.env.PREFIX_CACHE_TTL_MS ?? 30 * 60 * 1000); // 30 min default
+const TTL = Number(process.env.PREFIX_CACHE_TTL_MS ?? 60 * 60 * 1000); // 60 min default
 
 type CacheEntry = { prefix: string | null; expiresAt: number };
 
