@@ -19,9 +19,8 @@
     "noEmit": true,
     "rootDir": "src",
     "outDir": "dist",
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
 
     // Best practices
