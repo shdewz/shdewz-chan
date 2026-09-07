@@ -1,5 +1,5 @@
 const TOKEN_URL = 'https://osu.ppy.sh/oauth/token';
-const BUFFER_MS = 10 * 1000; // 10 seconds
+const BUFFER_MS = 30 * 1000; // 30 seconds
 
 type TokenState = {
   accessToken: string;
