@@ -36,8 +36,7 @@ const authorize = async (): Promise<string> => {
 };
 
 export const getAccessToken = async (): Promise<string> => {
-  if (tokenState && tokenState.expiresAt > Date.now())
-    return tokenState.accessToken;
+  if (tokenState && tokenState.expiresAt > Date.now()) return tokenState.accessToken;
   return authorize();
 };
 
@@ -46,7 +45,6 @@ export const apiCall = async <T>(url: string): Promise<T> => {
   const response = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!response.ok)
-    throw new Error(`osu! API error: ${response.status} ${url}`);
+  if (!response.ok) throw new Error(`osu! API error: ${response.status} ${url}`);
   return response.json() as Promise<T>;
 };

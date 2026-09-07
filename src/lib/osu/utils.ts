@@ -65,7 +65,6 @@ export const mapYear = (beatmap: {
     beatmap.beatmapset.ranked_date ?? beatmap.beatmapset.submitted_date,
   ).getFullYear();
 
-// Types for the above helpers — move to a types file once you have osu! API types defined
 type HitCounts = {
   count_300: number;
   count_100: number;

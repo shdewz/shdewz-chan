@@ -1,4 +1,4 @@
-export const sep = ' **·** ';
+export const sep = ' **•** ';
 
 export const line = (...parts: (string | null | undefined)[]): string =>
   '> ' + parts.filter(Boolean).join(sep);
