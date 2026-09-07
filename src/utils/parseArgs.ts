@@ -1,13 +1,13 @@
-export interface ArgSchema {
+export type ArgSchema = {
   flags?: string[];
   options?: string[];
-}
+};
 
-export interface ParsedArgs {
+export type ParsedArgs = {
   positional: string[];
   flags: Set<string>;
   options: Map<string, string>;
-}
+};
 
 export const parseArgs = (
   args: string[],
