@@ -1,60 +1,55 @@
-import { getDisplayMode, getEmote } from '@/lib/osu/utils.js';
-import { blank, line, timestamp } from '@/lib/osu/format.js';
-import type { OsuMode } from '@/lib/osu/constants.js';
-import type {
-  OsuProfile,
-  OsuProfileStatistics,
-} from '@/lib/osu/types/profile.ts';
+import { getDisplayMode, getEmote } from '@/lib/osu/utils';
+import {
+  blank,
+  embedLine,
+  timestamp,
+  formatCompactNumber,
+  formatNumber,
+  formatRank,
+  formatCountryFlag,
+  formatProfileUrl,
+} from '@/lib/osu/format';
+import type { OsuMode } from '@/lib/osu/types/common';
+import type { OsuProfile, OsuProfileStatistics } from '@/lib/osu/types/profile';
 import type { APIEmbed } from 'discord.js';
 import { pluralize } from '@/utils/general';
 import { getFlag } from '@/utils/icons';
 
-const formatNumber = (value: number) => value.toLocaleString();
-
-const formatCompactNumber = (value: number) => {
-  const suffixes = [
-    { threshold: 1_000_000_000_000, suffix: 'T' },
-    { threshold: 1_000_000_000, suffix: 'B' },
-    { threshold: 1_000_000, suffix: 'M' },
-    { threshold: 1_000, suffix: 'K' },
-  ];
-
-  const suffix = suffixes.find(({ threshold }) => value >= threshold);
-  if (!suffix) return formatNumber(value);
-
-  const compactValue = Math.round((value / suffix.threshold) * 10) / 10;
-  return `${compactValue}${suffix.suffix}`;
-};
-
-const formatRank = (rank: number | null) =>
-  rank ? `**#${formatNumber(rank)}**` : null;
-
-const formatProfileUrl = (profile: OsuProfile, mode?: OsuMode) =>
-  `https://osu.ppy.sh/users/${profile.id}${mode ? `/${mode}` : ''}`;
-
-const formatCountryFlag = (countryCode: string) =>
-  `:flag_${countryCode.toLowerCase()}:`;
+const displayGradeRanks = [
+  { label: 'SSH', key: 'ssh' },
+  { label: 'SS', key: 'ss' },
+  { label: 'SH', key: 'sh' },
+  { label: 'S', key: 's' },
+  { label: 'A', key: 'a' },
+] as const;
 
 const buildDescription = (
   profile: OsuProfile,
   statistics: OsuProfileStatistics,
 ) => {
   const lines: Array<string | null> = [
-    line(
+    // global rank | country rank
+    embedLine(
       formatRank(statistics.global_rank),
       `${formatCountryFlag(profile.country_code)} ${formatRank(statistics.country_rank)}`,
     ),
-    line(
+
+    // pp | accuracy
+    embedLine(
       statistics.pp ? `**${formatNumber(statistics.pp)}**pp` : null,
       `**${statistics.hit_accuracy.toFixed(2)}%** accuracy`,
     ),
-    line(
+
+    // level | medals
+    embedLine(
       `level **${statistics.level.current}.${statistics.level.progress}**`,
       `**${profile.user_achievements.length}** medals`,
     ),
+
+    // badges | first places
     profile.badges.length === 0 && profile.scores_first_count === 0
-      ? blank
-      : line(
+      ? null
+      : embedLine(
           profile.badges.length > 0
             ? `**${profile.badges.length}** badge${pluralize(profile.badges.length)}`
             : null,
@@ -62,16 +57,21 @@ const buildDescription = (
             ? `**${formatNumber(profile.scores_first_count)}** first place${pluralize(profile.scores_first_count)}`
             : null,
         ),
+
+    // peak rank
     statistics.global_rank
-      ? line(
+      ? embedLine(
           `peak **#${formatNumber(profile.rank_highest?.rank ?? statistics.global_rank)}**` +
             (profile.rank_highest?.updated_at
               ? ' ' + timestamp(profile.rank_highest.updated_at, 'R')
               : null),
         )
-      : blank,
+      : null,
+
     blank,
-    line(
+
+    // playcount | hours | hits per play
+    embedLine(
       `**${formatNumber(statistics.play_count)}** playcount`,
       `**${formatNumber(Math.round(statistics.play_time / 60 / 60))}** hours`,
       `**${formatNumber(
@@ -84,34 +84,46 @@ const buildDescription = (
         ),
       )}** hits/play`,
     ),
-    line(
+
+    // ranked score | total score
+    embedLine(
       `**${formatCompactNumber(statistics.ranked_score)}** ranked score`,
-      `**${formatCompactNumber(statistics.total_score)}** total`,
+      `**${formatCompactNumber(statistics.total_score)}** total score`,
     ),
+
+    // ranked sets
     profile.ranked_beatmapset_count === 0
       ? null
-      : line(
+      : embedLine(
           `**${profile.ranked_beatmapset_count}** ranked map${pluralize(profile.ranked_beatmapset_count)}`,
         ),
+
+    // loved sets
     profile.loved_beatmapset_count === 0
       ? null
-      : line(
+      : embedLine(
           `**${profile.loved_beatmapset_count}** loved map${pluralize(profile.loved_beatmapset_count)}`,
         ),
+
+    // guest diffs
     profile.guest_beatmapset_count === 0
       ? null
-      : line(
+      : embedLine(
           `**${profile.guest_beatmapset_count}** guest diff${pluralize(profile.guest_beatmapset_count)}`,
         ),
-    line(
-      `${getEmote('XH')?.emoji} **${statistics.grade_counts.ssh}**`,
-      `${getEmote('X')?.emoji} **${statistics.grade_counts.ss}**`,
-      `${getEmote('SH')?.emoji} **${statistics.grade_counts.sh}**`,
-      `${getEmote('S')?.emoji} **${statistics.grade_counts.s}**`,
-      `${getEmote('A')?.emoji} **${statistics.grade_counts.a}**`,
+
+    // rank counts
+    embedLine(
+      ...displayGradeRanks.map(({ label, key }) => {
+        const count = statistics.grade_counts[key];
+        return `${getEmote(label)?.emoji} **${count}**`;
+      }),
     ),
+
     blank,
-    line(
+
+    // join date | online status
+    embedLine(
       `joined ${timestamp(profile.join_date, 'R')}`,
       profile.is_online
         ? 'currently online'
@@ -119,8 +131,10 @@ const buildDescription = (
           ? `last seen ${timestamp(profile.last_visit, 'R')}`
           : null,
     ),
+
+    // socials
     profile.twitter || profile.discord
-      ? line(
+      ? embedLine(
           profile.discord
             ? `${getEmote('discord')?.emoji} **${profile.discord}**`
             : null,
