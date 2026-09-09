@@ -1,6 +1,7 @@
 import { getProfile } from '@/lib/osu/api/profile.ts';
-import { buildProfileEmbed } from '@/lib/osu/embeds/profile.ts';
+import { buildProfileEmbed } from '@/lib/osu/embeds/profileEmbed';
 import { getMode } from '@/lib/osu/utils.js';
+import { getLinkedProfileLookup } from '@/services/osuUserService';
 import type { Command, CommandContext } from '@/types';
 import { parseArgs } from '@/utils/parseArgs';
 import type { Client } from 'discord.js';
@@ -12,7 +13,7 @@ export default {
   description: 'Show an osu! profile',
   execute: async (
     _client: Client,
-    { message, args, invoked }: CommandContext,
+    { message, args, prefix, invoked }: CommandContext,
   ) => {
     if (!message) return;
 
@@ -21,14 +22,19 @@ export default {
     });
 
     const username = positional.join(' ').trim();
-    if (!username) {
-      return message.reply('Usage: `profile <username>`');
+    const lookup =
+      username || (await getLinkedProfileLookup(message.author.id));
+
+    if (!lookup) {
+      return message.reply(
+        `Usage: \`${prefix}profile <username>\`, or link an account with \`${prefix}setosu <username|id>\` first.`,
+      );
     }
 
     const mode = getMode(options, invoked ?? '');
     const explicitMode =
       options.has('mode') || options.has('m') || invoked !== 'profile';
-    const profile = await getProfile(username, explicitMode ? mode : undefined);
+    const profile = await getProfile(lookup, explicitMode ? mode : undefined);
 
     return message.reply({
       embeds: [buildProfileEmbed(profile, explicitMode ? mode : undefined)],
