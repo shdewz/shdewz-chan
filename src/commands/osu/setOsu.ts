@@ -18,7 +18,7 @@ export default {
 
     try {
       const profile = await getProfile(lookupString);
-      await setLinkedOsuUser(message.author.id, profile.id, profile.username);
+      await setLinkedOsuUser(message.author.id, profile.id);
 
       return message.reply(
         `Linked osu! account: **${profile.username}** (ID: ${profile.id})`,
