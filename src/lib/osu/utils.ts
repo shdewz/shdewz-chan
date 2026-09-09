@@ -5,11 +5,23 @@ import {
   MODE_SUFFIX_ALIASES,
   MODS_ENUM,
   type ModKey,
-  type OsuMode,
-} from '@/lib/osu/constants.js';
+} from '@/lib/osu/constants';
+import type { OsuMode } from '@/lib/osu/types/common';
 
-const PREFIX_RE = new RegExp(`^(${MODE_PREFIX_ALIASES.join('|')})`, 'i');
-const SUFFIX_RE = new RegExp(`(${MODE_SUFFIX_ALIASES.join('|')})$`, 'i');
+const escapeRegExp = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const buildAliasPattern = (aliases: string[]) =>
+  aliases.map(escapeRegExp).join('|');
+
+const PREFIX_RE = new RegExp(
+  `^(${buildAliasPattern(MODE_PREFIX_ALIASES)})`,
+  'i',
+);
+const SUFFIX_RE = new RegExp(
+  `(${buildAliasPattern(MODE_SUFFIX_ALIASES)})$`,
+  'i',
+);
 
 export const getEmote = (name: string) => EMOTES.find((e) => e.name === name);
 
@@ -55,6 +67,7 @@ export const scoreCompletion = (
     hits.count_300 + hits.count_100 + hits.count_50 + hits.count_miss;
   const maxHits =
     beatmap.count_circles + beatmap.count_sliders + beatmap.count_spinners;
+  if (maxHits === 0) return 0;
   return userHits / maxHits;
 };
 

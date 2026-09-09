@@ -1,17 +1,4 @@
-export type OsuMode = 'osu' | 'taiko' | 'fruits' | 'mania';
-export type Grade = 'XH' | 'X' | 'SH' | 'S' | 'A' | 'B' | 'C' | 'D' | 'F';
-
-export type ModeConfig = {
-  mode: OsuMode;
-  display: string;
-  aliases: string[];
-};
-
-export type EmoteConfig = {
-  name: string;
-  color: number;
-  emoji: string;
-};
+import type { EmoteConfig, ModeConfig } from '@/lib/osu/types/common';
 
 export const MODES: ModeConfig[] = [
   { mode: 'osu', display: 'osu!', aliases: ['osu', 'std', 'standard'] },
@@ -30,8 +17,8 @@ export const MODE_SUFFIX_ALIASES = MODES.flatMap((m) =>
 export const MODE_PREFIX_ALIASES = MODES.flatMap((m) => m.aliases);
 
 export const EMOTES: EmoteConfig[] = [
-  { name: 'XH', color: 0xcb1699, emoji: '<:rankingSSH:871388940836413471>' },
-  { name: 'X', color: 0xcb1699, emoji: '<:rankingSS:871388941205508126>' },
+  { name: 'SSH', color: 0xcb1699, emoji: '<:rankingSSH:871388940836413471>' },
+  { name: 'SS', color: 0xcb1699, emoji: '<:rankingSS:871388941205508126>' },
   { name: 'SH', color: 0x01a9b7, emoji: '<:rankingSH:871388941281021963>' },
   { name: 'S', color: 0x01a9b7, emoji: '<:rankingS:871388941058732084>' },
   { name: 'A', color: 0x84d71c, emoji: '<:rankingA:871388941088096316>' },

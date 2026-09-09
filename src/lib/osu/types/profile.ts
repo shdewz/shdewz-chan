@@ -1,4 +1,4 @@
-import type { OsuMode } from '@/lib/osu/constants.js';
+import type { OsuMode } from '@/lib/osu/types/common';
 
 export type OsuProfileStatistics = {
   level: {
