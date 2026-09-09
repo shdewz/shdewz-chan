@@ -9,13 +9,20 @@ type TokenState = {
 let tokenState: TokenState = null;
 
 const authorize = async (): Promise<string> => {
+  const clientId = process.env.OSU_CLIENT_ID;
+  const clientSecret = process.env.OSU_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new Error('OSU_CLIENT_ID and OSU_CLIENT_SECRET must be set');
+  }
+
   const response = await fetch(TOKEN_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       grant_type: 'client_credentials',
-      client_id: process.env.OSU_CLIENT_ID,
-      client_secret: process.env.OSU_CLIENT_SECRET,
+      client_id: clientId,
+      client_secret: clientSecret,
       scope: 'public',
     }),
   });
