@@ -65,7 +65,7 @@ const run = async () => {
   }
 };
 
-if (require.main === module) {
+if (import.meta.main) {
   run().catch((err) => {
     console.error('Migration runner failed', err);
     process.exit(1);
