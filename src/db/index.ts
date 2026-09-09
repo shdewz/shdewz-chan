@@ -32,4 +32,32 @@ export const setGuildPrefixInDb = async (
   );
 };
 
+export const getUserOsuLinkFromDb = async (
+  userId: string,
+): Promise<number | null> => {
+  const res = await pool.query(
+    'SELECT osu_user_id FROM users WHERE user_id = $1 LIMIT 1',
+    [userId],
+  );
+
+  if (res.rows.length === 0) return null;
+
+  return res.rows[0].osu_user_id ?? null;
+};
+
+export const setUserOsuLinkInDb = async (
+  userId: string,
+  osuUserId: number,
+): Promise<void> => {
+  await pool.query(
+    `
+      INSERT INTO users (user_id, osu_user_id)
+      VALUES ($1, $2)
+      ON CONFLICT (user_id) DO UPDATE SET
+        osu_user_id = EXCLUDED.osu_user_id
+    `,
+    [userId, osuUserId],
+  );
+};
+
 export default pool;
