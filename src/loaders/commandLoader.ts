@@ -1,7 +1,10 @@
 import path from 'path';
 import type { Command } from '@/types';
 import { walkDir } from '@/utils/fs';
-import { MODE_PREFIX_ALIASES, MODE_SUFFIX_ALIASES } from '@/lib/osu/constants';
+import {
+  MODE_PREFIX_ALIASES,
+  MODE_SUFFIX_ALIASES,
+} from '@/lib/osu/constants/modes';
 
 const registerPrefixedAliases = (
   cmdName: string,

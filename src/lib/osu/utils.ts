@@ -1,12 +1,11 @@
+import { EMOTES } from '@/lib/osu/constants/emotes';
 import {
-  EMOTES,
-  MODES,
   MODE_PREFIX_ALIASES,
   MODE_SUFFIX_ALIASES,
-  MODS_ENUM,
-  type ModKey,
-} from '@/lib/osu/constants';
-import type { OsuMode } from '@/lib/osu/types/common';
+  MODES,
+} from '@/lib/osu/constants/modes';
+import { MODS_ENUM, type ModKey } from '@/lib/osu/constants/mods';
+import type * as osu from 'osu-api-v2-js';
 
 const escapeRegExp = (value: string) =>
   value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -23,12 +22,13 @@ const SUFFIX_RE = new RegExp(
   'i',
 );
 
-export const getEmote = (name: string) => EMOTES.find((e) => e.name === name);
+export const getOsuEmoteTemp = (name: string) =>
+  EMOTES.find((e) => e.name === name);
 
 export const getMode = (
   options: Map<string, string>,
   command: string = '',
-): OsuMode => {
+): keyof typeof osu.Ruleset => {
   const modeArg = options.get('mode') ?? options.get('m');
   if (modeArg) return parseMode(modeArg);
 
@@ -36,7 +36,7 @@ export const getMode = (
   return parseMode(match ?? '');
 };
 
-const parseMode = (input: string): OsuMode =>
+const parseMode = (input: string): keyof typeof osu.Ruleset =>
   MODES.find((m) => m.aliases.includes(input.toLowerCase()))?.mode ?? 'osu';
 
 export const getDisplayMode = (mode: string): string =>

@@ -1,5 +1,4 @@
-import type { OsuMode } from '@/lib/osu/types/common';
-import type { OsuProfile } from '@/lib/osu/types/profile';
+import type * as osu from 'osu-api-v2-js';
 
 export const sep = ' **•** ';
 
@@ -33,8 +32,10 @@ export const formatCompactNumber = (value: number) => {
 export const formatRank = (rank: number | null) =>
   rank ? `**#${formatNumber(rank)}**` : null;
 
-export const formatProfileUrl = (profile: OsuProfile, mode?: OsuMode) =>
-  `https://osu.ppy.sh/users/${profile.id}${mode ? `/${mode}` : ''}`;
+export const formatProfileUrl = (
+  profile: osu.User.Extended,
+  mode?: keyof typeof osu.Ruleset,
+) => `https://osu.ppy.sh/users/${profile.id}${mode ? `/${mode}` : ''}`;
 
 export const formatCountryFlag = (countryCode: string) =>
   `:flag_${countryCode.toLowerCase()}:`;

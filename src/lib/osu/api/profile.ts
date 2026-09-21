@@ -1,14 +1,18 @@
-import { apiCall } from '@/lib/osu/api/client';
-import type { OsuMode } from '@/lib/osu/types/common';
-import type { OsuProfile } from '@/lib/osu/types/profile';
+import * as osu from 'osu-api-v2-js';
 
-const API_BASE_URL = 'https://osu.ppy.sh/api/v2';
+import { api } from '@/lib/osu/api/client';
+import { MODE_RULESET_MAP } from '@/lib/osu/constants/modes';
+
+const normalizeUserLookup = (value: string): string | number => {
+  const trimmed = value.trim();
+  return /^\d+$/.test(trimmed) ? Number(trimmed) : trimmed;
+};
 
 export const getProfile = async (
   username: string,
-  mode?: OsuMode,
-): Promise<OsuProfile> => {
-  const url = new URL(`${API_BASE_URL}/users/${encodeURIComponent(username)}`);
-  if (mode) url.pathname += `/${mode}`;
-  return apiCall<OsuProfile>(url.toString());
-};
+  mode?: keyof typeof osu.Ruleset,
+): Promise<osu.User.Extended> =>
+  api.getUser(
+    normalizeUserLookup(username),
+    mode ? MODE_RULESET_MAP[mode] : undefined,
+  );
